@@ -11,17 +11,13 @@ interface CalendarProps {
   events: CalendarEvent[];
   onEventClick?: (event: CalendarEvent) => void;
   onDateClick?: (date: Date) => void;
-  onEventAdd?: (event: CalendarEvent) => void;
-  onEventChange?: (event: CalendarEvent) => void;
-  currentView: CalendarViewType; // 부모에서 뷰 내림
+  currentView: CalendarViewType;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
   events,
   onEventClick,
   onDateClick,
-  onEventAdd,
-  onEventChange,
   currentView,
 }) => {
   // 뷰 타입 매핑
@@ -58,7 +54,7 @@ const Calendar: React.FC<CalendarProps> = ({
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
         initialView={getFullCalendarView(currentView)}
-        headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로 관리주ㅇ
+        headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 관리
         events={events.map(event => ({
           id: event.id,
           title: event.title,
