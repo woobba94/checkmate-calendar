@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signIn } from '../services/authService';
+import { useAuth } from '../contexts/AuthContext';
 import './LoginPage.css';
 
 const LoginPage: React.FC = () => {
@@ -9,6 +9,13 @@ const LoginPage: React.FC = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { user, login } = useAuth();
+
+  useEffect(() => {
+    if (!!user) {
+      navigate('/');
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,12 +28,7 @@ const LoginPage: React.FC = () => {
     try {
       setIsLoading(true);
       setError('');
-      
-      const user = await signIn(email, password);
-      
-      if (user) {
-        navigate('/');
-      }
+      await login(email, password);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to log in');
     } finally {
