@@ -4,46 +4,81 @@ import Calendar from '../components/calendar/Calendar';
 import CalendarHeader from '../components/calendar/CalendarHeader';
 import EventModal from '../components/calendar/EventModal';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '../services/eventService';
-import type { CalendarEvent, CalendarViewType } from '../types/calendar';
+import { getCalendars, createCalendar } from '../services/calendarService';
+import type { CalendarEvent, CalendarViewType, Calendar as CalendarType } from '../types/calendar';
 import { format } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import './CalendarPage.css';
 
 const CalendarPage: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
+  const [calendars, setCalendars] = useState<CalendarType[]>([]);
+  const [selectedCalendar, setSelectedCalendar] = useState<CalendarType | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | undefined>(undefined);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [newCalendarName, setNewCalendarName] = useState('');
   const [view, setView] = useState<CalendarViewType>('month');
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  // Auth Context에서 사용자 정보 가져오기
+  
   const { user } = useAuth();
   
-  // TODO null?
-  const userId = user?.id || ''; 
+  // TODO null 로 처리해서 에러 컨트롤 하는게 나을지 고민
+  const userId = user?.id || '';
 
+  // 캘린더 목록 조회
   useEffect(() => {
-    // TODO 동작 테스트 필요. 추가 페이지 등 처리 고려
-    if (!userId) {
-      setIsLoading(false);
-      return;
-    }
-    
-    const fetchEvents = async () => {
+    const fetchCalendars = async () => {
+      if (!userId) {
+        setIsLoading(false);
+        return;
+      }
+      
       try {
         setIsLoading(true);
         setError(null);
-        const eventsData = await getEvents(userId);
+        const calendarList = await getCalendars();
+        setCalendars(calendarList);
+        
+        // 첫 번째 캘린더 선택
+        if (calendarList.length > 0) {
+          setSelectedCalendar(calendarList[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch calendars:', error);
+        if (error instanceof Error) {
+          setError(`Failed to load calendars: ${error.message}`);
+        } else {
+          setError('An unknown error occurred while fetching calendars');
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCalendars();
+  }, [userId]);
+
+  // 선택한 캘린더의 이벤트 조회
+  // TODO 너무 길어지는데 나눌방법 찾기
+  useEffect(() => {
+    const fetchEvents = async () => {
+      if (!userId || !selectedCalendar) {
+        setEvents([]);
+        return;
+      }
+      
+      try {
+        setIsLoading(true);
+        setError(null);
+        const eventsData = await getEvents(selectedCalendar.id);
         setEvents(eventsData);
       } catch (error) {
         console.error('Failed to fetch events:', error);
         if (error instanceof Error) {
-          if (error.message.includes('does not exist')) {
-            setError('Database table "events" does not exist. Please create it in Supabase.');
-          } else {
-            setError(`Failed to load events: ${error.message}`);
-          }
+          setError(`Failed to load events: ${error.message}`);
         } else {
           setError('An unknown error occurred while fetching events');
         }
@@ -53,54 +88,63 @@ const CalendarPage: React.FC = () => {
     };
 
     fetchEvents();
-  }, [userId]); // userId 변경감지
+  }, [userId, selectedCalendar]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
-    setIsModalOpen(true);
+    setIsEventModalOpen(true);
   };
 
   const handleDateClick = (date: Date) => {
-    // TODO 동작 테스트 필요. 추가 페이지 등 처리 고려
+    if (!selectedCalendar) {
+      setError('Please select or create a calendar first');
+      return;
+    }
+    
     if (!userId) {
       setError('Please log in to add events');
       return;
     }
     
-    const newEvent: CalendarEvent = {
-      id: '',
+    const newEvent: Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'> = {
       title: '',
       start: date,
-      userId,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      calendar_id: selectedCalendar.id,
     };
-    setSelectedEvent(newEvent);
-    setIsModalOpen(true);
+    
+    setSelectedEvent(newEvent as CalendarEvent);
+    setIsEventModalOpen(true);
   };
 
-  const handleSaveEvent = async (event: CalendarEvent) => {
-    // TODO 동작 테스트 필요. 추가 페이지 등 처리 고려
+  const handleSaveEvent = async (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
     if (!userId) {
       setError('Please log in to save events');
       return;
     }
     
+    if (!selectedCalendar) {
+      setError('Please select a calendar');
+      return;
+    }
+    
     try {
-      let savedEvent: any;
-      const eventWithUserId = {
-        ...event,
-        userId,
-      };
+      setError(null);
       
-      // 이벤트 업데이트
-      if (event.id && events.some(e => e.id === event.id)) {
-        savedEvent = await updateEvent(eventWithUserId);
-        setEvents(events.map(e => e.id === event.id ? savedEvent : e));
+      // 새로운 이벤트인 경우 (id 없는 경우임)
+      if (!('id' in eventData) || !eventData.id) {
+        // calendar_id 확인 및 전처리
+        const newEventData = {
+          ...eventData,
+          calendar_id: selectedCalendar.id,
+        } as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>;
+        
+        // 새 이벤트 생성
+        const createdEvent = await createEvent(newEventData);
+        setEvents([...events, createdEvent]);
       } else {
-        // 이벤트 생성
-        savedEvent = await createEvent(eventWithUserId);
-        setEvents([...events, savedEvent]);
+        // 기존 이벤트 업데이트
+        const updatedEvent = await updateEvent(eventData as CalendarEvent);
+        setEvents(events.map(e => e.id === updatedEvent.id ? updatedEvent : e));
       }
     } catch (error) {
       console.error('Failed to save event:', error);
@@ -126,7 +170,30 @@ const CalendarPage: React.FC = () => {
     }
   };
 
+  const handleCreateCalendar = async () => {
+    if (!newCalendarName.trim()) {
+      setError('Please enter a calendar name');
+      return;
+    }
+    
+    try {
+      const newCalendar = await createCalendar(newCalendarName.trim());
+      setCalendars([...calendars, newCalendar]);
+      setSelectedCalendar(newCalendar);
+      setNewCalendarName('');
+      setIsCalendarModalOpen(false);
+    } catch (error) {
+      console.error('Failed to create calendar:', error);
+      if (error instanceof Error) {
+        setError(`Failed to create calendar: ${error.message}`);
+      } else {
+        setError('An unknown error occurred while creating calendar');
+      }
+    }
+  };
+
   const handlePrev = () => {
+    // 이전 달/주/일로 이동하는 로직
     setCurrentDate(prev => {
       const date = new Date(prev);
       if (view === 'month') {
@@ -141,6 +208,7 @@ const CalendarPage: React.FC = () => {
   };
 
   const handleNext = () => {
+    // 다음 달/주/일로 이동하는 로직
     setCurrentDate(prev => {
       const date = new Date(prev);
       if (view === 'month') {
@@ -162,34 +230,66 @@ const CalendarPage: React.FC = () => {
     if (view === 'month') {
       return format(currentDate, 'MMMM yyyy');
     } else if (view === 'week') {
-      // TODO 일단 간단한 주 표시 (사용성 고려하면 시작일과 종료일을 표시?)
+      // 간단한 주 표시
+      // TODO 실제로는 시작일과 종료일을 표시하는 것이 좋을듯함.
       return `Week of ${format(currentDate, 'MMM d, yyyy')}`;
     } else {
       return format(currentDate, 'EEEE, MMMM d, yyyy');
     }
   };
+
   return (
     <Layout>
       <div className="calendar-page">
-      <CalendarHeader
-  view={view}
-  onViewChange={(newView) => {
-    setView(newView);
-    // FullCalendar view 업데이트 로직이 필요하면 여기에
-  }}
-  onPrev={handlePrev}
-  onNext={handleNext}
-  onToday={handleToday}
-  title={getTitle()}
-  onAddEvent={() => {
-    if (!userId) {
-      setError('Please log in to add events');
-      return;
-    }
-    setSelectedEvent(undefined);
-    setIsModalOpen(true);
-  }}
-/>
+        <div className="calendar-selector">
+          <select 
+            value={selectedCalendar?.id || ''}
+            onChange={(e) => {
+              const calendarId = e.target.value;
+              const calendar = calendars.find(c => c.id === calendarId);
+              setSelectedCalendar(calendar || null);
+            }}
+            disabled={calendars.length === 0}
+          >
+            {calendars.length === 0 && (
+              <option value="">No calendars available</option>
+            )}
+            {calendars.map(calendar => (
+              <option key={calendar.id} value={calendar.id}>
+                {calendar.name}
+              </option>
+            ))}
+          </select>
+          <button 
+            className="create-calendar-button"
+            onClick={() => setIsCalendarModalOpen(true)}
+          >
+            Create Calendar
+          </button>
+        </div>
+        
+        <CalendarHeader
+          view={view}
+          onViewChange={setView}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          onToday={handleToday}
+          title={getTitle()}
+          onAddEvent={() => {
+            if (!selectedCalendar) {
+              setError('Please select or create a calendar first');
+              return;
+            }
+            
+            if (!userId) {
+              setError('Please log in to add events');
+              return;
+            }
+            
+            setSelectedEvent(undefined);
+            setIsEventModalOpen(true);
+          }}
+        />
         
         {error && (
           <div className="error-container">
@@ -206,21 +306,65 @@ const CalendarPage: React.FC = () => {
         {isLoading ? (
           <div className="loading">Loading calendar...</div>
         ) : (
-<Calendar
-  events={events}
-  onEventClick={handleEventClick}
-  onDateClick={handleDateClick}
-  currentView={view} // 현재 뷰 전달
-/>
+          <div className="calendar-container">
+            {selectedCalendar ? (
+              <Calendar
+                events={events}
+                onEventClick={handleEventClick}
+                onDateClick={handleDateClick}
+                currentView={view}
+              />
+            ) : (
+              <div className="no-calendar-message">
+                <p>You don't have any calendars yet.</p>
+                <button 
+                  className="create-calendar-button"
+                  onClick={() => setIsCalendarModalOpen(true)}
+                >
+                  Create Your First Calendar
+                </button>
+              </div>
+            )}
+          </div>
         )}
         
+        {/* 이벤트 모달 */}
         <EventModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          isOpen={isEventModalOpen}
+          onClose={() => setIsEventModalOpen(false)}
           event={selectedEvent}
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
         />
+        
+        {/* 캘린더 생성 모달 */}
+        {isCalendarModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h2>Create New Calendar</h2>
+              <input
+                type="text"
+                placeholder="Calendar Name"
+                value={newCalendarName}
+                onChange={(e) => setNewCalendarName(e.target.value)}
+              />
+              <div className="modal-buttons">
+                <button 
+                  className="cancel-button"
+                  onClick={() => setIsCalendarModalOpen(false)}
+                >
+                  Cancel
+                </button>
+                <button 
+                  className="create-button"
+                  onClick={handleCreateCalendar}
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

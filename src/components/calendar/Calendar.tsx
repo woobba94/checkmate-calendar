@@ -33,7 +33,8 @@ const Calendar: React.FC<CalendarProps> = ({
 
   const handleEventClick = (info: any) => {
     if (onEventClick) {
-      const event = {
+      // 이벤트 데이터를 CalendarEvent 형식으로 변환
+      const event: CalendarEvent = {
         id: info.event.id,
         title: info.event.title,
         start: info.event.start,
@@ -41,9 +42,10 @@ const Calendar: React.FC<CalendarProps> = ({
         allDay: info.event.allDay,
         description: info.event.extendedProps.description,
         color: info.event.backgroundColor,
-        userId: info.event.extendedProps.userId,
-        createdAt: info.event.extendedProps.createdAt,
-        updatedAt: info.event.extendedProps.updatedAt,
+        calendar_id: info.event.extendedProps.calendar_id,
+        created_by: info.event.extendedProps.created_by,
+        created_at: info.event.extendedProps.created_at,
+        updated_at: info.event.extendedProps.updated_at,
       };
       onEventClick(event);
     }
@@ -54,7 +56,7 @@ const Calendar: React.FC<CalendarProps> = ({
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
         initialView={getFullCalendarView(currentView)}
-        headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 관리
+        headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
         events={events.map(event => ({
           id: event.id,
           title: event.title,
@@ -63,9 +65,15 @@ const Calendar: React.FC<CalendarProps> = ({
           allDay: event.allDay,
           description: event.description,
           backgroundColor: event.color,
-          userId: event.userId,
-          createdAt: event.createdAt,
-          updatedAt: event.updatedAt,
+          // 확장 속성으로 추가 필드 전달
+          extendedProps: {
+            description: event.description,
+            color: event.color,
+            calendar_id: event.calendar_id,
+            created_by: event.created_by,
+            created_at: event.created_at,
+            updated_at: event.updated_at,
+          }
         }))}
         eventClick={handleEventClick}
         dateClick={(info) => onDateClick && onDateClick(info.date)}

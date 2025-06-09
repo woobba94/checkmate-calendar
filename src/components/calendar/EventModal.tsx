@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import type { CalendarEvent } from '../../types/calendar';
 import './EventModel.css';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface EventModalProps {
   isOpen: boolean;
   onClose: () => void;
-  event?: CalendarEvent;
-  onSave: (event: CalendarEvent) => void;
+  event?: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>;
+  onSave: (event: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => void;
   onDelete?: (eventId: string) => void;
 }
 
@@ -23,6 +24,7 @@ const EventModal: React.FC<EventModalProps> = ({
   const [allDay, setAllDay] = useState(false);
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#0070f3');
+  const { user } = useAuth();
 
   useEffect(() => {
     if (event) {
@@ -33,6 +35,7 @@ const EventModal: React.FC<EventModalProps> = ({
       setDescription(event.description || '');
       setColor(event.color || '#0070f3');
     } else {
+      // 새 이벤트 생성 시 디폴트값 세팅
       setTitle('');
       setStart(formatDateForInput(new Date()));
       setEnd('');
@@ -58,25 +61,49 @@ const EventModal: React.FC<EventModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    const updatedEvent: CalendarEvent = {
-      id: event?.id || Math.random().toString(36).substring(2, 9),
-      title,
-      start: new Date(start),
-      end: end ? new Date(end) : undefined,
-      allDay,
-      description,
-      color,
-      userId: event?.userId || 'current-user-id', // 추후 정리. 널로 처리할지?
-      createdAt: event?.createdAt || new Date(),
-      updatedAt: new Date(),
-    };
+    if (!user) {
+      alert('You must be logged in to save events');
+      return;
+    }
     
-    onSave(updatedEvent);
+    // 기존 이벤트인지 확인 (id가 있는지)
+    const isExistingEvent = event && 'id' in event && event.id;
+    if (isExistingEvent) {
+      // 기존 이벤트 업데이트
+      const updatedEvent: CalendarEvent = {
+        id: event.id as string,
+        title,
+        start: new Date(start),
+        end: end ? new Date(end) : undefined,
+        allDay,
+        description,
+        color,
+        calendar_id: (event as CalendarEvent).calendar_id,
+        created_by: (event as CalendarEvent).created_by,
+        created_at: (event as CalendarEvent).created_at,
+        updated_at: new Date(),
+      };
+      onSave(updatedEvent);
+    } else {
+      // 새 이벤트 생성
+      const newEvent: Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'> = {
+        title,
+        start: new Date(start),
+        end: end ? new Date(end) : undefined,
+        allDay,
+        description,
+        color,
+        // TODO calendar_id 무결하게 만들어야함. 방법 검토
+        calendar_id: (event as any)?.calendar_id || '', // 선택된 캘린더 ID
+      };
+      onSave(newEvent);
+    }
+    
     onClose();
   };
 
   const handleDelete = () => {
-    if (event?.id && onDelete) {
+    if (event && 'id' in event && event.id && onDelete) {
       onDelete(event.id);
       onClose();
     }
@@ -88,7 +115,7 @@ const EventModal: React.FC<EventModalProps> = ({
     <div className="modal-overlay">
       <div className="event-modal">
         <div className="modal-header">
-          <h2>{event?.id ? 'Edit Event' : 'Create Event'}</h2>
+          <h2>{event && 'id' in event && event.id ? 'Edit Event' : 'Create Event'}</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
         
@@ -158,7 +185,7 @@ const EventModal: React.FC<EventModalProps> = ({
           </div>
           
           <div className="modal-footer">
-            {event?.id && onDelete && (
+            {event && 'id' in event && event.id && onDelete && (
               <button 
                 type="button" 
                 className="delete-button"
