@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
-import './Layout.css';
+import './Layout.scss';
 
 interface LayoutProps {
   children: React.ReactNode;

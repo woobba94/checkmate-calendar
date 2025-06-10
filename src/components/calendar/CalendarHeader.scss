@@ -1,0 +1,118 @@
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 10px 0;
+
+  &-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &-right {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+.today-button {
+  padding: 6px 12px;
+  background-color: $white;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+  color: $black;
+
+  &:hover {
+    background-color: $light-gray;
+  }
+}
+
+.navigation-buttons {
+  display: flex;
+  gap: 5px;
+}
+
+.nav-button {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: $white;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  cursor: pointer;
+  color: $black;
+
+  &:hover {
+    background-color: $light-gray;
+  }
+}
+
+.calendar-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.view-buttons {
+  display: flex;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.view-button {
+  padding: 6px 12px;
+  background-color: $white;
+  border: none;
+  border-right: 1px solid $border-color;
+  cursor: pointer;
+  font-size: 14px;
+  color: $black;
+
+  &:last-child {
+    border-right: none;
+  }
+
+  &.active {
+    background-color: $primary-color;
+    color: $white;
+  }
+
+  &:hover:not(.active) {
+    background-color: $light-gray;
+  }
+}
+
+.add-event-button {
+  padding: 6px 12px;
+  background-color: $primary-color;
+  color: $white;
+  border: none;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover {
+    background-color: $primary-hover;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar-header {
+    flex-direction: column;
+    gap: 12px;
+
+    &-left,
+    &-right {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+}

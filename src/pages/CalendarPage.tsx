@@ -8,7 +8,7 @@ import { getCalendars, createCalendar } from '../services/calendarService';
 import type { CalendarEvent, CalendarViewType, Calendar as CalendarType } from '../types/calendar';
 import { format } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
-import './CalendarPage.css';
+import './CalendarPage.scss';
 
 const CalendarPage: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);

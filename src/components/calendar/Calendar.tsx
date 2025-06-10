@@ -5,7 +5,7 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import type { CalendarEvent, CalendarViewType } from '../../types/calendar';
-import './Calendar.css';
+import './Calendar.scss';
 
 interface CalendarProps {
   events: CalendarEvent[];

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import './LoginPage.css';
+import './LoginPage.scss';
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
