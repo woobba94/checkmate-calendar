@@ -52,7 +52,7 @@ const EventModal: React.FC<EventModalProps> = ({
     const day = String(d.getDate()).padStart(2, '0');
     const hours = String(d.getHours()).padStart(2, '0');
     const minutes = String(d.getMinutes()).padStart(2, '0');
-    
+
     return allDay
       ? `${year}-${month}-${day}`
       : `${year}-${month}-${day}T${hours}:${minutes}`;
@@ -60,12 +60,12 @@ const EventModal: React.FC<EventModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!user) {
       alert('You must be logged in to save events');
       return;
     }
-    
+
     // 기존 이벤트인지 확인 (id가 있는지)
     const isExistingEvent = event && 'id' in event && event.id;
     if (isExistingEvent) {
@@ -98,7 +98,7 @@ const EventModal: React.FC<EventModalProps> = ({
       };
       onSave(newEvent);
     }
-    
+
     onClose();
   };
 
@@ -118,7 +118,7 @@ const EventModal: React.FC<EventModalProps> = ({
           <h2>{event && 'id' in event && event.id ? 'Edit Event' : 'Create Event'}</h2>
           <button className="close-button" onClick={onClose}>×</button>
         </div>
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="title">Title</label>
@@ -130,7 +130,7 @@ const EventModal: React.FC<EventModalProps> = ({
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="allDay">
               <input
@@ -142,7 +142,7 @@ const EventModal: React.FC<EventModalProps> = ({
               All Day
             </label>
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="start">Start</label>
             <input
@@ -153,7 +153,7 @@ const EventModal: React.FC<EventModalProps> = ({
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="end">End</label>
             <input
@@ -163,7 +163,7 @@ const EventModal: React.FC<EventModalProps> = ({
               onChange={(e) => setEnd(e.target.value)}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="description">Description</label>
             <textarea
@@ -173,7 +173,7 @@ const EventModal: React.FC<EventModalProps> = ({
               rows={3}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="color">Color</label>
             <input
@@ -183,11 +183,11 @@ const EventModal: React.FC<EventModalProps> = ({
               onChange={(e) => setColor(e.target.value)}
             />
           </div>
-          
+
           <div className="modal-footer">
             {event && 'id' in event && event.id && onDelete && (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 className="delete-button"
                 onClick={handleDelete}
               >

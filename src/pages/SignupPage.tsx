@@ -13,23 +13,23 @@ const SignupPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password || !confirmPassword) {
       setError('Please fill in all fields');
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
-    
+
     try {
       setIsLoading(true);
       setError('');
-      
+
       const user = await signUp(email, password);
-      
+
       if (user) {
         navigate('/login', { state: { message: 'Account created successfully. Please log in.' } });
       }
@@ -44,9 +44,9 @@ const SignupPage: React.FC = () => {
     <div className="auth-page">
       <div className="auth-container">
         <h1>Sign Up</h1>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -58,7 +58,7 @@ const SignupPage: React.FC = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -69,7 +69,7 @@ const SignupPage: React.FC = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="confirm-password">Confirm Password</label>
             <input
@@ -80,16 +80,16 @@ const SignupPage: React.FC = () => {
               required
             />
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className="submit-button"
             disabled={isLoading}
           >
             {isLoading ? 'Creating Account...' : 'Sign Up'}
           </button>
         </form>
-        
+
         <div className="auth-footer">
           Already have an account? <Link to="/login">Log In</Link>
         </div>

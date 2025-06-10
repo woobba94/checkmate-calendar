@@ -27,7 +27,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         <button onClick={onToday} className="today-button">
           Today
         </button>
-      <div className="navigation-buttons">
+        <div className="navigation-buttons">
           <button onClick={onPrev} className="nav-button">
             &lt;
           </button>
@@ -37,7 +37,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
         </div>
         <h2 className="calendar-title">{title}</h2>
       </div>
-      
+
       <div className="calendar-header-right">
         <div className="view-buttons">
           <button
@@ -65,7 +65,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             List
           </button>
         </div>
-        
+
         <button onClick={onAddEvent} className="add-event-button">
           + Add Event
         </button>

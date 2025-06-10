@@ -19,12 +19,12 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       setError('Please enter both email and password');
       return;
     }
-    
+
     try {
       setIsLoading(true);
       setError('');
@@ -40,9 +40,9 @@ const LoginPage: React.FC = () => {
     <div className="auth-page">
       <div className="auth-container">
         <h1>Log In</h1>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label htmlFor="email">Email</label>
@@ -54,7 +54,7 @@ const LoginPage: React.FC = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">Password</label>
             <input
@@ -65,16 +65,16 @@ const LoginPage: React.FC = () => {
               required
             />
           </div>
-          
-          <button 
-            type="submit" 
+
+          <button
+            type="submit"
             className="submit-button"
             disabled={isLoading}
           >
             {isLoading ? 'Logging in...' : 'Log In'}
           </button>
         </form>
-        
+
         <div className="auth-footer">
           Don't have an account? <Link to="/signup">Sign Up</Link>
         </div>

@@ -1,9 +1,9 @@
 :root {
   --primary-color: #0070f3;
   --secondary-color: #0070f3;
-  --text-color: #333;
-  --background-color: #fff;
-  --border-color: #eaeaea;
+  --text-color: #fff;
+  --background-color: #333;
+  --border-color: #666;
 }
 
 * {
@@ -17,6 +17,9 @@ body {
     Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   color: var(--text-color);
   background-color: var(--background-color);
+  display: grid;
+  justify-content: center;
+  align-items: center;
 }
 
 a {

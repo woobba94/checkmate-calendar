@@ -1,22 +1,23 @@
 .calendar-page {
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-  
-  .loading {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 400px;
-    font-size: 18px;
-    color: #666;
-  }
-  .error-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  font-size: 18px;
+  color: #666;
+}
+
+.error-container {
   padding: 12px 16px;
   margin-bottom: 20px;
-  background-color: #fff1f0;
-  border: 1px solid #ffccc7;
+  background-color: #222;
+  border: 1px solid #d47168;
   border-radius: 4px;
   display: flex;
   justify-content: space-between;
@@ -24,14 +25,14 @@
 }
 
 .error-message {
-  color: #ff4d4f;
+  color: #d47168;
   margin: 0;
 }
 
 .error-dismiss {
   background: none;
   border: none;
-  color: #ff4d4f;
+  color: #d47168;
   cursor: pointer;
   padding: 4px 8px;
   border-radius: 4px;

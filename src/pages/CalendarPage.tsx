@@ -22,9 +22,9 @@ const CalendarPage: React.FC = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { user } = useAuth();
-  
+
   // TODO null 로 처리해서 에러 컨트롤 하는게 나을지 고민
   const userId = user?.id || '';
 
@@ -35,13 +35,13 @@ const CalendarPage: React.FC = () => {
         setIsLoading(false);
         return;
       }
-      
+
       try {
         setIsLoading(true);
         setError(null);
         const calendarList = await getCalendars();
         setCalendars(calendarList);
-        
+
         // 첫 번째 캘린더 선택
         if (calendarList.length > 0) {
           setSelectedCalendar(calendarList[0]);
@@ -69,7 +69,7 @@ const CalendarPage: React.FC = () => {
         setEvents([]);
         return;
       }
-      
+
       try {
         setIsLoading(true);
         setError(null);
@@ -100,18 +100,18 @@ const CalendarPage: React.FC = () => {
       setError('Please select or create a calendar first');
       return;
     }
-    
+
     if (!userId) {
       setError('Please log in to add events');
       return;
     }
-    
+
     const newEvent: Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'> = {
       title: '',
       start: date,
       calendar_id: selectedCalendar.id,
     };
-    
+
     setSelectedEvent(newEvent as CalendarEvent);
     setIsEventModalOpen(true);
   };
@@ -121,15 +121,15 @@ const CalendarPage: React.FC = () => {
       setError('Please log in to save events');
       return;
     }
-    
+
     if (!selectedCalendar) {
       setError('Please select a calendar');
       return;
     }
-    
+
     try {
       setError(null);
-      
+
       // 새로운 이벤트인 경우 (id 없는 경우임)
       if (!('id' in eventData) || !eventData.id) {
         // calendar_id 확인 및 전처리
@@ -137,7 +137,7 @@ const CalendarPage: React.FC = () => {
           ...eventData,
           calendar_id: selectedCalendar.id,
         } as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>;
-        
+
         // 새 이벤트 생성
         const createdEvent = await createEvent(newEventData);
         setEvents([...events, createdEvent]);
@@ -175,7 +175,7 @@ const CalendarPage: React.FC = () => {
       setError('Please enter a calendar name');
       return;
     }
-    
+
     try {
       const newCalendar = await createCalendar(newCalendarName.trim());
       setCalendars([...calendars, newCalendar]);
@@ -242,7 +242,7 @@ const CalendarPage: React.FC = () => {
     <Layout>
       <div className="calendar-page">
         <div className="calendar-selector">
-          <select 
+          <select
             value={selectedCalendar?.id || ''}
             onChange={(e) => {
               const calendarId = e.target.value;
@@ -260,14 +260,14 @@ const CalendarPage: React.FC = () => {
               </option>
             ))}
           </select>
-          <button 
+          <button
             className="create-calendar-button"
             onClick={() => setIsCalendarModalOpen(true)}
           >
             Create Calendar
           </button>
         </div>
-        
+
         <CalendarHeader
           view={view}
           onViewChange={setView}
@@ -280,29 +280,29 @@ const CalendarPage: React.FC = () => {
               setError('Please select or create a calendar first');
               return;
             }
-            
+
             if (!userId) {
               setError('Please log in to add events');
               return;
             }
-            
+
             setSelectedEvent(undefined);
             setIsEventModalOpen(true);
           }}
         />
-        
+
         {error && (
           <div className="error-container">
             <p className="error-message">{error}</p>
-            <button 
-              className="error-dismiss" 
+            <button
+              className="error-dismiss"
               onClick={() => setError(null)}
             >
               Dismiss
             </button>
           </div>
         )}
-        
+
         {isLoading ? (
           <div className="loading">Loading calendar...</div>
         ) : (
@@ -317,7 +317,7 @@ const CalendarPage: React.FC = () => {
             ) : (
               <div className="no-calendar-message">
                 <p>You don't have any calendars yet.</p>
-                <button 
+                <button
                   className="create-calendar-button"
                   onClick={() => setIsCalendarModalOpen(true)}
                 >
@@ -327,7 +327,7 @@ const CalendarPage: React.FC = () => {
             )}
           </div>
         )}
-        
+
         {/* 이벤트 모달 */}
         <EventModal
           isOpen={isEventModalOpen}
@@ -336,7 +336,7 @@ const CalendarPage: React.FC = () => {
           onSave={handleSaveEvent}
           onDelete={handleDeleteEvent}
         />
-        
+
         {/* 캘린더 생성 모달 */}
         {isCalendarModalOpen && (
           <div className="modal-overlay">
@@ -349,13 +349,13 @@ const CalendarPage: React.FC = () => {
                 onChange={(e) => setNewCalendarName(e.target.value)}
               />
               <div className="modal-buttons">
-                <button 
+                <button
                   className="cancel-button"
                   onClick={() => setIsCalendarModalOpen(false)}
                 >
                   Cancel
                 </button>
-                <button 
+                <button
                   className="create-button"
                   onClick={handleCreateCalendar}
                 >

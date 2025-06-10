@@ -1,78 +1,79 @@
 .layout {
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-  }
-  
-  .app-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 20px;
-    height: 60px;
-    border-bottom: 1px solid var(--border-color);
-    background-color: white;
-  }
-  
-  .logo {
-    font-weight: 600;
-    font-size: 18px;
-  }
-  
-  .nav-menu {
-    display: flex;
-    gap: 20px;
-  }
-  
-  .user-menu {
-    display: flex;
-    align-items: center;
-  }
-  
-  .app-main {
-    flex: 1;
-    padding: 20px;
-    max-width: 1200px;
-    width: 100%;
-    margin: 0 auto;
-  }
-  
-  @media (max-width: 768px) {
-    .app-main {
-      padding: 10px;
-    }
-  }
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
 
-  .user-email {
-    margin-right: 10px;
-    font-size: 14px;
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  height: 60px;
+  border-bottom: 1px solid var(--border-color);
+  background-color: #333;
+}
+
+.logo {
+  font-weight: 600;
+  font-size: 18px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 20px;
+}
+
+.user-menu {
+  display: flex;
+  align-items: center;
+}
+
+.app-main {
+  flex: 1;
+  padding: 20px;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .app-main {
+    padding: 10px;
   }
-  
-  .logout-button,
-  .login-button {
-    padding: 6px 12px;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 500;
-  }
-  
-  .logout-button {
-    background-color: white;
-    color: #ff4d4f;
-    border: 1px solid #ff4d4f;
-  }
-  
-  .login-button {
-    background-color: var(--primary-color);
-    color: white;
-    border: none;
-  }
-  
-  .logout-button:hover {
-    background-color: #fff1f0;
-  }
-  
-  .login-button:hover {
-    background-color: #0060d0;
-  }
+}
+
+.user-email {
+  margin-right: 10px;
+  font-size: 14px;
+}
+
+.logout-button,
+.login-button {
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.logout-button {
+  background-color: #222;
+  color: #d47168;
+  border: 1px solid #d47168;
+}
+
+.login-button {
+  background-color: var(--primary-color);
+  color: white;
+  border: none;
+}
+
+.logout-button:hover {
+  border-color: #ffaeae;
+  color: #ffaeae;
+}
+
+.login-button:hover {
+  background-color: #0060d0;
+}
