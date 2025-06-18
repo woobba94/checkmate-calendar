@@ -144,6 +144,28 @@ async function getOrCreateCalendar(supabase, userId, googleEmail) {
     console.log('구글캘린더 기반 신규 캘린더 생성완료');
   }
 
+  // 캘린더에 current user 를 owner 로 추가 (신규/기존 관계없음)
+  const { data: member } = await supabase
+    .from('calendar_members')
+    .select('id')
+    .eq('calendar_id', calendar.id)
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (!member) {
+    const { error: memberError } = await supabase
+      .from('calendar_members')
+      .insert({
+        calendar_id: calendar.id,
+        user_id: userId,
+        role: 'owner'
+      });
+
+    if (memberError) {
+      throw memberError;
+    }
+  }
+
   return calendar;
 }
 
