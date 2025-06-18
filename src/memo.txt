@@ -1,0 +1,6 @@
+구글 연동 프로세스 정리
+
+[사용자] → Vite 프론트
+   └─ 연동 버튼 클릭 → Google 로그인 URL로 이동
+       └─ 로그인 후 → Google이 Supabase Edge Function으로 redirect
+           └─ Edge Function이 code → access_token/refresh_token 받아서 Supabase DB 저장

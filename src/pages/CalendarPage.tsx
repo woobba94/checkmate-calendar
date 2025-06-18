@@ -9,6 +9,8 @@ import type { CalendarEvent, CalendarViewType, Calendar as CalendarType } from '
 import { format } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import './CalendarPage.scss';
+import GoogleCalendarIntegration from '../components/common/google-calendar-integration/GoogleCalendarIntegration';
+import GoogleCalendarSync from '../components/common/google-calendar-sync/GoogleCalendarSync';
 
 const CalendarPage: React.FC = () => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -266,6 +268,8 @@ const CalendarPage: React.FC = () => {
           >
             Create Calendar
           </button>
+          <GoogleCalendarIntegration />
+          <GoogleCalendarSync />
         </div>
 
         <CalendarHeader
