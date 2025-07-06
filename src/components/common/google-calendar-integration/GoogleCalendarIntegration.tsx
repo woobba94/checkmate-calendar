@@ -1,4 +1,4 @@
-import { useAuth } from '../../../contexts/AuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 
 const GoogleCalendarIntegration: React.FC = () => {
   const { user } = useAuth();

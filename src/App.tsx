@@ -1,13 +1,13 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import CalendarPage from './pages/CalendarPage';
-import LoginPage from './pages/LoginPage';
-import SignupPage from './pages/SignupPage';
+import CalendarPage from './pages/calendar/CalendarPage';
+import LoginPage from './pages/auth/LoginPage';
+import SignupPage from './pages/auth/SignupPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './App.css';
-import Terms from './pages/Terms';
-import Privacy from './pages/Privacy';
+import Terms from './pages/legal/Terms';
+import Privacy from './pages/legal/Privacy';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, isLoading } = useAuth();

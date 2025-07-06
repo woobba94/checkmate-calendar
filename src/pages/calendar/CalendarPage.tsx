@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
-import Layout from '../components/layout/Layout';
-import Calendar from '../components/calendar/Calendar';
-import CalendarHeader from '../components/calendar/CalendarHeader';
-import EventModal from '../components/calendar/EventModal';
-import type { CalendarEvent } from '../types/calendar';
-import { useAuth } from '../contexts/AuthContext';
+import Layout from '@/components/layout/Layout';
+import Calendar from '@/components/calendar/core/Calendar';
+import CalendarHeader from '@/components/calendar/header/CalendarHeader';
+import EventModal from '@/components/calendar/modals/EventModal';
+import type { CalendarEvent } from '@/types/calendar';
+import { useAuth } from '@/contexts/AuthContext';
 import './CalendarPage.scss';
-import CalendarSelector from '../components/calendar/CalendarSelector';
-import ErrorMessage from '../components/common/\berror-message/ErrorMessage';
-import CalendarCreateModal from '../components/calendar/CalendarCreateModal';
-import { useCalendarData } from '../hooks/useCalendarData';
-import { useCalendarNavigation } from '../hooks/useCalendarNavigation';
+import CalendarSelector from '@/components/calendar/selector/CalendarSelector';
+import ErrorMessage from '@/components/common/error-message/ErrorMessage';
+import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
+import { useCalendarData } from '@/hooks/useCalendarData';
+import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();

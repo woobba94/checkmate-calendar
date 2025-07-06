@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import type { CalendarViewType } from '../types/calendar';
+import type { CalendarViewType } from '@/types/calendar';
 
 export const useCalendarNavigation = () => {
   const [view, setView] = useState<CalendarViewType>('month');

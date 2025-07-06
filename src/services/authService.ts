@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { User } from '../types/calendar';
+import type { User } from '@/types/calendar';
 
 // 회원가입
 export const signUp = async (email: string, password: string): Promise<User | null> => {

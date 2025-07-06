@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Calendar, CalendarMember } from '../types/calendar';
+import type { Calendar, CalendarMember } from '@/types/calendar';
 
 // 캘린더 생성
 export const createCalendar = async (

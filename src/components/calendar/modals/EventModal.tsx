@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import type { CalendarEvent } from '../../types/calendar';
-import './EventModel.scss';
-import { useAuth } from '../../contexts/AuthContext';
+import type { CalendarEvent } from '@/types/calendar';
+import './EventModal.scss';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface EventModalProps {
   isOpen: boolean;

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { CalendarViewType } from '../../types/calendar';
+import type { CalendarViewType } from '@/types/calendar';
 import './CalendarHeader.scss';
 
 interface CalendarHeaderProps {

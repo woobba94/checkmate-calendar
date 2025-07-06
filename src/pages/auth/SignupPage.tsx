@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signUp } from '../services/authService';
+import { signUp } from '@/services/authService';
 import './LoginPage.scss'; // 로그인 페이지와 동일한 스타일 사용
 
 const SignupPage: React.FC = () => {

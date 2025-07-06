@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { getEvents, createEvent, updateEvent, deleteEvent } from '../services/eventService';
-import { getCalendars, createCalendar } from '../services/calendarService';
-import type { CalendarEvent, Calendar as CalendarType } from '../types/calendar';
+import { getEvents, createEvent, updateEvent, deleteEvent } from '@/services/eventService';
+import { getCalendars, createCalendar } from '@/services/calendarService';
+import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 
 export const useCalendarData = (userId: string) => {
   const [events, setEvents] = useState<CalendarEvent[]>([]);

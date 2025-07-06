@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { CalendarEvent } from '../types/calendar';
+import type { CalendarEvent } from '@/types/calendar';
 
 // 특정 캘린더의 이벤트 조회
 export const getEvents = async (calendarId: string): Promise<CalendarEvent[]> => {

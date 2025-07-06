@@ -1,7 +1,7 @@
 import React from 'react';
-import type { Calendar as CalendarType } from '../../types/calendar';
-import GoogleCalendarIntegration from '../common/google-calendar-integration/GoogleCalendarIntegration';
-import GoogleCalendarSync from '../common/google-calendar-sync/GoogleCalendarSync';
+import type { Calendar as CalendarType } from '@/types/calendar';
+import GoogleCalendarIntegration from '@/components/common/google-calendar-integration/GoogleCalendarIntegration';
+import GoogleCalendarSync from '@/components/common/google-calendar-sync/GoogleCalendarSync';
 
 interface CalendarSelectorProps {
     calendars: CalendarType[];
