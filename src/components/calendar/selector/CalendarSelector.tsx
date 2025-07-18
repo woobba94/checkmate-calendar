@@ -17,34 +17,33 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
     onCreateCalendarClick,
 }) => {
     return (
-        <div className="calendar-selector">
-            <select
-                value={selectedCalendar?.id || ''}
-                onChange={(e) => {
-                    const calendarId = e.target.value;
-                    const calendar = calendars.find(c => c.id === calendarId);
-                    onCalendarChange(calendar || null);
-                }}
-                disabled={calendars.length === 0}
-            >
+        <aside className="calendar-sidebar">
+            <div className="calendar-list-title">캘린더 목록</div>
+            <ul className="calendar-list">
                 {calendars.length === 0 && (
-                    <option value="">No calendars available</option>
+                    <li className="calendar-list-empty">캘린더가 없습니다</li>
                 )}
                 {calendars.map(calendar => (
-                    <option key={calendar.id} value={calendar.id}>
+                    <li
+                        key={calendar.id}
+                        className={`calendar-list-item${selectedCalendar?.id === calendar.id ? ' selected' : ''}`}
+                        onClick={() => onCalendarChange(calendar)}
+                    >
                         {calendar.name}
-                    </option>
+                    </li>
                 ))}
-            </select>
+            </ul>
             <button
-                className="create-calendar-button"
+                className="create-calendar-button sidebar"
                 onClick={onCreateCalendarClick}
             >
-                Create Calendar
+                + 새 캘린더 만들기
             </button>
-            <GoogleCalendarIntegration />
-            <GoogleCalendarSync />
-        </div>
+            <div className="calendar-sidebar-google">
+                <GoogleCalendarIntegration />
+                <GoogleCalendarSync />
+            </div>
+        </aside>
     );
 };
 

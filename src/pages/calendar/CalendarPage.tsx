@@ -165,20 +165,20 @@ const CalendarPage: React.FC = () => {
           onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
         />
 
-        <CalendarHeader
-          view={view}
-          onViewChange={setView}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          onToday={handleToday}
-          title={getTitle()}
-          onAddEvent={handleAddEvent}
-        />
-
-        <ErrorMessage error={localError} onDismiss={() => setLocalError(null)} />
-
-        <div className="calendar-container">
-          {renderCalendarContent()}
+        <div className="calendar-main-content">
+          <CalendarHeader
+            view={view}
+            onViewChange={setView}
+            onPrev={handlePrev}
+            onNext={handleNext}
+            onToday={handleToday}
+            title={getTitle()}
+            onAddEvent={handleAddEvent}
+          />
+          <ErrorMessage error={localError} onDismiss={() => setLocalError(null)} />
+          <div className="calendar-container">
+            {renderCalendarContent()}
+          </div>
         </div>
 
         <EventModal
