@@ -82,6 +82,8 @@
   flex: 1;
   min-width: 0;
   height: calc(100vh - 60px);
+  background: #fff;
+  color: #222;
 }
 
 .calendar-container {
@@ -91,6 +93,8 @@
   width: 100%;
   box-sizing: border-box;
   overflow-x: auto;
+  background: #fff;
+  color: #222;
 }
 
 .loading {

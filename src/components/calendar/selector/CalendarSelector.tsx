@@ -5,14 +5,14 @@ import GoogleCalendarSync from '@/components/common/google-calendar-sync/GoogleC
 
 interface CalendarSelectorProps {
     calendars: CalendarType[];
-    selectedCalendar: CalendarType | null;
-    onCalendarChange: (calendar: CalendarType | null) => void;
+    selectedCalendarIds: string[];
+    onCalendarChange: (calendarId: string, checked: boolean) => void;
     onCreateCalendarClick: () => void;
 }
 
 const CalendarSelector: React.FC<CalendarSelectorProps> = ({
     calendars,
-    selectedCalendar,
+    selectedCalendarIds,
     onCalendarChange,
     onCreateCalendarClick,
 }) => {
@@ -24,12 +24,17 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                     <li className="calendar-list-empty">캘린더가 없습니다</li>
                 )}
                 {calendars.map(calendar => (
-                    <li
-                        key={calendar.id}
-                        className={`calendar-list-item${selectedCalendar?.id === calendar.id ? ' selected' : ''}`}
-                        onClick={() => onCalendarChange(calendar)}
-                    >
-                        {calendar.name}
+                    <li key={calendar.id} className="calendar-list-item">
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <input
+                                type="checkbox"
+                                checked={selectedCalendarIds.includes(calendar.id)}
+                                onChange={e => onCalendarChange(calendar.id, e.target.checked)}
+                            />
+                            <span className={selectedCalendarIds.includes(calendar.id) ? 'selected' : ''}>
+                                {calendar.name}
+                            </span>
+                        </label>
                     </li>
                 ))}
             </ul>
