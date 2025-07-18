@@ -1,123 +1,89 @@
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { getEvents, createEvent, updateEvent, deleteEvent } from '@/services/eventService';
 import { getCalendars, createCalendar } from '@/services/calendarService';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 
 export const useCalendarData = (userId: string) => {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [calendars, setCalendars] = useState<CalendarType[]>([]);
+  const queryClient = useQueryClient();
   const [selectedCalendar, setSelectedCalendar] = useState<CalendarType | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   // 캘린더 목록 조회
+  const {
+    data: calendars,
+    isLoading: isLoadingCalendars,
+    error: calendarsError,
+  } = useQuery({
+    queryKey: ['calendars', userId],
+    queryFn: getCalendars,
+    enabled: !!userId,
+  });
+
+  // 캘린더 데이터가 로드되면 selectedCalendar를 자동으로 설정
   useEffect(() => {
-    const fetchCalendars = async () => {
-      if (!userId) {
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        const calendarList = await getCalendars();
-        setCalendars(calendarList);
-
-        if (calendarList.length > 0) {
-          setSelectedCalendar(calendarList[0]);
-        }
-      } catch (error) {
-        console.error('Failed to fetch calendars:', error);
-        setError(error instanceof Error ? `Failed to load calendars: ${error.message}` : 'Failed to load calendars');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCalendars();
-  }, [userId]);
-
-  // 이벤트 조회
-  useEffect(() => {
-    const fetchEvents = async () => {
-      if (!userId || !selectedCalendar) {
-        setEvents([]);
-        return;
-      }
-
-      try {
-        setIsLoading(true);
-        setError(null);
-        const eventsData = await getEvents(selectedCalendar.id);
-        setEvents(eventsData);
-      } catch (error) {
-        console.error('Failed to fetch events:', error);
-        setError(error instanceof Error ? `Failed to load events: ${error.message}` : 'Failed to load events');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchEvents();
-  }, [userId, selectedCalendar]);
-
-  const handleCreateCalendar = async (name: string) => {
-    try {
-      const newCalendar = await createCalendar(name);
-      setCalendars(prev => [...prev, newCalendar]);
-      setSelectedCalendar(newCalendar);
-      return newCalendar;
-    } catch (error) {
-      console.error('Failed to create calendar:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to create calendar';
-      setError(errorMessage);
-      throw error;
+    if (calendars && calendars.length > 0 && !selectedCalendar) {
+      setSelectedCalendar(calendars[0]);
     }
-  };
+  }, [calendars, selectedCalendar]);
 
-  const handleSaveEvent = async (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
-    if (!selectedCalendar) throw new Error('No calendar selected');
+  // 이벤트 조회 (선택된 캘린더가 있을 때만)
+  const {
+    data: events,
+    isLoading: isLoadingEvents,
+    error: eventsError,
+  } = useQuery({
+    queryKey: ['events', selectedCalendar?.id],
+    queryFn: () => selectedCalendar ? getEvents(selectedCalendar.id) : Promise.resolve([]),
+    enabled: !!selectedCalendar,
+    // suspense: false, // 필요시 활성화
+  });
 
-    try {
+  // 캘린더 생성
+  const createCalendarMutation = useMutation({
+    mutationFn: (name: string) => createCalendar(name),
+    onSuccess: (newCalendar) => {
+      queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
+      setSelectedCalendar(newCalendar);
+    },
+  });
+
+  // 이벤트 생성/수정
+  const saveEventMutation = useMutation({
+    mutationFn: (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
+      if (!selectedCalendar) throw new Error('No calendar selected');
       if (!('id' in eventData) || !eventData.id) {
         const newEventData = { ...eventData, calendar_id: selectedCalendar.id };
-        const createdEvent = await createEvent(newEventData as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>);
-        setEvents(prev => [...prev, createdEvent]);
+        return createEvent(newEventData as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>);
       } else {
-        const updatedEvent = await updateEvent(eventData as CalendarEvent);
-        setEvents(prev => prev.map(e => e.id === updatedEvent.id ? updatedEvent : e));
+        return updateEvent(eventData as CalendarEvent);
       }
-    } catch (error) {
-      console.error('Failed to save event:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to save event';
-      setError(errorMessage);
-      throw error;
-    }
-  };
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events', selectedCalendar?.id] });
+    },
+  });
 
-  const handleDeleteEvent = async (eventId: string) => {
-    try {
-      await deleteEvent(eventId);
-      setEvents(prev => prev.filter(e => e.id !== eventId));
-    } catch (error) {
-      console.error('Failed to delete event:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Failed to delete event';
-      setError(errorMessage);
-      throw error;
-    }
-  };
+  // 이벤트 삭제
+  const deleteEventMutation = useMutation({
+    mutationFn: (eventId: string) => deleteEvent(eventId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['events', selectedCalendar?.id] });
+    },
+  });
+
+  // 통합 로딩/에러 상태
+  const overallIsLoading = isLoadingCalendars || (!!selectedCalendar && isLoadingEvents);
+  const overallError = calendarsError || eventsError;
 
   return {
-    events,
-    calendars,
+    events: events ?? [],
+    calendars: calendars ?? [],
     selectedCalendar,
     setSelectedCalendar,
-    isLoading,
-    error,
-    setError,
-    handleCreateCalendar,
-    handleSaveEvent,
-    handleDeleteEvent,
+    isLoading: overallIsLoading,
+    error: overallError,
+    handleCreateCalendar: createCalendarMutation.mutateAsync,
+    handleSaveEvent: saveEventMutation.mutateAsync,
+    handleDeleteEvent: deleteEventMutation.mutateAsync,
   };
 };

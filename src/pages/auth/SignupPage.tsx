@@ -1,99 +1,66 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { signUp } from '@/services/authService';
+import { useAuth } from '@/contexts/AuthContext';
 import './LoginPage.scss'; // 로그인 페이지와 동일한 스타일 사용
 
 const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const { signup, isLoading, error } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !password || !confirmPassword) {
-      setError('Please fill in all fields');
+      alert('Please fill in all fields');
       return;
     }
-
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      alert('Passwords do not match');
       return;
     }
-
     try {
-      setIsLoading(true);
-      setError('');
-
-      const user = await signUp(email, password);
-
-      if (user) {
-        navigate('/login', { state: { message: 'Account created successfully. Please log in.' } });
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create account');
-    } finally {
-      setIsLoading(false);
+      await signup(email, password);
+      navigate('/login', { state: { message: 'Account created successfully. Please log in.' } });
+    } catch {
+      // 에러는 useAuth에서 관리
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <h1>Sign Up</h1>
-
+    <div className="signup-container">
+      <form onSubmit={handleSubmit} className="signup-form">
+        <h2>회원가입</h2>
+        <input
+          type="email"
+          placeholder="이메일"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          autoComplete="username"
+        />
+        <input
+          type="password"
+          placeholder="비밀번호"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          autoComplete="new-password"
+        />
+        <input
+          type="password"
+          placeholder="비밀번호 확인"
+          value={confirmPassword}
+          onChange={e => setConfirmPassword(e.target.value)}
+          autoComplete="new-password"
+        />
         {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="confirm-password">Confirm Password</label>
-            <input
-              id="confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Creating Account...' : 'Sign Up'}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          Already have an account? <Link to="/login">Log In</Link>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? '회원가입 중...' : '회원가입'}
+        </button>
+        <div className="signup-links">
+          <Link to="/login">로그인</Link>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

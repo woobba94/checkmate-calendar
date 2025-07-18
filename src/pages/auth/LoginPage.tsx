@@ -6,10 +6,8 @@ import './LoginPage.scss';
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
-  const { user, login } = useAuth();
+  const { user, login, isLoading, error } = useAuth();
 
   useEffect(() => {
     if (!!user) {
@@ -19,66 +17,43 @@ const LoginPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!email || !password) {
-      setError('Please enter both email and password');
+      alert('Please enter both email and password');
       return;
     }
-
     try {
-      setIsLoading(true);
-      setError('');
       await login(email, password);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to log in');
-    } finally {
-      setIsLoading(false);
+    } catch {
+      // 에러는 useAuth에서 관리
     }
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-container">
-        <h1>Log In</h1>
-
+    <div className="login-container">
+      <form onSubmit={handleSubmit} className="login-form">
+        <h2>로그인</h2>
+        <input
+          type="email"
+          placeholder="이메일"
+          value={email}
+          onChange={e => setEmail(e.target.value)}
+          autoComplete="username"
+        />
+        <input
+          type="password"
+          placeholder="비밀번호"
+          value={password}
+          onChange={e => setPassword(e.target.value)}
+          autoComplete="current-password"
+        />
         {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">Password</label>
-            <input
-              id="password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Logging in...' : 'Log In'}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          Don't have an account? <Link to="/signup">Sign Up</Link>
+        <button type="submit" disabled={isLoading}>
+          {isLoading ? '로그인 중...' : '로그인'}
+        </button>
+        <div className="login-links">
+          <Link to="/signup">회원가입</Link>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

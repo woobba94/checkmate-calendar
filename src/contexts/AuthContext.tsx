@@ -1,11 +1,12 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useContext } from 'react';
 import type { User } from '@/types/calendar';
 import { getCurrentUser, signIn, signOut, signUp } from '@/services/authService';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  error: string | null;
+  error: string;
   login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -14,74 +15,70 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const checkUser = async () => {
-      try {
-        setIsLoading(true);
-        const currentUser = await getCurrentUser();
-        setUser(currentUser);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Authentication error');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  // 현재 로그인된 유저 정보 쿼리
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ['auth', 'user'],
+    queryFn: getCurrentUser,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
 
-    checkUser();
-  }, []);
+  // 로그인 뮤테이션
+  const loginMutation = useMutation({
+    mutationFn: (payload: { email: string; password: string }) => signIn(payload.email, payload.password),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
+    },
+  });
+
+  // 회원가입 뮤테이션
+  const signupMutation = useMutation({
+    mutationFn: (payload: { email: string; password: string }) => signUp(payload.email, payload.password),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
+    },
+  });
+
+  // 로그아웃 뮤테이션
+  const logoutMutation = useMutation({
+    mutationFn: signOut,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
+    },
+  });
+
+  // 에러 메시지 통합
+  const errorMsg: string =
+    (loginMutation.isError && (loginMutation.error as Error)?.message) ||
+    (signupMutation.isError && (signupMutation.error as Error)?.message) ||
+    (logoutMutation.isError && (logoutMutation.error as Error)?.message) ||
+    (error instanceof Error ? error.message : (error ? error as string : '')) ||
+    '';
 
   const login = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const user = await signIn(email, password);
-      setUser(user);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    await loginMutation.mutateAsync({ email, password });
   };
 
   const signup = async (email: string, password: string) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const user = await signUp(email, password);
-      setUser(user);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Signup failed');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    await signupMutation.mutateAsync({ email, password });
   };
 
   const logout = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      await signOut();
-      setUser(null);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Logout failed');
-      throw err;
-    } finally {
-      setIsLoading(false);
-    }
+    await logoutMutation.mutateAsync();
   };
 
   return (
     <AuthContext.Provider
       value={{
-        user,
-        isLoading,
-        error,
+        user: user ?? null,
+        isLoading: isLoading || loginMutation.isPending || signupMutation.isPending || logoutMutation.isPending,
+        error: errorMsg,
         login,
         signup,
         logout,
@@ -94,7 +91,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;

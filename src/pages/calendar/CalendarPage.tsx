@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '@/components/layout/Layout';
 import Calendar from '@/components/calendar/core/Calendar';
 import CalendarHeader from '@/components/calendar/header/CalendarHeader';
@@ -23,7 +23,6 @@ const CalendarPage: React.FC = () => {
     setSelectedCalendar,
     isLoading,
     error,
-    setError,
     handleCreateCalendar,
     handleSaveEvent,
     handleDeleteEvent,
@@ -41,6 +40,13 @@ const CalendarPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | undefined>(undefined);
   const [isEventModalOpen, setIsEventModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (error) {
+      setLocalError(error.message);
+    }
+  }, [error]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -49,12 +55,12 @@ const CalendarPage: React.FC = () => {
 
   const handleDateClick = (date: Date) => {
     if (!selectedCalendar) {
-      setError('Please select or create a calendar first');
+      setLocalError('Please select or create a calendar first');
       return;
     }
 
     if (!userId) {
-      setError('Please log in to add events');
+      setLocalError('Please log in to add events');
       return;
     }
 
@@ -70,12 +76,12 @@ const CalendarPage: React.FC = () => {
 
   const handleAddEvent = () => {
     if (!selectedCalendar) {
-      setError('Please select or create a calendar first');
+      setLocalError('Please select or create a calendar first');
       return;
     }
 
     if (!userId) {
-      setError('Please log in to add events');
+      setLocalError('Please log in to add events');
       return;
     }
 
@@ -83,38 +89,49 @@ const CalendarPage: React.FC = () => {
     setIsEventModalOpen(true);
   };
 
-  const handleSaveEventWithErrorHandling = async (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
+  const handleSaveEventWrapper = async (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
     if (!userId) {
-      setError('Please log in to save events');
+      setLocalError('Please log in to save events');
       return;
     }
 
     try {
       await handleSaveEvent(eventData);
-    } catch (error) {
-      // 훅에서 처리됨
+      setIsEventModalOpen(false);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Failed to save event');
     }
   };
 
-  const handleCreateCalendarWithErrorHandling = async (name: string) => {
+  const handleDeleteEventWrapper = async (eventId: string) => {
+    try {
+      await handleDeleteEvent(eventId);
+      setIsEventModalOpen(false);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Failed to delete event');
+    }
+  };
+
+  const handleCreateCalendarWrapper = async (name: string) => {
     if (!name.trim()) {
-      setError('Please enter a calendar name');
+      setLocalError('Please enter a calendar name');
       return;
     }
 
     try {
       await handleCreateCalendar(name);
-    } catch (error) {
-      // 훅에서 처리됨    
+      setIsCalendarModalOpen(false);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Failed to create calendar');
     }
   };
 
   const renderCalendarContent = () => {
-    if (isLoading) {
+    if (isLoading && !selectedCalendar) { // 초기 캘린더 로딩
       return <div className="loading">Loading calendar...</div>;
     }
 
-    if (!selectedCalendar) {
+    if (!selectedCalendar && calendars.length === 0) {
       return (
         <div className="no-calendar-message">
           <p>You don't have any calendars yet.</p>
@@ -158,7 +175,7 @@ const CalendarPage: React.FC = () => {
           onAddEvent={handleAddEvent}
         />
 
-        <ErrorMessage error={error} onDismiss={() => setError(null)} />
+        <ErrorMessage error={localError} onDismiss={() => setLocalError(null)} />
 
         <div className="calendar-container">
           {renderCalendarContent()}
@@ -168,14 +185,14 @@ const CalendarPage: React.FC = () => {
           isOpen={isEventModalOpen}
           onClose={() => setIsEventModalOpen(false)}
           event={selectedEvent}
-          onSave={handleSaveEventWithErrorHandling}
-          onDelete={handleDeleteEvent}
+          onSave={handleSaveEventWrapper}
+          onDelete={handleDeleteEventWrapper}
         />
 
         <CalendarCreateModal
           isOpen={isCalendarModalOpen}
           onClose={() => setIsCalendarModalOpen(false)}
-          onCreateCalendar={handleCreateCalendarWithErrorHandling}
+          onCreateCalendar={handleCreateCalendarWrapper}
         />
       </div>
     </Layout>
