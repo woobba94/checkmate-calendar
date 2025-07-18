@@ -1,4 +1,4 @@
-.login-container {
+.signup-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -6,7 +6,7 @@
   background: #f7f8fa;
 }
 
-.login-form {
+.signup-form {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 24px rgba(0,0,0,0.08);
@@ -18,15 +18,15 @@
   gap: 18px;
 }
 
-.login-form h2 {
+.signup-form h2 {
   margin-bottom: 8px;
   font-size: 2rem;
   color: #1976d2;
   text-align: center;
 }
 
-.login-form input[type="email"],
-.login-form input[type="password"] {
+.signup-form input[type="email"],
+.signup-form input[type="password"] {
   background: #f7f8fa;
   color: #222;
   border: 1px solid #e0e0e0;
@@ -38,13 +38,13 @@
   box-sizing: border-box;
 }
 
-.login-form input[type="email"]:focus,
-.login-form input[type="password"]:focus {
+.signup-form input[type="email"]:focus,
+.signup-form input[type="password"]:focus {
   outline: 2px solid #1976d2;
   border-color: #1976d2;
 }
 
-.login-form .error-message {
+.signup-form .error-message {
   background: #fff0f0;
   color: #d47168;
   border: 1px solid #ffd6d6;
@@ -55,7 +55,7 @@
   text-align: center;
 }
 
-.login-form button[type="submit"] {
+.signup-form button[type="submit"] {
   width: 100%;
   padding: 12px;
   background: #1976d2;
@@ -68,31 +68,31 @@
   margin-top: 8px;
   transition: background 0.15s;
 }
-.login-form button[type="submit"]:hover {
+.signup-form button[type="submit"]:hover {
   background: #1565c0;
 }
-.login-form button[type="submit"]:disabled {
+.signup-form button[type="submit"]:disabled {
   background: #cccccc;
   cursor: not-allowed;
 }
 
-.login-links {
+.signup-links {
   margin-top: 10px;
   text-align: center;
   font-size: 15px;
 }
-.login-links a {
+.signup-links a {
   color: #1976d2;
   text-decoration: none;
   font-weight: 500;
 }
-.login-links a:hover {
+.signup-links a:hover {
   text-decoration: underline;
 }
 
 @media (max-width: 600px) {
-  .login-form {
+  .signup-form {
     padding: 28px 8px 24px 8px;
     max-width: 98vw;
   }
-}
+} 

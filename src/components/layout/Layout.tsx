@@ -2,6 +2,8 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import './Layout.scss';
+import { useQueryClient } from '@tanstack/react-query';
+import { getCurrentUser } from '@/services/authService';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -10,11 +12,12 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     try {
       await logout();
-      navigate('/login');
+      queryClient.removeQueries({ queryKey: ['auth', 'user'] });
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -25,7 +28,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="app-header">
         <div className="logo">BUBU Calendar</div>
         <nav className="nav-menu">
-          {/* 필요한 네비게이션 메뉴 항목들 */}
         </nav>
         <div className="user-menu">
           {user ? (

@@ -63,6 +63,10 @@ export const getCurrentUser = async (): Promise<User | null> => {
   const { data, error } = await supabase.auth.getUser();
 
   if (error) {
+    // 세션이 없으면 null 반환
+    if (error.message === 'Auth session missing!') {
+      return null;
+    }
     throw new Error(error.message);
   }
 

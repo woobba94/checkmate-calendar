@@ -27,6 +27,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     queryFn: getCurrentUser,
     retry: false,
     refetchOnWindowFocus: false,
+    staleTime: 0,
   });
 
   // 로그인 뮤테이션
