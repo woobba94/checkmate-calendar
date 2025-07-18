@@ -52,7 +52,7 @@ export const useCalendarData = (userId: string) => {
     mutationFn: (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
       if (!selectedCalendar) throw new Error('No calendar selected');
       if (!('id' in eventData) || !eventData.id) {
-        const newEventData = { ...eventData, calendar_id: selectedCalendar.id };
+        const newEventData = { ...eventData  };
         return createEvent(newEventData as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>);
       } else {
         return updateEvent(eventData as CalendarEvent);

@@ -300,6 +300,8 @@ const CalendarPage: React.FC = () => {
           onClose={() => setIsEventModalOpen(false)}
           event={selectedEvent}
           onSave={handleSaveEventWrapper}
+          calendars={calendars.filter(c => selectedCalendarIds.includes(c.id))}
+          defaultCalendarId={selectedCalendarIds[selectedCalendarIds.length - 1]}
         />
 
         <CalendarCreateModal

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import type { CalendarEvent } from '@/types/calendar';
+import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 import './EventModal.scss';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -9,6 +9,8 @@ interface EventModalProps {
   event?: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>;
   onSave: (event: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => void;
   onDelete?: (eventId: string) => void;
+  calendars: CalendarType[];
+  defaultCalendarId?: string;
 }
 
 const EventModal: React.FC<EventModalProps> = ({
@@ -17,6 +19,8 @@ const EventModal: React.FC<EventModalProps> = ({
   event,
   onSave,
   onDelete,
+  calendars,
+  defaultCalendarId,
 }) => {
   const [title, setTitle] = useState('');
   const [start, setStart] = useState('');
@@ -24,82 +28,62 @@ const EventModal: React.FC<EventModalProps> = ({
   const [allDay, setAllDay] = useState(false);
   const [description, setDescription] = useState('');
   const [color, setColor] = useState('#0070f3');
+  const [calendarId, setCalendarId] = useState(defaultCalendarId || (calendars[0]?.id ?? ''));
   const { user } = useAuth();
 
+  const isSingleCalendar = calendars.length === 1;
+
   useEffect(() => {
+    if (!isOpen) return;
     if (event) {
       setTitle(event.title || '');
-      setStart(formatDateForInput(event.start));
-      setEnd(event.end ? formatDateForInput(event.end) : '');
-      setAllDay(event.allDay || false);
+      setStart(event.start ? new Date(event.start).toISOString().slice(0, 16) : '');
+      setEnd(event.end ? new Date(event.end).toISOString().slice(0, 16) : '');
+      setAllDay(!!event.allDay);
       setDescription(event.description || '');
       setColor(event.color || '#0070f3');
+      setCalendarId('calendar_id' in event && event.calendar_id ? event.calendar_id : (defaultCalendarId || calendars[0]?.id || ''));
     } else {
-      // 새 이벤트 생성 시 디폴트값 세팅
       setTitle('');
-      setStart(formatDateForInput(new Date()));
+      setStart('');
       setEnd('');
-      setAllDay(false);
+      setAllDay(true); // 디폴트로 종일
       setDescription('');
       setColor('#0070f3');
+      setCalendarId(defaultCalendarId || calendars[0]?.id || '');
     }
-  }, [event, isOpen]);
+  }, [isOpen, event]);
 
-  const formatDateForInput = (date: Date | string): string => {
-    const d = new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    const hours = String(d.getHours()).padStart(2, '0');
-    const minutes = String(d.getMinutes()).padStart(2, '0');
-
-    return allDay
-      ? `${year}-${month}-${day}`
-      : `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
+  if (!isOpen) return null;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!user) {
-      alert('You must be logged in to save events');
-      return;
-    }
-
-    // 기존 이벤트인지 확인 (id가 있는지)
-    const isExistingEvent = event && 'id' in event && event.id;
-    if (isExistingEvent) {
-      // 기존 이벤트 업데이트
-      const updatedEvent: CalendarEvent = {
-        id: event.id as string,
-        title,
-        start: new Date(start),
-        end: end ? new Date(end) : undefined,
-        allDay,
-        description,
-        color,
-        calendar_id: (event as CalendarEvent).calendar_id,
-        created_by: (event as CalendarEvent).created_by,
-        created_at: (event as CalendarEvent).created_at,
-        updated_at: new Date(),
-      };
-      onSave(updatedEvent);
+    if (!title || !calendarId || !start) return;
+    let startDate: Date;
+    let endDate: Date;
+    if (allDay) {
+      // 종일 -> 날짜만 사용, 시간은 00:00:00
+      const day = start.slice(0, 10);
+      startDate = new Date(day + 'T00:00:00');
+      endDate = end ? new Date(end.slice(0, 10) + 'T00:00:00') : startDate;
     } else {
-      // 새 이벤트 생성
-      const newEvent: Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'> = {
-        title,
-        start: new Date(start),
-        end: end ? new Date(end) : undefined,
-        allDay,
-        description,
-        color,
-        // TODO calendar_id 무결하게 만들어야함. 방법 검토
-        calendar_id: (event as any)?.calendar_id || '', // 선택된 캘린더 ID
-      };
-      onSave(newEvent);
+      startDate = new Date(start);
+      endDate = end ? new Date(end) : startDate;
     }
-
-    onClose();
+    const base = {
+      title,
+      start: startDate.toISOString(),
+      end: endDate.toISOString(),
+      allDay,
+      description,
+      color,
+      calendar_id: calendarId,
+    };
+    if (event && 'id' in event && event.id) {
+      onSave({ ...event, ...base });
+    } else {
+      onSave(base);
+    }
   };
 
   const handleDelete = () => {
@@ -109,97 +93,53 @@ const EventModal: React.FC<EventModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
-
   return (
-    <div className="modal-overlay">
-      <div className="event-modal">
-        <div className="modal-header">
-          <h2>{event && 'id' in event && event.id ? 'Edit Event' : 'Create Event'}</h2>
-          <button className="close-button" onClick={onClose}>×</button>
-        </div>
-
+    <div className="modal-overlay light">
+      <div className="event-modal light">
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="title">Title</label>
-            <input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              required
-            />
+          <div className="modal-header">
+            <h2>{event && 'id' in event ? '이벤트 수정' : '이벤트 생성'}</h2>
+            <button type="button" className="close-button" onClick={onClose}>&times;</button>
           </div>
-
           <div className="form-group">
-            <label htmlFor="allDay">
-              <input
-                id="allDay"
-                type="checkbox"
-                checked={allDay}
-                onChange={(e) => setAllDay(e.target.checked)}
-              />
-              All Day
+            <label>캘린더</label>
+            <select value={calendarId} onChange={e => setCalendarId(e.target.value)} required disabled={isSingleCalendar}>
+              {calendars.map(cal => (
+                <option key={cal.id} value={cal.id}>{cal.name}</option>
+              ))}
+            </select>
+          </div>
+          <div className="form-group">
+            <label>제목</label>
+            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+          </div>
+          <div className="form-group">
+            <label>
+              <input type="checkbox" checked={allDay} onChange={e => setAllDay(e.target.checked)} /> 종일
             </label>
           </div>
-
           <div className="form-group">
-            <label htmlFor="start">Start</label>
-            <input
-              id="start"
-              type={allDay ? "date" : "datetime-local"}
-              value={start}
-              onChange={(e) => setStart(e.target.value)}
-              required
-            />
+            <label>시작</label>
+            <input type={allDay ? 'date' : 'datetime-local'} value={start} onChange={e => setStart(e.target.value)} required />
           </div>
-
           <div className="form-group">
-            <label htmlFor="end">End</label>
-            <input
-              id="end"
-              type={allDay ? "date" : "datetime-local"}
-              value={end}
-              onChange={(e) => setEnd(e.target.value)}
-            />
+            <label>종료</label>
+            <input type={allDay ? 'date' : 'datetime-local'} value={end} onChange={e => setEnd(e.target.value)} disabled={allDay} />
           </div>
-
           <div className="form-group">
-            <label htmlFor="description">Description</label>
-            <textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={3}
-            />
+            <label>설명</label>
+            <input type="text" value={description} onChange={e => setDescription(e.target.value)} />
           </div>
-
           <div className="form-group">
-            <label htmlFor="color">Color</label>
-            <input
-              id="color"
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-            />
+            <label>색상</label>
+            <input type="color" value={color} onChange={e => setColor(e.target.value)} />
           </div>
-
-          <div className="modal-footer">
-            {event && 'id' in event && event.id && onDelete && (
-              <button
-                type="button"
-                className="delete-button"
-                onClick={handleDelete}
-              >
-                Delete
-              </button>
+          <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+            {event && 'id' in event && onDelete && (
+              <button type="button" className="delete-button" onClick={handleDelete}>삭제</button>
             )}
-            <button type="button" className="cancel-button" onClick={onClose}>
-              Cancel
-            </button>
-            <button type="submit" className="save-button">
-              Save
-            </button>
+            <button type="button" className="cancel-button" onClick={onClose}>취소</button>
+            <button type="submit" className="save-button">저장</button>
           </div>
         </form>
       </div>
