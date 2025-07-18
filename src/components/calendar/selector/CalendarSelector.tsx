@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import type { Calendar as CalendarType } from '@/types/calendar';
 import GoogleCalendarIntegration from '@/components/common/google-calendar-integration/GoogleCalendarIntegration';
 import GoogleCalendarSync from '@/components/common/google-calendar-sync/GoogleCalendarSync';
@@ -8,6 +8,7 @@ interface CalendarSelectorProps {
     selectedCalendarIds: string[];
     onCalendarChange: (calendarId: string, checked: boolean) => void;
     onCreateCalendarClick: () => void;
+    onEditCalendar: (calendar: CalendarType) => void;
 }
 
 const CalendarSelector: React.FC<CalendarSelectorProps> = ({
@@ -15,7 +16,10 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
     selectedCalendarIds,
     onCalendarChange,
     onCreateCalendarClick,
+    onEditCalendar,
 }) => {
+    const [menuOpenId, setMenuOpenId] = useState<string | null>(null);
+
     return (
         <aside className="calendar-sidebar">
             <div className="calendar-list-title">캘린더 목록</div>
@@ -24,8 +28,8 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                     <li className="calendar-list-empty">캘린더가 없습니다</li>
                 )}
                 {calendars.map(calendar => (
-                    <li key={calendar.id} className="calendar-list-item">
-                        <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <li key={calendar.id} className="calendar-list-item" style={{ position: 'relative' }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
                             <input
                                 type="checkbox"
                                 checked={selectedCalendarIds.includes(calendar.id)}
@@ -35,6 +39,20 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                                 {calendar.name}
                             </span>
                         </label>
+                        <button
+                            className="calendar-more-btn"
+                            onClick={() => setMenuOpenId(menuOpenId === calendar.id ? null : calendar.id)}
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: 4 }}
+                            aria-label="더보기"
+                        >
+                            ⋮
+                        </button>
+                        {menuOpenId === calendar.id && (
+                            <div className="calendar-more-menu">
+                                <button onClick={() => { setMenuOpenId(null); onEditCalendar(calendar); }}>수정</button>
+                                <button onClick={() => { }}>삭제</button>
+                            </div>
+                        )}
                     </li>
                 ))}
             </ul>

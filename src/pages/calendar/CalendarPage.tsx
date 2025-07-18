@@ -11,10 +11,18 @@ import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
 import { useCalendarData } from '@/hooks/useCalendarData';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
+import { updateCalendar } from '@/services/calendarService';
+import { useQueryClient } from '@tanstack/react-query';
 
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
   const userId = user?.id || '';
+  const [editingCalendar, setEditingCalendar] = useState<CalendarType | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editDesc, setEditDesc] = useState('');
+  const [editLoading, setEditLoading] = useState(false);
+  const queryClient = useQueryClient();
 
   // 캘린더 및 이벤트 데이터
   const {
@@ -23,7 +31,6 @@ const CalendarPage: React.FC = () => {
     error,
     handleCreateCalendar,
     handleSaveEvent,
-    handleDeleteEvent,
   } = useCalendarData(userId);
 
   // 초기 진입 시 모든 캘린더 정보 한 번에 fetch
@@ -168,16 +175,6 @@ const CalendarPage: React.FC = () => {
     }
   };
 
-  const handleDeleteEventWrapper = async (eventId: string) => {
-    try {
-      await handleDeleteEvent(eventId);
-      await refetchEvents();
-      setIsEventModalOpen(false);
-    } catch (e) {
-      setLocalError(e instanceof Error ? e.message : 'Failed to delete event');
-    }
-  };
-
   const handleCreateCalendarWrapper = async (name: string) => {
     if (!name.trim()) {
       setLocalError('Please enter a calendar name');
@@ -190,6 +187,36 @@ const CalendarPage: React.FC = () => {
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : 'Failed to create calendar');
     }
+  };
+
+  // 사이드바에서 수정 클릭 시
+  const onEditCalendar = (calendar: CalendarType) => {
+    setEditingCalendar(calendar);
+    setEditName(calendar.name);
+    setEditDesc(calendar.description || '');
+    setIsEditModalOpen(true);
+  };
+
+  // 수정 모달 저장
+  const handleEditCalendarSave = async () => {
+    if (!editingCalendar) return;
+    setEditLoading(true);
+    try {
+      await updateCalendar(editingCalendar.id, { name: editName, description: editDesc });
+      await queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
+      setIsEditModalOpen(false);
+      setEditingCalendar(null);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : '캘린더 수정 실패');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
+  // 수정 모달 취소
+  const handleEditCalendarCancel = () => {
+    setIsEditModalOpen(false);
+    setEditingCalendar(null);
   };
 
   // renderCalendarContent도 병합된 이벤트로 변경
@@ -225,6 +252,7 @@ const CalendarPage: React.FC = () => {
           selectedCalendarIds={selectedCalendarIds}
           onCalendarChange={handleCalendarToggle}
           onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
+          onEditCalendar={onEditCalendar}
         />
         <div className="calendar-main-content">
           <CalendarHeader
@@ -241,12 +269,37 @@ const CalendarPage: React.FC = () => {
             {renderCalendarContent()}
           </div>
         </div>
+        {isEditModalOpen && (
+          <div className="modal-overlay">
+            <div className="event-modal">
+              <form onSubmit={e => { e.preventDefault(); handleEditCalendarSave(); }}>
+                <div className="modal-header">
+                  <h2>캘린더 수정</h2>
+                  <button type="button" className="close-button" onClick={handleEditCalendarCancel}>&times;</button>
+                </div>
+                <div className="form-group">
+                  <label>이름</label>
+                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} required />
+                </div>
+                <div className="form-group">
+                  <label>설명</label>
+                  <input type="text" value={editDesc} onChange={e => setEditDesc(e.target.value)} />
+                </div>
+                <div className="modal-footer">
+                  <button type="button" className="cancel-button" onClick={handleEditCalendarCancel}>취소</button>
+                  <button type="submit" className="save-button" disabled={editLoading}>
+                    {editLoading ? '저장 중...' : '저장'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
         <EventModal
           isOpen={isEventModalOpen}
           onClose={() => setIsEventModalOpen(false)}
           event={selectedEvent}
           onSave={handleSaveEventWrapper}
-          onDelete={handleDeleteEventWrapper}
         />
 
         <CalendarCreateModal
