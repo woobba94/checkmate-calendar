@@ -1,6 +1,7 @@
 import React from 'react';
 import type { CalendarViewType } from '@/types/calendar';
 import './CalendarHeader.scss';
+import { Button } from "@chakra-ui/react";
 
 interface CalendarHeaderProps {
   view: CalendarViewType;
@@ -24,51 +25,39 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   return (
     <div className="calendar-header">
       <div className="calendar-header-left">
-        <button onClick={onToday} className="today-button">
-          Today
-        </button>
+        <Button onClick={onToday}>Today</Button>
         <div className="navigation-buttons">
-          <button onClick={onPrev} className="nav-button">
-            &lt;
-          </button>
-          <button onClick={onNext} className="nav-button">
-            &gt;
-          </button>
+          <Button onClick={onPrev}>&lt;</Button>
+          <Button onClick={onNext}>&gt;</Button>
         </div>
         <h2 className="calendar-title">{title}</h2>
       </div>
 
       <div className="calendar-header-right">
         <div className="view-buttons">
-          <button
-            className={`view-button ${view === 'month' ? 'active' : ''}`}
+          <Button
             onClick={() => onViewChange('month')}
           >
             Month
-          </button>
-          <button
-            className={`view-button ${view === 'week' ? 'active' : ''}`}
+          </Button>
+          <Button
             onClick={() => onViewChange('week')}
           >
             Week
-          </button>
-          <button
-            className={`view-button ${view === 'day' ? 'active' : ''}`}
+          </Button>
+          <Button
             onClick={() => onViewChange('day')}
           >
             Day
-          </button>
-          <button
-            className={`view-button ${view === 'list' ? 'active' : ''}`}
+          </Button>
+          <Button
             onClick={() => onViewChange('list')}
           >
             List
-          </button>
+          </Button>
         </div>
 
-        <button onClick={onAddEvent} className="add-event-button">
-          + Add Event
-        </button>
+        <Button onClick={onAddEvent}>+ Add Event</Button>
       </div>
     </div>
   );

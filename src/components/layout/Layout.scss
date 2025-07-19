@@ -44,33 +44,3 @@
   margin-right: 10px;
   font-size: 14px;
 }
-
-.logout-button,
-.login-button {
-  padding: 6px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.logout-button {
-  background-color: #222;
-  color: #d47168;
-  border: 1px solid #d47168;
-}
-
-.login-button {
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-}
-
-.logout-button:hover {
-  border-color: #ffaeae;
-  color: #ffaeae;
-}
-
-.login-button:hover {
-  background-color: #0060d0;
-}

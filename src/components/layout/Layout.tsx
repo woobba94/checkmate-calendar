@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import './Layout.scss';
 import { useQueryClient } from '@tanstack/react-query';
 import { getCurrentUser } from '@/services/authService';
+import { Button } from "@chakra-ui/react";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -33,14 +34,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {user ? (
             <>
               <span className="user-email">{user.email}</span>
-              <button onClick={handleLogout} className="logout-button">
-                Logout
-              </button>
+              <Button onClick={handleLogout}>Logout</Button>
             </>
           ) : (
-            <button onClick={() => navigate('/login')} className="login-button">
-              Login
-            </button>
+            <Button onClick={() => navigate('/login')}>Login</Button>
           )}
         </div>
       </header>

@@ -77,46 +77,6 @@
   margin-top: 20px;
 }
 
-%button-base {
-  padding: 8px 16px;
-  border-radius: 4px;
-  font-weight: 500;
-  cursor: pointer;
-  border: none;
-}
-
-.save-button {
-  @extend %button-base;
-  background-color: $primary-color;
-  color: $white;
-
-  &:hover {
-    background-color: $primary-hover;
-  }
-}
-
-.cancel-button {
-  @extend %button-base;
-  background-color: $white;
-  color: $text-dark;
-  border: 1px solid $border-color;
-
-  &:hover {
-    background-color: $light-gray;
-  }
-}
-
-.delete-button {
-  @extend %button-base;
-  background-color: $error-color;
-  color: $white;
-  margin-right: auto;
-
-  &:hover {
-    background-color: $error-hover;
-  }
-}
-
 .modal-overlay.light {
   background-color: rgba(0,0,0,0.25);
   color: #222;
@@ -184,41 +144,4 @@
   justify-content: flex-end;
   gap: 8px;
   padding: 12px 0 0 0;
-}
-
-.event-modal.light .save-button {
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 18px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  &:hover { background: #1565c0; }
-}
-
-.event-modal.light .cancel-button {
-  background: #f7f8fa;
-  color: #1976d2;
-  border: 1px solid #1976d2;
-  border-radius: 6px;
-  padding: 8px 18px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  &:hover { background: #e3f0ff; }
-}
-
-.event-modal.light .delete-button {
-  background: #d47168;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  padding: 8px 18px;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-right: auto;
-  &:hover { background: #ff2d2f; }
 }

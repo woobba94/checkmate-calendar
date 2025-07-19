@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from "@chakra-ui/react";
 
 const GoogleCalendarIntegration: React.FC = () => {
   const { user } = useAuth();
@@ -31,11 +32,9 @@ const GoogleCalendarIntegration: React.FC = () => {
 
   return (
     <div>
-      <button
-        onClick={handleGoogleConnect}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+      <Button onClick={handleGoogleConnect}>
         구글 캘린더 연동
-      </button>
+      </Button>
     </div>
   );
 }

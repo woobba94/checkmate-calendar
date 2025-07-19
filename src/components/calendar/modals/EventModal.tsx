@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 import './EventModal.scss';
 import { useAuth } from '@/contexts/AuthContext';
+import { Button } from "@chakra-ui/react";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -136,10 +137,10 @@ const EventModal: React.FC<EventModalProps> = ({
           </div>
           <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
             {event && 'id' in event && onDelete && (
-              <button type="button" className="delete-button" onClick={handleDelete}>삭제</button>
+              <Button type="button" onClick={handleDelete}>삭제</Button>
             )}
-            <button type="button" className="cancel-button" onClick={onClose}>취소</button>
-            <button type="submit" className="save-button">저장</button>
+            <Button type="button" onClick={onClose}>취소</Button>
+            <Button type="submit">저장</Button>
           </div>
         </form>
       </div>

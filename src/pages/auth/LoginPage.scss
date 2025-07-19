@@ -55,27 +55,6 @@
   text-align: center;
 }
 
-.login-form button[type="submit"] {
-  width: 100%;
-  padding: 12px;
-  background: #1976d2;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-  font-size: 17px;
-  font-weight: 500;
-  cursor: pointer;
-  margin-top: 8px;
-  transition: background 0.15s;
-}
-.login-form button[type="submit"]:hover {
-  background: #1565c0;
-}
-.login-form button[type="submit"]:disabled {
-  background: #cccccc;
-  cursor: not-allowed;
-}
-
 .login-links {
   margin-top: 10px;
   text-align: center;

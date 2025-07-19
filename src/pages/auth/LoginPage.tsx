@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import './LoginPage.scss';
+import { Button } from "@chakra-ui/react";
 
 const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -47,9 +48,9 @@ const LoginPage: React.FC = () => {
           autoComplete="current-password"
         />
         {error && <div className="error-message">{error}</div>}
-        <button type="submit" disabled={isLoading}>
+        <Button type="submit" loading={isLoading} disabled={isLoading}>
           {isLoading ? '로그인 중...' : '로그인'}
-        </button>
+        </Button>
         <div className="login-links">
           <Link to="/signup">회원가입</Link>
         </div>

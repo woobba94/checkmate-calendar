@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import type { Calendar as CalendarType } from '@/types/calendar';
 import GoogleCalendarIntegration from '@/components/common/google-calendar-integration/GoogleCalendarIntegration';
 import GoogleCalendarSync from '@/components/common/google-calendar-sync/GoogleCalendarSync';
+import { Button } from "@chakra-ui/react";
 
 interface CalendarSelectorProps {
     calendars: CalendarType[];
@@ -39,29 +40,24 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                                 {calendar.name}
                             </span>
                         </label>
-                        <button
-                            className="calendar-more-btn"
+                        <Button
                             onClick={() => setMenuOpenId(menuOpenId === calendar.id ? null : calendar.id)}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', marginLeft: 4 }}
                             aria-label="더보기"
                         >
                             ⋮
-                        </button>
+                        </Button>
                         {menuOpenId === calendar.id && (
                             <div className="calendar-more-menu">
-                                <button onClick={() => { setMenuOpenId(null); onEditCalendar(calendar); }}>수정</button>
-                                <button onClick={() => { }}>삭제</button>
+                                <Button onClick={() => { setMenuOpenId(null); onEditCalendar(calendar); }}>수정</Button>
+                                <Button onClick={() => { }}>삭제</Button>
                             </div>
                         )}
                     </li>
                 ))}
             </ul>
-            <button
-                className="create-calendar-button sidebar"
-                onClick={onCreateCalendarClick}
-            >
+            <Button onClick={onCreateCalendarClick}>
                 + 새 캘린더 만들기
-            </button>
+            </Button>
             <div className="calendar-sidebar-google">
                 <GoogleCalendarIntegration />
                 <GoogleCalendarSync />

@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Button } from "@chakra-ui/react";
 
 interface CalendarCreateModalProps {
     isOpen: boolean;
@@ -43,20 +44,12 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
                     disabled={isCreating}
                 />
                 <div className="modal-buttons">
-                    <button
-                        className="cancel-button"
-                        onClick={onClose}
-                        disabled={isCreating}
-                    >
+                    <Button onClick={onClose} disabled={isCreating}>
                         Cancel
-                    </button>
-                    <button
-                        className="create-button"
-                        onClick={handleCreate}
-                        disabled={!newCalendarName.trim() || isCreating}
-                    >
+                    </Button>
+                    <Button onClick={handleCreate} disabled={!newCalendarName.trim() || isCreating}>
                         {isCreating ? 'Creating...' : 'Create'}
-                    </button>
+                    </Button>
                 </div>
             </div>
         </div>
