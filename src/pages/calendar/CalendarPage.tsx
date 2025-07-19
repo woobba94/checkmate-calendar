@@ -13,6 +13,7 @@ import { useCalendarData } from '@/hooks/useCalendarData';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { updateCalendar } from '@/services/calendarService';
 import { useQueryClient } from '@tanstack/react-query';
+import { Button } from "@chakra-ui/react";
 
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
@@ -275,7 +276,7 @@ const CalendarPage: React.FC = () => {
               <form onSubmit={e => { e.preventDefault(); handleEditCalendarSave(); }}>
                 <div className="modal-header">
                   <h2>캘린더 수정</h2>
-                  <button type="button" className="close-button" onClick={handleEditCalendarCancel}>&times;</button>
+                  <Button type="button" className="close-button" onClick={handleEditCalendarCancel} variant="surface" aria-label="닫기">&times;</Button>
                 </div>
                 <div className="form-group">
                   <label>이름</label>
@@ -286,10 +287,10 @@ const CalendarPage: React.FC = () => {
                   <input type="text" value={editDesc} onChange={e => setEditDesc(e.target.value)} />
                 </div>
                 <div className="modal-footer">
-                  <button type="button" className="cancel-button" onClick={handleEditCalendarCancel}>취소</button>
-                  <button type="submit" className="save-button" disabled={editLoading}>
+                  <Button type="button" className="cancel-button" onClick={handleEditCalendarCancel} variant="surface">취소</Button>
+                  <Button type="submit" className="save-button" disabled={editLoading} variant="surface">
                     {editLoading ? '저장 중...' : '저장'}
-                  </button>
+                  </Button>
                 </div>
               </form>
             </div>

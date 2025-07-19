@@ -48,7 +48,7 @@ const LoginPage: React.FC = () => {
           autoComplete="current-password"
         />
         {error && <div className="error-message">{error}</div>}
-        <Button type="submit" loading={isLoading} disabled={isLoading}>
+        <Button type="submit" loading={isLoading} disabled={isLoading} variant="surface">
           {isLoading ? '로그인 중...' : '로그인'}
         </Button>
         <div className="login-links">

@@ -100,7 +100,7 @@ const EventModal: React.FC<EventModalProps> = ({
         <form onSubmit={handleSubmit}>
           <div className="modal-header">
             <h2>{event && 'id' in event ? '이벤트 수정' : '이벤트 생성'}</h2>
-            <button type="button" className="close-button" onClick={onClose}>&times;</button>
+            <Button type="button" onClick={onClose} variant="surface" aria-label="닫기" className="close-button">&times;</Button>
           </div>
           <div className="form-group">
             <label>캘린더</label>
@@ -137,10 +137,10 @@ const EventModal: React.FC<EventModalProps> = ({
           </div>
           <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
             {event && 'id' in event && onDelete && (
-              <Button type="button" onClick={handleDelete}>삭제</Button>
+              <Button type="button" onClick={handleDelete} variant="surface">삭제</Button>
             )}
-            <Button type="button" onClick={onClose}>취소</Button>
-            <Button type="submit">저장</Button>
+            <Button type="button" onClick={onClose} variant="surface">취소</Button>
+            <Button type="submit" variant="surface">저장</Button>
           </div>
         </form>
       </div>

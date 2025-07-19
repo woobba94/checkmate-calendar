@@ -43,19 +43,20 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                         <Button
                             onClick={() => setMenuOpenId(menuOpenId === calendar.id ? null : calendar.id)}
                             aria-label="더보기"
+                            variant="surface"
                         >
                             ⋮
                         </Button>
                         {menuOpenId === calendar.id && (
                             <div className="calendar-more-menu">
-                                <Button onClick={() => { setMenuOpenId(null); onEditCalendar(calendar); }}>수정</Button>
-                                <Button onClick={() => { }}>삭제</Button>
+                                <Button onClick={() => { setMenuOpenId(null); onEditCalendar(calendar); }} variant="surface">수정</Button>
+                                <Button onClick={() => { }} variant="surface">삭제</Button>
                             </div>
                         )}
                     </li>
                 ))}
             </ul>
-            <Button onClick={onCreateCalendarClick}>
+            <Button onClick={onCreateCalendarClick} variant="surface">
                 + 새 캘린더 만들기
             </Button>
             <div className="calendar-sidebar-google">

@@ -12,7 +12,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({ error, onDismiss }) => {
     return (
         <div className="error-container">
             <p className="error-message">{error}</p>
-            <Button onClick={onDismiss}>Dismiss</Button>
+            <Button onClick={onDismiss} variant="surface">Dismiss</Button>
         </div>
     );
 };

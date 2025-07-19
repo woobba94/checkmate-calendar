@@ -34,7 +34,7 @@ const GoogleCalendarSync: React.FC = () => {
 
   return (
     <div>
-      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending}>
+      <Button onClick={() => mutation.mutate()} disabled={mutation.isPending} variant="surface">
         {mutation.isPending ? '동기화 중...' : '구글 캘린더 동기화'}
       </Button>
       {message && <p>{message}</p>}

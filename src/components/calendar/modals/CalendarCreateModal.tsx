@@ -44,10 +44,10 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
                     disabled={isCreating}
                 />
                 <div className="modal-buttons">
-                    <Button onClick={onClose} disabled={isCreating}>
+                    <Button onClick={onClose} disabled={isCreating} variant="surface">
                         Cancel
                     </Button>
-                    <Button onClick={handleCreate} disabled={!newCalendarName.trim() || isCreating}>
+                    <Button onClick={handleCreate} disabled={!newCalendarName.trim() || isCreating} variant="surface">
                         {isCreating ? 'Creating...' : 'Create'}
                     </Button>
                 </div>

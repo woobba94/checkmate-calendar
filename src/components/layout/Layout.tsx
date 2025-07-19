@@ -34,10 +34,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           {user ? (
             <>
               <span className="user-email">{user.email}</span>
-              <Button onClick={handleLogout}>Logout</Button>
+              <Button onClick={handleLogout} variant="surface">Logout</Button>
             </>
           ) : (
-            <Button onClick={() => navigate('/login')}>Login</Button>
+            <Button onClick={() => navigate('/login')} variant="surface">Login</Button>
           )}
         </div>
       </header>

@@ -55,7 +55,7 @@ const SignupPage: React.FC = () => {
           autoComplete="new-password"
         />
         {error && <div className="error-message">{error}</div>}
-        <Button type="submit" loading={isLoading} disabled={isLoading}>
+        <Button type="submit" loading={isLoading} disabled={isLoading} variant="surface">
           {isLoading ? '회원가입 중...' : '회원가입'}
         </Button>
         <div className="signup-links">
