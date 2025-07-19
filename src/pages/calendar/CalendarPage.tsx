@@ -17,7 +17,7 @@ import { Button, Dialog, Portal, CloseButton, Theme } from "@chakra-ui/react";
 import { useColorModeToggle } from "@/components/ui/provider";
 
 const CalendarPage: React.FC = () => {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const userId = user?.id || '';
   const [editingCalendar, setEditingCalendar] = useState<CalendarType | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -246,7 +246,7 @@ const CalendarPage: React.FC = () => {
     );
   };
 
-  const { colorMode } = useColorModeToggle();
+  const { colorMode, toggleColorMode } = useColorModeToggle();
 
   return (
     <Layout>
@@ -257,6 +257,10 @@ const CalendarPage: React.FC = () => {
           onCalendarChange={handleCalendarToggle}
           onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
           onEditCalendar={onEditCalendar}
+          user={user}
+          logout={logout}
+          colorMode={colorMode}
+          toggleColorMode={toggleColorMode}
         />
         <div className="calendar-main-content">
           <CalendarHeader

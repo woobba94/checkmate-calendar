@@ -8,13 +8,10 @@ import { AuthProvider, useAuth } from './contexts/AuthContext';
 import './App.css';
 import Terms from './pages/legal/Terms';
 import Privacy from './pages/legal/Privacy';
+import { SplashScreen } from "@/components/common/splash-screen/SplashScreen";
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  const { user } = useAuth();
 
   if (!user) {
     return <Navigate to="/login" />;
@@ -45,12 +42,33 @@ const AppRoutes: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <BrowserRouter>
-      <AuthProvider>
-        <AppRoutes />
-      </AuthProvider>
-    </BrowserRouter>
+    <AuthProvider>
+      <AppMain />
+      <SplashScreen />
+    </AuthProvider>
   );
 };
+
+function AppMain() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <CalendarPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
 
 export default App;

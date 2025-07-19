@@ -19,8 +19,21 @@ const config = defineConfig({
 export const system = createSystem(defaultConfig, config);
 
 export function Provider(props: ColorModeProviderProps) {
-  const [colorMode, setColorMode] = useState<'light' | 'dark'>('light');
-  const toggleColorMode = () => setColorMode((m) => (m === 'light' ? 'dark' : 'light'));
+  const [colorMode, setColorMode] = useState<'light' | 'dark'>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('colorMode') as 'light' | 'dark' || 'light';
+    }
+    return 'light';
+  });
+  const toggleColorMode = () => {
+    setColorMode((m) => {
+      const next = m === 'light' ? 'dark' : 'light';
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('colorMode', next);
+      }
+      return next;
+    });
+  };
 
   return (
     <ChakraProvider value={system}>
