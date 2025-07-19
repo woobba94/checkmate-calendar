@@ -3,6 +3,19 @@
   width: 100%;
   margin: 0 auto;
   padding: 20px;
-  background-color: #333;
   border-radius: 8px;
+}
+
+body[data-theme='dark'] .fc {
+  --fc-page-bg-color: #111111;
+  --fc-neutral-bg-color: #18181b;
+  --fc-neutral-text-color: #f4f4f5;
+  --fc-border-color: #23232b;
+  --fc-button-bg-color: #23232b;
+  --fc-button-text-color: #f4f4f5;
+  --fc-button-active-bg-color: #333;
+  --fc-button-active-border-color: #23232b;
+  --fc-event-bg-color: #333;
+  --fc-event-border-color: #23232b;
+  --fc-event-text-color: #f4f4f5;
 }

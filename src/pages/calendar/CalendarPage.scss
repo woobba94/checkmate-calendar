@@ -10,19 +10,6 @@
   flex: 1;
   min-width: 0;
   height: calc(100vh - 60px);
-  background: #fff;
-  color: #222;
-}
-
-.calendar-container {
-  flex: 1;
-  padding: 32px 24px 24px 24px;
-  min-width: 0;
-  width: 100%;
-  box-sizing: border-box;
-  overflow-x: auto;
-  background: #fff;
-  color: #222;
 }
 
 .loading {

@@ -74,4 +74,37 @@
     font-size: 13px;
     margin-bottom: 4px;
   }
+}
+
+body[data-theme='dark'] .calendar-sidebar,
+.dark-mode .calendar-sidebar {
+  background: #18181b;
+  color: #f4f4f5;
+  
+  &__list-title,
+  &__list-item,
+  &__list-empty,
+  &__user-email {
+    color: #f4f4f5;
+  }
+  &__list-item {
+    &--selected {
+      background: #22223b;
+      color: #f4f4f5;
+    }
+    &:hover {
+      background: #23232b;
+    }
+  }
+  &__footer {
+    border-top: 1px solid #23232b;
+  }
+}
+body[data-theme='dark'] {
+  background: #111111;
+  color: #f4f4f5;
+}
+.dark-mode {
+  background: #111111;
+  color: #f4f4f5;
 } 

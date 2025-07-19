@@ -75,3 +75,39 @@
     max-width: 98vw;
   }
 }
+
+body[data-theme='dark'] {
+  .login-container {
+    background: #111111;
+  }
+  .login-form {
+    background: #18181b;
+    color: #f4f4f5;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.32);
+  }
+  .login-form h2 {
+    color: #7bb0ff;
+  }
+  .login-form input[type="email"],
+  .login-form input[type="password"] {
+    background: #23232b;
+    color: #f4f4f5;
+    border: 1px solid #23232b;
+  }
+  .login-form input[type="email"]:focus,
+  .login-form input[type="password"]:focus {
+    outline: 2px solid #7bb0ff;
+    border-color: #7bb0ff;
+  }
+  .login-form .error-message {
+    background: #2a1a1a;
+    color: #ffb4b4;
+    border: 1px solid #ffb4b4;
+  }
+  .login-links {
+    color: #bdbdbd;
+  }
+  .login-links a {
+    color: #7bb0ff;
+  }
+}

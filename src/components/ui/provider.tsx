@@ -1,7 +1,7 @@
 "use client"
 
 import { ChakraProvider, createSystem, defaultConfig, defaultSystem, defineConfig, Theme } from "@chakra-ui/react";
-import React, { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { ColorModeProvider, type ColorModeProviderProps } from "./color-mode";
 
 const ColorModeContext = createContext<{ colorMode: 'light' | 'dark', toggleColorMode: () => void }>({ colorMode: 'light', toggleColorMode: () => {} });
@@ -34,6 +34,13 @@ export function Provider(props: ColorModeProviderProps) {
       return next;
     });
   };
+
+  // colorMode가 바뀔 때 body에 data-theme 속성 동기화
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.body.setAttribute('data-theme', colorMode);
+    }
+  }, [colorMode]);
 
   return (
     <ChakraProvider value={system}>
