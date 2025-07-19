@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Button } from "@chakra-ui/react";
+import { Button, Dialog, Portal, CloseButton, Theme } from "@chakra-ui/react";
+import { useColorModeToggle } from "@/components/ui/provider";
 
 interface CalendarCreateModalProps {
     isOpen: boolean;
@@ -14,6 +15,7 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
 }) => {
     const [newCalendarName, setNewCalendarName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
+    const { colorMode } = useColorModeToggle();
 
     const handleCreate = async () => {
         if (!newCalendarName.trim()) return;
@@ -33,26 +35,43 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
     if (!isOpen) return null;
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
-                <h2>Create New Calendar</h2>
-                <input
-                    type="text"
-                    placeholder="Calendar Name"
-                    value={newCalendarName}
-                    onChange={(e) => setNewCalendarName(e.target.value)}
-                    disabled={isCreating}
-                />
-                <div className="modal-buttons">
-                    <Button onClick={onClose} disabled={isCreating} variant="surface">
-                        Cancel
-                    </Button>
-                    <Button onClick={handleCreate} disabled={!newCalendarName.trim() || isCreating} variant="surface">
-                        {isCreating ? 'Creating...' : 'Create'}
-                    </Button>
-                </div>
-            </div>
-        </div>
+        <Dialog.Root open={isOpen} onOpenChange={v => { if (!v.open) onClose(); }}>
+            <Portal>
+                <Dialog.Backdrop />
+                <Dialog.Positioner>
+                    <Dialog.Content>
+                        <Theme appearance={colorMode}>
+                            <Dialog.Header>
+                                <Dialog.Title>새 캘린더 만들기</Dialog.Title>
+                                <Dialog.CloseTrigger asChild>
+                                    <CloseButton size="sm" aria-label="닫기" />
+                                </Dialog.CloseTrigger>
+                            </Dialog.Header>
+                            <Dialog.Body>
+                                <input
+                                    type="text"
+                                    placeholder="Calendar Name"
+                                    value={newCalendarName}
+                                    onChange={(e) => setNewCalendarName(e.target.value)}
+                                    disabled={isCreating}
+                                    style={{ width: '100%', marginBottom: 16 }}
+                                />
+                            </Dialog.Body>
+                            <Dialog.Footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                                <Dialog.ActionTrigger asChild>
+                                    <Button onClick={onClose} disabled={isCreating} variant="surface">
+                                        Cancel
+                                    </Button>
+                                </Dialog.ActionTrigger>
+                                <Button onClick={handleCreate} disabled={!newCalendarName.trim() || isCreating} variant="surface">
+                                    {isCreating ? 'Creating...' : 'Create'}
+                                </Button>
+                            </Dialog.Footer>
+                        </Theme>
+                    </Dialog.Content>
+                </Dialog.Positioner>
+            </Portal>
+        </Dialog.Root>
     );
 };
 

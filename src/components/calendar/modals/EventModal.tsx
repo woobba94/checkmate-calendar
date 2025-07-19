@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 import './EventModal.scss';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from "@chakra-ui/react";
+import { Button, Dialog, Portal, CloseButton, Theme } from "@chakra-ui/react";
+import { useColorModeToggle } from "@/components/ui/provider";
 
 interface EventModalProps {
   isOpen: boolean;
@@ -31,6 +32,7 @@ const EventModal: React.FC<EventModalProps> = ({
   const [color, setColor] = useState('#0070f3');
   const [calendarId, setCalendarId] = useState(defaultCalendarId || (calendars[0]?.id ?? ''));
   const { user } = useAuth();
+  const { colorMode } = useColorModeToggle();
 
   const isSingleCalendar = calendars.length === 1;
 
@@ -95,56 +97,71 @@ const EventModal: React.FC<EventModalProps> = ({
   };
 
   return (
-    <div className="modal-overlay light">
-      <div className="event-modal light">
-        <form onSubmit={handleSubmit}>
-          <div className="modal-header">
-            <h2>{event && 'id' in event ? '이벤트 수정' : '이벤트 생성'}</h2>
-            <Button type="button" onClick={onClose} variant="surface" aria-label="닫기" className="close-button">&times;</Button>
-          </div>
-          <div className="form-group">
-            <label>캘린더</label>
-            <select value={calendarId} onChange={e => setCalendarId(e.target.value)} required disabled={isSingleCalendar}>
-              {calendars.map(cal => (
-                <option key={cal.id} value={cal.id}>{cal.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="form-group">
-            <label>제목</label>
-            <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>
-              <input type="checkbox" checked={allDay} onChange={e => setAllDay(e.target.checked)} /> 종일
-            </label>
-          </div>
-          <div className="form-group">
-            <label>시작</label>
-            <input type={allDay ? 'date' : 'datetime-local'} value={start} onChange={e => setStart(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label>종료</label>
-            <input type={allDay ? 'date' : 'datetime-local'} value={end} onChange={e => setEnd(e.target.value)} disabled={allDay} />
-          </div>
-          <div className="form-group">
-            <label>설명</label>
-            <input type="text" value={description} onChange={e => setDescription(e.target.value)} />
-          </div>
-          <div className="form-group">
-            <label>색상</label>
-            <input type="color" value={color} onChange={e => setColor(e.target.value)} />
-          </div>
-          <div className="modal-footer" style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-            {event && 'id' in event && onDelete && (
-              <Button type="button" onClick={handleDelete} variant="surface">삭제</Button>
-            )}
-            <Button type="button" onClick={onClose} variant="surface">취소</Button>
-            <Button type="submit" variant="surface">저장</Button>
-          </div>
-        </form>
-      </div>
-    </div>
+    <Dialog.Root open={isOpen} onOpenChange={v => { if (!v.open) onClose(); }}>
+      <Portal>
+        <Dialog.Backdrop />
+        <Dialog.Positioner>
+          <Dialog.Content>
+            <Theme appearance={colorMode}>
+              <form onSubmit={handleSubmit} style={{ width: 400, maxWidth: '95vw' }}>
+                <Dialog.Header>
+                  <Dialog.Title>{event && 'id' in event ? '이벤트 수정' : '이벤트 생성'}</Dialog.Title>
+                  <Dialog.CloseTrigger asChild>
+                    <CloseButton size="sm" aria-label="닫기" />
+                  </Dialog.CloseTrigger>
+                </Dialog.Header>
+                <Dialog.Body>
+                  <div className="form-group">
+                    <label>캘린더</label>
+                    <select value={calendarId} onChange={e => setCalendarId(e.target.value)} required disabled={isSingleCalendar}>
+                      {calendars.map(cal => (
+                        <option key={cal.id} value={cal.id}>{cal.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="form-group">
+                    <label>제목</label>
+                    <input type="text" value={title} onChange={e => setTitle(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label>
+                      <input type="checkbox" checked={allDay} onChange={e => setAllDay(e.target.checked)} /> 종일
+                    </label>
+                  </div>
+                  <div className="form-group">
+                    <label>시작</label>
+                    <input type={allDay ? 'date' : 'datetime-local'} value={start} onChange={e => setStart(e.target.value)} required />
+                  </div>
+                  <div className="form-group">
+                    <label>종료</label>
+                    <input type={allDay ? 'date' : 'datetime-local'} value={end} onChange={e => setEnd(e.target.value)} disabled={allDay} />
+                  </div>
+                  <div className="form-group">
+                    <label>설명</label>
+                    <input type="text" value={description} onChange={e => setDescription(e.target.value)} />
+                  </div>
+                  <div className="form-group">
+                    <label>색상</label>
+                    <input type="color" value={color} onChange={e => setColor(e.target.value)} />
+                  </div>
+                </Dialog.Body>
+                <Dialog.Footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                  {event && 'id' in event && onDelete && (
+                    <Dialog.ActionTrigger asChild>
+                      <Button type="button" onClick={handleDelete} variant="surface">삭제</Button>
+                    </Dialog.ActionTrigger>
+                  )}
+                  <Dialog.ActionTrigger asChild>
+                    <Button type="button" onClick={onClose} variant="surface">취소</Button>
+                  </Dialog.ActionTrigger>
+                  <Button type="submit" variant="surface">저장</Button>
+                </Dialog.Footer>
+              </form>
+            </Theme>
+          </Dialog.Content>
+        </Dialog.Positioner>
+      </Portal>
+    </Dialog.Root>
   );
 };
 

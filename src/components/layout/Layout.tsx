@@ -5,6 +5,8 @@ import './Layout.scss';
 import { useQueryClient } from '@tanstack/react-query';
 import { getCurrentUser } from '@/services/authService';
 import { Button } from "@chakra-ui/react";
+import { useColorModeToggle } from "@/components/ui/provider";
+import { LuSun, LuMoon } from "react-icons/lu";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -31,6 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <nav className="nav-menu">
         </nav>
         <div className="user-menu">
+          <ColorModeToggleButton />
           {user ? (
             <>
               <span className="user-email">{user.email}</span>
@@ -45,5 +48,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     </div>
   );
 };
+
+function ColorModeToggleButton() {
+  const { colorMode, toggleColorMode } = useColorModeToggle();
+  return (
+    <Button onClick={toggleColorMode} variant="ghost" size="sm" aria-label="색상 모드 토글" style={{ marginRight: 8 }}>
+      {colorMode === 'light' ? <LuMoon /> : <LuSun />}
+    </Button>
+  );
+}
 
 export default Layout;

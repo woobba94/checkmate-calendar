@@ -13,7 +13,8 @@ import { useCalendarData } from '@/hooks/useCalendarData';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { updateCalendar } from '@/services/calendarService';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button } from "@chakra-ui/react";
+import { Button, Dialog, Portal, CloseButton, Theme } from "@chakra-ui/react";
+import { useColorModeToggle } from "@/components/ui/provider";
 
 const CalendarPage: React.FC = () => {
   const { user } = useAuth();
@@ -245,6 +246,8 @@ const CalendarPage: React.FC = () => {
     );
   };
 
+  const { colorMode } = useColorModeToggle();
+
   return (
     <Layout>
       <div className="calendar-page">
@@ -271,30 +274,43 @@ const CalendarPage: React.FC = () => {
           </div>
         </div>
         {isEditModalOpen && (
-          <div className="modal-overlay">
-            <div className="event-modal">
-              <form onSubmit={e => { e.preventDefault(); handleEditCalendarSave(); }}>
-                <div className="modal-header">
-                  <h2>캘린더 수정</h2>
-                  <Button type="button" className="close-button" onClick={handleEditCalendarCancel} variant="surface" aria-label="닫기">&times;</Button>
-                </div>
-                <div className="form-group">
-                  <label>이름</label>
-                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label>설명</label>
-                  <input type="text" value={editDesc} onChange={e => setEditDesc(e.target.value)} />
-                </div>
-                <div className="modal-footer">
-                  <Button type="button" className="cancel-button" onClick={handleEditCalendarCancel} variant="surface">취소</Button>
-                  <Button type="submit" className="save-button" disabled={editLoading} variant="surface">
-                    {editLoading ? '저장 중...' : '저장'}
-                  </Button>
-                </div>
-              </form>
-            </div>
-          </div>
+          <Dialog.Root open={isEditModalOpen} onOpenChange={v => { if (!v.open) handleEditCalendarCancel(); }}>
+            <Portal>
+              <Dialog.Backdrop />
+              <Dialog.Positioner>
+                <Dialog.Content>
+                  <Theme appearance={colorMode}>
+                    <form onSubmit={e => { e.preventDefault(); handleEditCalendarSave(); }} style={{ width: 400, maxWidth: '95vw' }}>
+                      <Dialog.Header>
+                        <Dialog.Title>캘린더 수정</Dialog.Title>
+                        <Dialog.CloseTrigger asChild>
+                          <CloseButton size="sm" aria-label="닫기" />
+                        </Dialog.CloseTrigger>
+                      </Dialog.Header>
+                      <Dialog.Body>
+                        <div className="form-group">
+                          <label>이름</label>
+                          <input type="text" value={editName} onChange={e => setEditName(e.target.value)} required />
+                        </div>
+                        <div className="form-group">
+                          <label>설명</label>
+                          <input type="text" value={editDesc} onChange={e => setEditDesc(e.target.value)} />
+                        </div>
+                      </Dialog.Body>
+                      <Dialog.Footer style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                        <Dialog.ActionTrigger asChild>
+                          <Button type="button" className="cancel-button" onClick={handleEditCalendarCancel} variant="surface">취소</Button>
+                        </Dialog.ActionTrigger>
+                        <Button type="submit" className="save-button" disabled={editLoading} variant="surface">
+                          {editLoading ? '저장 중...' : '저장'}
+                        </Button>
+                      </Dialog.Footer>
+                    </form>
+                  </Theme>
+                </Dialog.Content>
+              </Dialog.Positioner>
+            </Portal>
+          </Dialog.Root>
         )}
         <EventModal
           isOpen={isEventModalOpen}
