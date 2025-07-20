@@ -19,7 +19,7 @@ export default defineConfig({
     preprocessorOptions: {
       scss: {
         api: 'modern-compiler',
-        additionalData: `@use "/src/styles/variables.scss" as *;`
+        additionalData: `@use "/src/styles/color-tokens.scss" as *;`
       }
     }
   }

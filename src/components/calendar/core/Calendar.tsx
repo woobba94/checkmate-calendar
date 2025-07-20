@@ -52,7 +52,6 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   return (
-    <div className="calendar-container">
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
         initialView={getFullCalendarView(currentView)}
@@ -82,9 +81,8 @@ const Calendar: React.FC<CalendarProps> = ({
         selectMirror={true}
         dayMaxEvents={true}
         weekends={true}
-        height="auto"
+        height="100%"
       />
-    </div>
   );
 };
 

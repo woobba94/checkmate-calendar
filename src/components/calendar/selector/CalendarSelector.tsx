@@ -4,7 +4,7 @@ import type { User } from '@/types/calendar';
 import GoogleCalendarIntegration from '@/components/common/google-calendar-integration/GoogleCalendarIntegration';
 import GoogleCalendarSync from '@/components/common/google-calendar-sync/GoogleCalendarSync';
 import { Link } from "react-router-dom";
-import { Button } from "@chakra-ui/react";
+import { Button, CheckboxCard } from "@chakra-ui/react";
 import { LuSun, LuMoon } from "react-icons/lu";
 import "./CalendarSelector.scss";
 
@@ -35,6 +35,7 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
 
     return (
         <aside className="calendar-sidebar">
+            <div>
             <div className="calendar-sidebar__logo">
                 <Link to="/">
                     <img
@@ -45,44 +46,72 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                 </Link>
             </div>
             <div className="calendar-sidebar__main">
-                <div className="calendar-sidebar__list-title">캘린더 목록</div>
-                <ul className="calendar-sidebar__list">
+                <div className="calendar-sidebar__list">
                     {calendars.length === 0 && (
-                        <li className="calendar-sidebar__list-empty">캘린더가 없습니다</li>
+                        <div className="calendar-sidebar__list-empty">캘린더가 없습니다</div>
                     )}
                     {calendars.map(calendar => (
-                        <li key={calendar.id} className={`calendar-sidebar__list-item${selectedCalendarIds.includes(calendar.id) ? ' calendar-sidebar__list-item--selected' : ''}`}>
-                            <label className="calendar-sidebar__label">
-                                <input
-                                    type="checkbox"
-                                    checked={selectedCalendarIds.includes(calendar.id)}
-                                    onChange={e => onCalendarChange(calendar.id, e.target.checked)}
-                                />
-                                <span>{calendar.name}</span>
-                            </label>
-                            <Button
-                                onClick={() => setMenuOpenId(menuOpenId === calendar.id ? null : calendar.id)}
-                                aria-label="더보기"
-                                variant="surface"
+                        <div key={calendar.id} className="calendar-sidebar__list-item">
+                            <CheckboxCard.Root
+                                checked={selectedCalendarIds.includes(calendar.id)}
+                                onCheckedChange={(details) => onCalendarChange(calendar.id, Boolean(details.checked))}
+                                size="sm"
+                                variant="outline"
+                                className="calendar-sidebar__checkbox-card"
                             >
-                                ⋮
-                            </Button>
+                                <CheckboxCard.HiddenInput />
+                                <CheckboxCard.Control>
+                                    <CheckboxCard.Label>{calendar.name}</CheckboxCard.Label>
+                                    <div className="calendar-sidebar__item-actions">
+                                        <Button
+                                            size="xs"
+                                            variant="ghost"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                setMenuOpenId(menuOpenId === calendar.id ? null : calendar.id);
+                                            }}
+                                            aria-label="더보기"
+                                        >
+                                            ⋮
+                                        </Button>
+                                    </div>
+                                    <CheckboxCard.Indicator />
+                                </CheckboxCard.Control>
+                            </CheckboxCard.Root>
                             {menuOpenId === calendar.id && (
-                                <div className="calendar-more-menu">
-                                    <Button onClick={() => { setMenuOpenId(null); onEditCalendar(calendar); }} variant="surface">수정</Button>
-                                    <Button onClick={() => { }} variant="surface">삭제</Button>
+                                <div className="calendar-sidebar__menu">
+                                    <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => {
+                                            setMenuOpenId(null);
+                                            onEditCalendar(calendar);
+                                        }}
+                                    >
+                                        수정
+                                    </Button>
+                                    <Button 
+                                        size="sm" 
+                                        variant="ghost" 
+                                        onClick={() => {
+                                            setMenuOpenId(null);
+                                        }}
+                                    >
+                                        삭제
+                                    </Button>
                                 </div>
                             )}
-                        </li>
+                        </div>
                     ))}
-                </ul>
-                <Button onClick={onCreateCalendarClick} variant="surface">
+                </div>
+                <Button onClick={onCreateCalendarClick} variant="outline" size="sm" w="100%">
                     + 새 캘린더 만들기
                 </Button>
                 <div className="calendar-sidebar__google">
                     <GoogleCalendarIntegration />
                     <GoogleCalendarSync />
                 </div>
+            </div>  
             </div>
             <div className="calendar-sidebar__footer">
                 <Button onClick={toggleColorMode} variant="ghost" size="sm" aria-label="색상 모드 토글">
@@ -91,7 +120,7 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                 {user ? (
                     <>
                         <div className="calendar-sidebar__user-email">{user.email}</div>
-                        <Button onClick={logout} variant="surface" size="sm">Logout</Button>
+                        <Button onClick={logout} variant="outline" size="sm">Logout</Button>
                     </>
                 ) : null}
             </div>

@@ -1,10 +1,12 @@
+@use '@/styles/color-tokens' as *;
+
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: $modal-overlay-bg;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -12,13 +14,13 @@
 }
 
 .event-modal {
-  background-color: $layer-01;
+  background-color: var(--bg-secondary);
   border-radius: 8px;
   width: 500px;
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: $modal-shadow;
+  box-shadow: var(--shadow-lg);
 
   form {
     padding: 20px;
@@ -30,7 +32,7 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px;
-  border-bottom: 1px solid $border-color;
+  border-bottom: 1px solid var(--border-color);
 }
 
 .close-button {
@@ -38,10 +40,10 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: $text-gray;
+  color: var(--text-muted);
 
   &:hover {
-    color: $text-dark;
+    color: var(--text-primary);
   }
 }
 
@@ -60,7 +62,7 @@
   textarea {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid $border-color;
+    border: 1px solid var(--border-color);
     border-radius: 4px;
     font-size: 14px;
   }
@@ -79,14 +81,14 @@
 
 .modal-overlay.light {
   background-color: rgba(0,0,0,0.25);
-  color: #222;
+  color: var(--text-primary);
 }
 
 .event-modal.light {
-  background-color: #fff;
-  color: #222;
+  background-color: var(--bg-secondary);
+  color: var(--text-primary);
   border-radius: 10px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-lg);
   width: 400px;
   max-width: 95vw;
   margin: 0 auto;
@@ -96,9 +98,9 @@
 .event-modal.light input[type="date"],
 .event-modal.light input[type="datetime-local"],
 .event-modal.light select {
-  background: #f7f8fa;
-  color: #222;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 8px 10px;
   font-size: 15px;
@@ -121,8 +123,8 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 20px 8px 20px;
-  border-bottom: 1px solid #e0e0e0;
-  background: #f7f8fa;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--bg-tertiary);
   border-radius: 10px 10px 0 0;
 }
 
@@ -131,8 +133,8 @@
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #888;
-  &:hover { color: #222; }
+  color: var(--text-muted);
+  &:hover { color: var(--text-primary); }
 }
 
 .event-modal.light .form-group {

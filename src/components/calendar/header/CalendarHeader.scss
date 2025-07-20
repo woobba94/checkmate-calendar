@@ -1,9 +1,10 @@
+@use '@/styles/color-tokens' as *;
+
 .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
-  padding: 10px 0;
+  padding: 12px;
 
   &-left {
     display: flex;
@@ -26,31 +27,31 @@
 
 .view-buttons {
   display: flex;
-  border: 1px solid $border-color;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
   overflow: hidden;
 }
 
 .view-button {
   padding: 6px 12px;
-  background-color: $white;
+  background-color: var(--bg-secondary);
   border: none;
-  border-right: 1px solid $border-color;
+  border-right: 1px solid var(--border-color);
   cursor: pointer;
   font-size: 14px;
-  color: $black;
+  color: var(--text-primary);
 
   &:last-child {
     border-right: none;
   }
 
   &.active {
-    background-color: $primary-color;
-    color: $white;
+    background-color: var(--accent-color);
+    color: white;
   }
 
   &:hover:not(.active) {
-    background-color: $light-gray;
+    background-color: var(--bg-tertiary);
   }
 }
 

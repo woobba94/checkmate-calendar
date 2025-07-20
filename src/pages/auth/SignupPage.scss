@@ -1,15 +1,17 @@
+@use '@/styles/color-tokens' as *;
+
 .signup-container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f7f8fa;
+  background: var(--bg-primary);
 }
 
 .signup-form {
-  background: #fff;
+  background: var(--bg-secondary);
   border-radius: 12px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-lg);
   padding: 40px 32px 32px 32px;
   width: 100%;
   max-width: 380px;
@@ -21,15 +23,15 @@
 .signup-form h2 {
   margin-bottom: 8px;
   font-size: 2rem;
-  color: #1976d2;
+  color: var(--accent-color);
   text-align: center;
 }
 
 .signup-form input[type="email"],
 .signup-form input[type="password"] {
-  background: #f7f8fa;
-  color: #222;
-  border: 1px solid #e0e0e0;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
   border-radius: 6px;
   padding: 12px 14px;
   font-size: 16px;
@@ -40,14 +42,14 @@
 
 .signup-form input[type="email"]:focus,
 .signup-form input[type="password"]:focus {
-  outline: 2px solid #1976d2;
-  border-color: #1976d2;
+  outline: 2px solid var(--accent-color);
+  border-color: var(--accent-color);
 }
 
 .signup-form .error-message {
-  background: #fff0f0;
-  color: #d47168;
-  border: 1px solid #ffd6d6;
+  background: var(--error-color);
+  color: white;
+  border: 1px solid var(--error-color);
   border-radius: 6px;
   padding: 10px 12px;
   margin-bottom: 4px;
@@ -61,7 +63,7 @@
   font-size: 15px;
 }
 .signup-links a {
-  color: #1976d2;
+  color: var(--accent-color);
   text-decoration: none;
   font-weight: 500;
 }
@@ -73,41 +75,5 @@
   .signup-form {
     padding: 28px 8px 24px 8px;
     max-width: 98vw;
-  }
-}
-
-body[data-theme='dark'] {
-  .signup-container {
-    background: #111111;
-  }
-  .signup-form {
-    background: #18181b;
-    color: #f4f4f5;
-    box-shadow: 0 4px 24px rgba(0,0,0,0.32);
-  }
-  .signup-form h2 {
-    color: #7bb0ff;
-  }
-  .signup-form input[type="email"],
-  .signup-form input[type="password"] {
-    background: #23232b;
-    color: #f4f4f5;
-    border: 1px solid #23232b;
-  }
-  .signup-form input[type="email"]:focus,
-  .signup-form input[type="password"]:focus {
-    outline: 2px solid #7bb0ff;
-    border-color: #7bb0ff;
-  }
-  .signup-form .error-message {
-    background: #2a1a1a;
-    color: #ffb4b4;
-    border: 1px solid #ffb4b4;
-  }
-  .signup-links {
-    color: #bdbdbd;
-  }
-  .signup-links a {
-    color: #7bb0ff;
   }
 } 

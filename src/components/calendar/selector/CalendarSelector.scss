@@ -1,18 +1,17 @@
+@use '@/styles/color-tokens' as *;
+
 .calendar-sidebar {
-  height: 100vh;
-  width: 220px;
+  width: 240px;
   min-width: 180px;
-  background: #f7f8fa;
-  border-right: 1px solid #e0e0e0;
-  padding: 24px 12px 12px 12px;
+  border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  align-items: stretch;
+  justify-content: space-between;
   gap: 16px;
   box-sizing: border-box;
 
   &__logo {
-    padding: 16px 0;
+    padding: 16px 20px;
     text-align: center;
   }
   &__logo-img {
@@ -20,44 +19,40 @@
   }
   &__main {
     flex: 1 1 auto;
-  }
-  &__list-title {
-    font-weight: bold;
-    font-size: 18px;
-    margin-bottom: 12px;
-    color: #333;
+    padding: 12px;
   }
   &__list {
-    list-style: none;
-    padding: 0;
     margin: 0 0 12px 0;
   }
   &__list-item {
-    padding: 10px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    color: #222;
     margin-bottom: 4px;
-    transition: background 0.15s;
-    &--selected {
-      background: #e3f0ff;
-      color: #1976d2;
-      font-weight: bold;
-    }
-    &:hover {
-      background: #f0f4fa;
-    }
+    position: relative;
   }
   &__list-empty {
-    color: #aaa;
+    color: $color-gray-400;
     padding: 10px 0;
     text-align: center;
   }
-  &__label {
+  &__checkbox-card {
+    width: 100%;
+  }
+  &__item-actions {
+    margin-left: auto;
+  }
+  &__menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    z-index: 10;
+    margin-top: 4px;
+    padding: 4px;
+    background: white;
+    border: 1px solid $color-gray-200;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     display: flex;
-    align-items: center;
-    gap: 8px;
-    flex: 1;
+    flex-direction: column;
+    gap: 2px;
   }
   &__google {
     margin-top: 16px;
@@ -68,7 +63,7 @@
   &__footer {
     padding: 16px 0;
     text-align: center;
-    border-top: 1px solid #eee;
+    border-top: 1px solid $color-gray-200;
   }
   &__user-email {
     font-size: 13px;
@@ -78,33 +73,29 @@
 
 body[data-theme='dark'] .calendar-sidebar,
 .dark-mode .calendar-sidebar {
-  background: #18181b;
-  color: #f4f4f5;
+  background: $color-gray-900;
+  color: $color-gray-100;
   
   &__list-title,
   &__list-item,
   &__list-empty,
   &__user-email {
-    color: #f4f4f5;
+    color: $color-gray-100;
   }
-  &__list-item {
-    &--selected {
-      background: #22223b;
-      color: #f4f4f5;
-    }
-    &:hover {
-      background: #23232b;
-    }
+  &__menu {
+    background: $color-gray-800;
+    border-color: $color-gray-700;
   }
   &__footer {
-    border-top: 1px solid #23232b;
+    border-top: 1px solid $color-gray-800;
   }
 }
+
 body[data-theme='dark'] {
-  background: #111111;
-  color: #f4f4f5;
+  background: $color-gray-950;
+  color: $color-gray-100;
 }
 .dark-mode {
-  background: #111111;
-  color: #f4f4f5;
+  background: $color-gray-950;
+  color: $color-gray-100;
 } 

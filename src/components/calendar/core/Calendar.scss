@@ -1,21 +1,23 @@
+@use '@/styles/color-tokens' as *;
+
 .calendar-container {
   height: 100%;
-  width: 100%;
-  margin: 0 auto;
   padding: 20px;
-  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
 }
 
-body[data-theme='dark'] .fc {
-  --fc-page-bg-color: #111111;
-  --fc-neutral-bg-color: #18181b;
-  --fc-neutral-text-color: #f4f4f5;
-  --fc-border-color: #23232b;
-  --fc-button-bg-color: #23232b;
-  --fc-button-text-color: #f4f4f5;
-  --fc-button-active-bg-color: #333;
-  --fc-button-active-border-color: #23232b;
-  --fc-event-bg-color: #333;
-  --fc-event-border-color: #23232b;
-  --fc-event-text-color: #f4f4f5;
+body[data-theme='dark'] .calendar-container {
+  background: $color-gray-950;
+  --fc-page-bg-color: $color-gray-950;
+  --fc-neutral-bg-color: $color-gray-900;
+  --fc-neutral-text-color: $color-gray-100;
+  --fc-border-color: $color-gray-800;
+  --fc-button-bg-color: $color-gray-800;
+  --fc-button-text-color: $color-gray-100;
+  --fc-button-active-bg-color: $color-gray-700;
+  --fc-button-active-border-color: $color-gray-800;
+  --fc-event-bg-color: $color-gray-700;
+  --fc-event-border-color: $color-gray-800;
+  --fc-event-text-color: $color-gray-100;
 }
