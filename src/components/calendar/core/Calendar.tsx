@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -12,6 +12,7 @@ interface CalendarProps {
   onEventClick?: (event: CalendarEvent) => void;
   onDateClick?: (date: Date) => void;
   currentView: CalendarViewType;
+  currentDate?: Date;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -19,7 +20,10 @@ const Calendar: React.FC<CalendarProps> = ({
   onEventClick,
   onDateClick,
   currentView,
+  currentDate,
 }) => {
+  const calendarRef = useRef<FullCalendar>(null);
+
   // 뷰 타입 매핑
   const getFullCalendarView = (view: CalendarViewType): string => {
     switch (view) {
@@ -30,6 +34,20 @@ const Calendar: React.FC<CalendarProps> = ({
       default: return 'dayGridMonth';
     }
   };
+
+  useEffect(() => {
+    if (calendarRef.current) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.changeView(getFullCalendarView(currentView));
+    }
+  }, [currentView]);
+
+  useEffect(() => {
+    if (calendarRef.current && currentDate) {
+      const calendarApi = calendarRef.current.getApi();
+      calendarApi.gotoDate(currentDate);
+    }
+  }, [currentDate]);
 
   const handleEventClick = (info: any) => {
     if (onEventClick) {
@@ -53,8 +71,10 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
         initialView={getFullCalendarView(currentView)}
+        initialDate={currentDate}
         headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
         events={events.map(event => ({
           id: event.id,

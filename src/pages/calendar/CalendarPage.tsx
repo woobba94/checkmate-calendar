@@ -84,6 +84,7 @@ const CalendarPage: React.FC = () => {
   const {
     view,
     setView,
+    currentDate,
     handlePrev,
     handleNext,
     handleToday,
@@ -239,9 +240,10 @@ const CalendarPage: React.FC = () => {
     return (
       <Calendar
         events={mergedEvents}
-        onEventClick={() => {}}
-        onDateClick={() => {}}
+        onEventClick={handleEventClick}
+        onDateClick={handleDateClick}
         currentView={view}
+        currentDate={currentDate}
       />
     );
   };
