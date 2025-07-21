@@ -1,11 +1,10 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import CalendarPage from './pages/calendar/CalendarPage';
+import DashboardPage from './pages/dashboard/DashboardPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import NotFoundPage from './pages/NotFoundPage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import './App.css';
 import Terms from './pages/legal/Terms';
 import Privacy from './pages/legal/Privacy';
 import { SplashScreen } from "@/components/common/splash-screen/SplashScreen";
@@ -31,7 +30,7 @@ const AppRoutes: React.FC = () => {
         path="/"
         element={
           <ProtectedRoute>
-            <CalendarPage />
+            <DashboardPage />
           </ProtectedRoute>
         }
       />
@@ -61,7 +60,7 @@ function AppMain() {
           path="/"
           element={
             <ProtectedRoute>
-              <CalendarPage />
+              <DashboardPage />
             </ProtectedRoute>
           }
         />

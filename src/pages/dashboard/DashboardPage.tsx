@@ -5,8 +5,8 @@ import CalendarHeader from '@/components/calendar/header/CalendarHeader';
 import EventModal from '@/components/calendar/modals/EventModal';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 import { useAuth } from '@/contexts/AuthContext';
-import './CalendarPage.scss';
-import CalendarSelector from '@/components/calendar/selector/CalendarSelector';
+import './DashboardPage.scss';
+import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
 import { useCalendarData } from '@/hooks/useCalendarData';
@@ -16,7 +16,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Button, Dialog, Portal, CloseButton, Theme } from "@chakra-ui/react";
 import { useColorModeToggle } from "@/components/ui/provider";
 
-const CalendarPage: React.FC = () => {
+const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const userId = user?.id || '';
   const [editingCalendar, setEditingCalendar] = useState<CalendarType | null>(null);
@@ -252,8 +252,8 @@ const CalendarPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="calendar-page">
-        <CalendarSelector
+      <div className="dashboard-page">
+        <AppSidebar
           calendars={calendars}
           selectedCalendarIds={selectedCalendarIds}
           onCalendarChange={handleCalendarToggle}
@@ -337,4 +337,4 @@ const CalendarPage: React.FC = () => {
   );
 };
 
-export default CalendarPage;
+export default DashboardPage;

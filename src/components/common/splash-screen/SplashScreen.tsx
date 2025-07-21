@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import "./SplashScreen.scss";
+import textLogoLight from '@/assets/images/text-logo-light.svg';
+import textLogoDark from '@/assets/images/text-logo-dark.svg';
 
 export function SplashScreen() {
   const [fadeOut, setFadeOut] = useState(false);
@@ -24,7 +26,7 @@ export function SplashScreen() {
     colorMode = localStorage.getItem('colorMode') ||
       (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   }
-  const logoSrc = colorMode === 'light' ? '/text-logo-light.svg' : '/text-logo-dark.svg';
+  const logoSrc = colorMode === 'light' ? textLogoLight : textLogoDark;
 
   return (
     <div
