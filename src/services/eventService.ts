@@ -2,7 +2,9 @@ import { supabase } from './supabase';
 import type { CalendarEvent } from '@/types/calendar';
 
 // 특정 캘린더의 이벤트 조회
-export const getEvents = async (calendarId: string): Promise<CalendarEvent[]> => {
+export const getEvents = async (
+  calendarId: string
+): Promise<CalendarEvent[]> => {
   const { data, error } = await supabase
     .from('events')
     .select('*')
@@ -53,7 +55,7 @@ export const createEvent = async (
       ...event,
       created_by: userId,
       created_at: new Date(),
-      updated_at: new Date()
+      updated_at: new Date(),
     })
     .select()
     .single();
@@ -86,7 +88,7 @@ export const updateEvent = async (
     .from('events')
     .update({
       ...event,
-      updated_at: new Date()
+      updated_at: new Date(),
     })
     .eq('id', event.id)
     .select()
@@ -110,10 +112,7 @@ export const deleteEvent = async (eventId: string): Promise<void> => {
     throw new Error('User not authenticated');
   }
 
-  const { error } = await supabase
-    .from('events')
-    .delete()
-    .eq('id', eventId);
+  const { error } = await supabase.from('events').delete().eq('id', eventId);
 
   if (error) {
     throw new Error(`Failed to delete event: ${error.message}`);

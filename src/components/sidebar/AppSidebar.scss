@@ -75,7 +75,7 @@ body[data-theme='dark'] .app-sidebar,
 .dark-mode .app-sidebar {
   background: $color-gray-900;
   color: $color-gray-100;
-  
+
   &__list-title,
   &__list-item,
   &__list-empty,
@@ -98,4 +98,4 @@ body[data-theme='dark'] {
 .dark-mode {
   background: $color-gray-950;
   color: $color-gray-100;
-} 
+}

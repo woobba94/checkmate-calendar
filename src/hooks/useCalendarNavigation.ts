@@ -7,7 +7,7 @@ export const useCalendarNavigation = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
 
   const handlePrev = () => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const date = new Date(prev);
       if (view === 'month') {
         date.setMonth(date.getMonth() - 1);
@@ -21,7 +21,7 @@ export const useCalendarNavigation = () => {
   };
 
   const handleNext = () => {
-    setCurrentDate(prev => {
+    setCurrentDate((prev) => {
       const date = new Date(prev);
       if (view === 'month') {
         date.setMonth(date.getMonth() + 1);

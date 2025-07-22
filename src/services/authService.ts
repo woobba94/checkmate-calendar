@@ -2,7 +2,10 @@ import { supabase } from './supabase';
 import type { User } from '@/types/calendar';
 
 // 회원가입
-export const signUp = async (email: string, password: string): Promise<User | null> => {
+export const signUp = async (
+  email: string,
+  password: string
+): Promise<User | null> => {
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
@@ -23,7 +26,10 @@ export const signUp = async (email: string, password: string): Promise<User | nu
 };
 
 // 로그인
-export const signIn = async (email: string, password: string): Promise<User | null> => {
+export const signIn = async (
+  email: string,
+  password: string
+): Promise<User | null> => {
   try {
     const { data, error } = await supabase.auth.signInWithPassword({
       email,

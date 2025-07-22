@@ -24,7 +24,7 @@
 
   &__checkbox-card {
     width: 100%;
-    
+
     .chakra-checkbox-card__label {
       flex: 1;
       text-align: left;
@@ -46,10 +46,10 @@
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
     z-index: 10;
     min-width: 80px;
-    
+
     button {
       width: 100%;
       justify-content: flex-start;
     }
   }
-} 
+}

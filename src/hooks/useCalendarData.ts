@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { getEvents, createEvent, updateEvent, deleteEvent } from '@/services/eventService';
+import {
+  getEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} from '@/services/eventService';
 import { getCalendars, createCalendar } from '@/services/calendarService';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 
 export const useCalendarData = (userId: string) => {
   const queryClient = useQueryClient();
-  const [selectedCalendar, setSelectedCalendar] = useState<CalendarType | null>(null);
+  const [selectedCalendar, setSelectedCalendar] = useState<CalendarType | null>(
+    null
+  );
 
   // 캘린더 목록 조회
   const {
@@ -33,7 +40,8 @@ export const useCalendarData = (userId: string) => {
     error: eventsError,
   } = useQuery({
     queryKey: ['events', selectedCalendar?.id],
-    queryFn: () => selectedCalendar ? getEvents(selectedCalendar.id) : Promise.resolve([]),
+    queryFn: () =>
+      selectedCalendar ? getEvents(selectedCalendar.id) : Promise.resolve([]),
     enabled: !!selectedCalendar,
     // suspense: false, // 필요시 활성화
   });
@@ -49,17 +57,28 @@ export const useCalendarData = (userId: string) => {
 
   // 이벤트 생성/수정
   const saveEventMutation = useMutation({
-    mutationFn: (eventData: CalendarEvent | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>) => {
+    mutationFn: (
+      eventData:
+        | CalendarEvent
+        | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>
+    ) => {
       if (!selectedCalendar) throw new Error('No calendar selected');
       if (!('id' in eventData) || !eventData.id) {
-        const newEventData = { ...eventData  };
-        return createEvent(newEventData as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>);
+        const newEventData = { ...eventData };
+        return createEvent(
+          newEventData as Omit<
+            CalendarEvent,
+            'id' | 'created_by' | 'created_at' | 'updated_at'
+          >
+        );
       } else {
         return updateEvent(eventData as CalendarEvent);
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events', selectedCalendar?.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['events', selectedCalendar?.id],
+      });
     },
   });
 
@@ -67,12 +86,15 @@ export const useCalendarData = (userId: string) => {
   const deleteEventMutation = useMutation({
     mutationFn: (eventId: string) => deleteEvent(eventId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events', selectedCalendar?.id] });
+      queryClient.invalidateQueries({
+        queryKey: ['events', selectedCalendar?.id],
+      });
     },
   });
 
   // 통합 로딩/에러 상태
-  const overallIsLoading = isLoadingCalendars || (!!selectedCalendar && isLoadingEvents);
+  const overallIsLoading =
+    isLoadingCalendars || (!!selectedCalendar && isLoadingEvents);
   const overallError = calendarsError || eventsError;
 
   return {

@@ -27,8 +27,8 @@
   text-align: center;
 }
 
-.signup-form input[type="email"],
-.signup-form input[type="password"] {
+.signup-form input[type='email'],
+.signup-form input[type='password'] {
   background: var(--bg-tertiary);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
@@ -40,8 +40,8 @@
   box-sizing: border-box;
 }
 
-.signup-form input[type="email"]:focus,
-.signup-form input[type="password"]:focus {
+.signup-form input[type='email']:focus,
+.signup-form input[type='password']:focus {
   outline: 2px solid var(--accent-color);
   border-color: var(--accent-color);
 }
@@ -76,4 +76,4 @@
     padding: 28px 8px 24px 8px;
     max-width: 98vw;
   }
-} 
+}

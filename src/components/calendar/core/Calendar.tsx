@@ -27,11 +27,16 @@ const Calendar: React.FC<CalendarProps> = ({
   // 뷰 타입 매핑
   const getFullCalendarView = (view: CalendarViewType): string => {
     switch (view) {
-      case 'month': return 'dayGridMonth';
-      case 'week': return 'timeGridWeek';
-      case 'day': return 'timeGridDay';
-      case 'list': return 'listWeek';
-      default: return 'dayGridMonth';
+      case 'month':
+        return 'dayGridMonth';
+      case 'week':
+        return 'timeGridWeek';
+      case 'day':
+        return 'timeGridDay';
+      case 'list':
+        return 'listWeek';
+      default:
+        return 'dayGridMonth';
     }
   };
 
@@ -70,39 +75,39 @@ const Calendar: React.FC<CalendarProps> = ({
   };
 
   return (
-      <FullCalendar
-        ref={calendarRef}
-        plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
-        initialView={getFullCalendarView(currentView)}
-        initialDate={currentDate}
-        headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
-        events={events.map(event => ({
-          id: event.id,
-          title: event.title,
-          start: event.start,
-          end: event.end,
-          allDay: event.allDay,
+    <FullCalendar
+      ref={calendarRef}
+      plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+      initialView={getFullCalendarView(currentView)}
+      initialDate={currentDate}
+      headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
+      events={events.map((event) => ({
+        id: event.id,
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        allDay: event.allDay,
+        description: event.description,
+        backgroundColor: event.color,
+        // 확장 속성으로 추가 필드 전달
+        extendedProps: {
           description: event.description,
-          backgroundColor: event.color,
-          // 확장 속성으로 추가 필드 전달
-          extendedProps: {
-            description: event.description,
-            color: event.color,
-            calendar_id: event.calendar_id,
-            created_by: event.created_by,
-            created_at: event.created_at,
-            updated_at: event.updated_at,
-          }
-        }))}
-        eventClick={handleEventClick}
-        dateClick={(info) => onDateClick && onDateClick(info.date)}
-        editable={true}
-        selectable={true}
-        selectMirror={true}
-        dayMaxEvents={true}
-        weekends={true}
-        height="100%"
-      />
+          color: event.color,
+          calendar_id: event.calendar_id,
+          created_by: event.created_by,
+          created_at: event.created_at,
+          updated_at: event.updated_at,
+        },
+      }))}
+      eventClick={handleEventClick}
+      dateClick={(info) => onDateClick && onDateClick(info.date)}
+      editable={true}
+      selectable={true}
+      selectMirror={true}
+      dayMaxEvents={true}
+      weekends={true}
+      height="100%"
+    />
   );
 };
 

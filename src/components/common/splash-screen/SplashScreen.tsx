@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import "./SplashScreen.scss";
+import { useEffect, useState } from 'react';
+import './SplashScreen.scss';
 import textLogoLight from '@/assets/images/text-logo-light.svg';
 import textLogoDark from '@/assets/images/text-logo-dark.svg';
 
@@ -23,8 +23,11 @@ export function SplashScreen() {
 
   let colorMode = 'light';
   if (typeof window !== 'undefined') {
-    colorMode = localStorage.getItem('colorMode') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    colorMode =
+      localStorage.getItem('colorMode') ||
+      (window.matchMedia('(prefers-color-scheme: dark)').matches
+        ? 'dark'
+        : 'light');
   }
   const logoSrc = colorMode === 'light' ? textLogoLight : textLogoDark;
 
@@ -33,7 +36,14 @@ export function SplashScreen() {
       className={`splash-screen${fadeOut ? ' fade-out' : ''}`}
       style={{ background: colorMode === 'light' ? '#fff' : '#18181b' }}
     >
-      <img src={logoSrc} alt="Checkmate Calendar Logo" style={{ height: 48, filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.08))' }} />
+      <img
+        src={logoSrc}
+        alt="Checkmate Calendar Logo"
+        style={{
+          height: 48,
+          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.08))',
+        }}
+      />
     </div>
   );
-} 
+}

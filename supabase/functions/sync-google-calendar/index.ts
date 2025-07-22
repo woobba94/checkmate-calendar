@@ -1,15 +1,18 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type'
+  'Access-Control-Allow-Headers':
+    'authorization, x-client-info, apikey, content-type',
 };
 
 // 구글 캘린더 API 호출
 async function fetchGoogleCalendarEvents(accessToken, syncToken, pageToken) {
-  const apiUrl = new URL('https://www.googleapis.com/calendar/v3/calendars/primary/events');
-  
+  const apiUrl = new URL(
+    'https://www.googleapis.com/calendar/v3/calendars/primary/events'
+  );
+
   if (syncToken) {
     // 일부 sync
     apiUrl.searchParams.set('syncToken', syncToken);
@@ -26,14 +29,16 @@ async function fetchGoogleCalendarEvents(accessToken, syncToken, pageToken) {
 
   const response = await fetch(apiUrl.toString(), {
     headers: {
-      'Authorization': `Bearer ${accessToken}`,
-      'Content-Type': 'application/json'
-    }
+      Authorization: `Bearer ${accessToken}`,
+      'Content-Type': 'application/json',
+    },
   });
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`[구글 캘린더 API 오류] response.status: ${response.status}, errorText: ${errorText}`);
+    throw new Error(
+      `[구글 캘린더 API 오류] response.status: ${response.status}, errorText: ${errorText}`
+    );
   }
 
   return await response.json();
@@ -46,7 +51,11 @@ async function getAllGoogleEvents(accessToken, syncToken) {
   let nextSyncToken = null;
 
   do {
-    const data = await fetchGoogleCalendarEvents(accessToken, syncToken, nextPageToken);
+    const data = await fetchGoogleCalendarEvents(
+      accessToken,
+      syncToken,
+      nextPageToken
+    );
     if (data.items) {
       allEvents.push(...data.items);
     }
@@ -59,17 +68,17 @@ async function getAllGoogleEvents(accessToken, syncToken) {
 
   console.log(`Total count of patch events: ${allEvents.length}`);
   console.log('최종 nextSyncToken:', nextSyncToken);
-  
+
   return {
     events: allEvents,
-    nextSyncToken
+    nextSyncToken,
   };
 }
 
 // 이벤트 처리
 async function processEvents(supabase, events, calendarId, userId) {
   let processedCount = 0;
-  
+
   for (const event of events) {
     try {
       if (event.status === 'cancelled') {
@@ -79,7 +88,7 @@ async function processEvents(supabase, events, calendarId, userId) {
           .delete()
           .eq('google_event_id', event.id)
           .eq('created_by', userId);
-        
+
         if (!error) {
           processedCount++;
         }
@@ -94,17 +103,15 @@ async function processEvents(supabase, events, calendarId, userId) {
           calendar_id: calendarId,
           created_by: userId,
           google_event_id: event.id,
-          google_updated: event.updated, 
-          updated_at: new Date().toISOString()
+          google_updated: event.updated,
+          updated_at: new Date().toISOString(),
         };
 
-        const { error } = await supabase
-          .from('events')
-          .upsert(eventData, {
-            onConflict: 'google_event_id,created_by',
-            ignoreDuplicates: false
-          });
-        
+        const { error } = await supabase.from('events').upsert(eventData, {
+          onConflict: 'google_event_id,created_by',
+          ignoreDuplicates: false,
+        });
+
         if (!error) {
           processedCount++;
         } else {
@@ -134,7 +141,7 @@ async function getOrCreateCalendar(supabase, userId, googleEmail) {
       .insert({
         name: googleEmail,
         description: `구글 캘린더 (${googleEmail})`,
-        created_by: userId
+        created_by: userId,
       })
       .select('id')
       .single();
@@ -158,7 +165,7 @@ async function getOrCreateCalendar(supabase, userId, googleEmail) {
       .insert({
         calendar_id: calendar.id,
         user_id: userId,
-        role: 'owner'
+        role: 'owner',
       });
 
     if (memberError) {
@@ -171,14 +178,14 @@ async function getOrCreateCalendar(supabase, userId, googleEmail) {
 
 // syncToken 업데이트
 async function updateSyncToken(supabase, userId, syncToken) {
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('google_integrations')
     .update({
       sync_token: syncToken,
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .eq('user_id', userId)
-    .select('sync_token'); 
+    .select('sync_token');
 
   if (error) {
     console.error('syncToken 저장 오류:', error);
@@ -193,14 +200,14 @@ async function refreshAccessToken(refreshToken) {
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/x-www-form-urlencoded'
+      'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({
       client_id: Deno.env.get('GOOGLE_CLIENT_ID') ?? '',
       client_secret: Deno.env.get('GOOGLE_CLIENT_SECRET') ?? '',
       refresh_token: refreshToken,
-      grant_type: 'refresh_token'
-    })
+      grant_type: 'refresh_token',
+    }),
   });
 
   if (!response.ok) {
@@ -211,7 +218,7 @@ async function refreshAccessToken(refreshToken) {
   const data = await response.json();
   return {
     access_token: data.access_token,
-    expires_in: data.expires_in
+    expires_in: data.expires_in,
   };
 }
 
@@ -230,7 +237,7 @@ async function getValidAccessToken(supabase, integration) {
       .update({
         access_token: tokenData.access_token,
         expires_at: newExpiresAt.toISOString(),
-        updated_at: now.toISOString()
+        updated_at: now.toISOString(),
       })
       .eq('user_id', integration.user_id);
 
@@ -269,20 +276,30 @@ serve(async (req) => {
     const validAccessToken = await getValidAccessToken(supabase, integration);
 
     // 캘린더 신규생성 또는 가져오기
-    const calendar = await getOrCreateCalendar(supabase, user_id, integration.google_email);
+    const calendar = await getOrCreateCalendar(
+      supabase,
+      user_id,
+      integration.google_email
+    );
 
     // 동기화 타입 결정
-    const useSyncToken = integration.sync_token && integration.sync_token.trim() !== '';
+    const useSyncToken =
+      integration.sync_token && integration.sync_token.trim() !== '';
     const syncType = useSyncToken ? 'incremental' : 'full';
-    
+
     // 구글 이벤트 가져오기
     const { events, nextSyncToken } = await getAllGoogleEvents(
-      validAccessToken, 
+      validAccessToken,
       useSyncToken ? integration.sync_token : null
     );
 
     // 이벤트 동기화 처리
-    const processedCount = await processEvents(supabase, events, calendar.id, user_id);
+    const processedCount = await processEvents(
+      supabase,
+      events,
+      calendar.id,
+      user_id
+    );
 
     // syncToken 최신화
     if (nextSyncToken) {
@@ -291,29 +308,34 @@ serve(async (req) => {
 
     console.log(`동기화 완료 - 처리된 이벤트: ${processedCount}개`);
 
-    return new Response(JSON.stringify({
-      success: true,
-      message: `patched ${processedCount} events.`,
-      sync_type: syncType,
-      total_events: events.length,
-      processed_events: processedCount
-    }), {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders
+    return new Response(
+      JSON.stringify({
+        success: true,
+        message: `patched ${processedCount} events.`,
+        sync_type: syncType,
+        total_events: events.length,
+        processed_events: processedCount,
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
       }
-    });
-
+    );
   } catch (error) {
     console.error('동기화 오류:', error);
-    return new Response(JSON.stringify({
-      error: error.message
-    }), {
-      status: 400,
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders
+    return new Response(
+      JSON.stringify({
+        error: error.message,
+      }),
+      {
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
       }
-    });
+    );
   }
 });

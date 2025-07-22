@@ -56,9 +56,9 @@
     font-weight: 500;
   }
 
-  input[type="text"],
-  input[type="date"],
-  input[type="datetime-local"],
+  input[type='text'],
+  input[type='date'],
+  input[type='datetime-local'],
   textarea {
     width: 100%;
     padding: 8px 12px;
@@ -67,7 +67,7 @@
     font-size: 14px;
   }
 
-  input[type="checkbox"] {
+  input[type='checkbox'] {
     margin-right: 8px;
   }
 }
@@ -80,7 +80,7 @@
 }
 
 .modal-overlay.light {
-  background-color: rgba(0,0,0,0.25);
+  background-color: rgba(0, 0, 0, 0.25);
   color: var(--text-primary);
 }
 
@@ -94,9 +94,9 @@
   margin: 0 auto;
 }
 
-.event-modal.light input[type="text"],
-.event-modal.light input[type="date"],
-.event-modal.light input[type="datetime-local"],
+.event-modal.light input[type='text'],
+.event-modal.light input[type='date'],
+.event-modal.light input[type='datetime-local'],
 .event-modal.light select {
   background: var(--bg-tertiary);
   color: var(--text-primary);
@@ -110,7 +110,7 @@
   box-sizing: border-box;
 }
 
-.event-modal.light input[type="color"] {
+.event-modal.light input[type='color'] {
   border: none;
   background: none;
   width: 32px;
@@ -134,7 +134,9 @@
   font-size: 24px;
   cursor: pointer;
   color: var(--text-muted);
-  &:hover { color: var(--text-primary); }
+  &:hover {
+    color: var(--text-primary);
+  }
 }
 
 .event-modal.light .form-group {
