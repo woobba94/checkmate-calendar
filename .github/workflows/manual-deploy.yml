@@ -34,17 +34,13 @@ jobs:
           npm ci
           npm run build
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
-            npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN }} \
-              --org ${{ secrets.VERCEL_ORG_ID }} \
-              --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }} \
-              --prod
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
-            npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN }} \
-              --org ${{ secrets.VERCEL_ORG_ID }} \
-              --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
 
       - name: Deploy calendar
         if: ${{ github.event.inputs.app == 'calendar' }}
@@ -53,14 +49,10 @@ jobs:
           npm ci
           npm run build
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
-            npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN }} \
-              --org ${{ secrets.VERCEL_ORG_ID }} \
-              --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }} \
-              --prod
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
-            npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN }} \
-              --org ${{ secrets.VERCEL_ORG_ID }} \
-              --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
