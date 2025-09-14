@@ -19,40 +19,137 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Deploy landing
+      # -------- landing --------
+      - name: Context (landing)
+        if: ${{ github.event.inputs.app == 'landing' }}
+        shell: bash
+        run: |
+          echo "APP=landing"
+          echo "BRANCH=${{ github.event.inputs.branch }}"
+
+      - name: Env / Versions (landing)
         if: ${{ github.event.inputs.app == 'landing' }}
         shell: bash
         working-directory: apps/landing
         run: |
-          npm ci
-          mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}' \
-            "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_LANDING }}" > .vercel/project.json
-          [ -s .vercel/project.json ] || { echo "project.json missing"; exit 1; }
+          node -v || true
+          npm -v || true
+          npx vercel --version || true
+          echo "PWD=$(pwd)"
+          echo "LS=$(ls -la)"
+
+      - name: npm ci (landing)
+        if: ${{ github.event.inputs.app == 'landing' }}
+        shell: bash
+        working-directory: apps/landing
+        run: npm ci
+
+      - name: vercel pull (landing)
+        if: ${{ github.event.inputs.app == 'landing' }}
+        shell: bash
+        working-directory: apps/landing
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
+        run: |
+          echo "vercel pull environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview)"
+          npx vercel pull --yes \
+            --environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview) \
+            --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Pulled files:"
+          ls -la .vercel || true
+          test -s .vercel/project.json && echo ".vercel/project.json exists (size > 0)" || { echo "project.json missing"; exit 1; }
+
+      - name: vercel build (landing)
+        if: ${{ github.event.inputs.app == 'landing' }}
+        shell: bash
+        working-directory: apps/landing
+        run: |
+          echo "Running vercel build..."
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Build output:"
+          ls -la .vercel/output || true
+          du -sh .vercel/output || true
+
+      - name: vercel deploy (landing)
+        if: ${{ github.event.inputs.app == 'landing' }}
+        shell: bash
+        working-directory: apps/landing
+        run: |
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            echo "Deploying as PRODUCTION..."
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
+            echo "Deploying as PREVIEW..."
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
-      - name: Deploy calendar
+      # -------- calendar --------
+      - name: Context (calendar)
+        if: ${{ github.event.inputs.app == 'calendar' }}
+        shell: bash
+        run: |
+          echo "APP=calendar"
+          echo "BRANCH=${{ github.event.inputs.branch }}"
+
+      - name: Env / Versions (calendar)
         if: ${{ github.event.inputs.app == 'calendar' }}
         shell: bash
         working-directory: apps/calendar
         run: |
-          npm ci
-          mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}' \
-            "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}" > .vercel/project.json
-          [ -s .vercel/project.json ] || { echo "project.json missing"; exit 1; }
+          node -v || true
+          npm -v || true
+          npx vercel --version || true
+          echo "PWD=$(pwd)"
+          echo "LS=$(ls -la)"
+
+      - name: npm ci (calendar)
+        if: ${{ github.event.inputs.app == 'calendar' }}
+        shell: bash
+        working-directory: apps/calendar
+        run: npm ci
+
+      - name: vercel pull (calendar)
+        if: ${{ github.event.inputs.app == 'calendar' }}
+        shell: bash
+        working-directory: apps/calendar
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
+        run: |
+          echo "vercel pull environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview)"
+          npx vercel pull --yes \
+            --environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview) \
+            --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Pulled files:"
+          ls -la .vercel || true
+          test -s .vercel/project.json && echo ".vercel/project.json exists (size > 0)" || { echo "project.json missing"; exit 1; }
+
+      - name: vercel build (calendar)
+        if: ${{ github.event.inputs.app == 'calendar' }}
+        shell: bash
+        working-directory: apps/calendar
+        run: |
+          echo "Running vercel build..."
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          echo "Build output:"
+          ls -la .vercel/output || true
+          du -sh .vercel/output || true
+
+      - name: vercel deploy (calendar)
+        if: ${{ github.event.inputs.app == 'calendar' }}
+        shell: bash
+        working-directory: apps/calendar
+        run: |
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            echo "Deploying as PRODUCTION..."
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
+            echo "Deploying as PREVIEW..."
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
