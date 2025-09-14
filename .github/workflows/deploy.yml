@@ -28,7 +28,10 @@ jobs:
         run: |
           cd apps/landing
           npm ci
-          npm run build
+          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
 
       - name: Deploy landing
         if: steps.landing_changes.outputs.changed == 'true'
@@ -64,7 +67,10 @@ jobs:
         run: |
           cd apps/calendar
           npm ci
-          npm run build
+          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
 
       - name: Deploy calendar
         if: steps.calendar_changes.outputs.changed == 'true'

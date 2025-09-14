@@ -32,7 +32,7 @@ jobs:
         run: |
           cd apps/landing
           npm ci
-          npm run build
+          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
@@ -47,7 +47,7 @@ jobs:
         run: |
           cd apps/calendar
           npm ci
-          npm run build
+          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
