@@ -7,17 +7,13 @@ on:
         description: 'target (landing / calendar)'
         required: true
         type: choice
-        options:
-          - landing
-          - calendar
+        options: [landing, calendar]
       branch:
         description: 'branch (main/dev)'
         default: 'main'
         required: true
         type: choice
-        options:
-          - main
-          - dev
+        options: [main, dev]
 
 jobs:
   deploy:
@@ -34,8 +30,9 @@ jobs:
         run: |
           npm ci
           mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}' "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_LANDING }}" > .vercel/project.json
-          test -f .vercel/project.json || { echo "project.json missing"; exit 1; }
+          printf '{"orgId":"%s","projectId":"%s"}' \
+            "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_LANDING }}" > .vercel/project.json
+          [ -s .vercel/project.json ] || { echo "project.json missing"; exit 1; }
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
@@ -50,8 +47,9 @@ jobs:
         run: |
           npm ci
           mkdir -p .vercel
-          printf '{"orgId":"%s","projectId":"%s"}' "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}" > .vercel/project.json
-          test -f .vercel/project.json || { echo "project.json missing"; exit 1; }
+          printf '{"orgId":"%s","projectId":"%s"}' \
+            "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}" > .vercel/project.json
+          [ -s .vercel/project.json ] || { echo "project.json missing"; exit 1; }
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
