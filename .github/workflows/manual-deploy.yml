@@ -11,14 +11,13 @@ on:
           - landing
           - calendar
       branch:
-        description: 'branch (main/dev/qa)'
+        description: 'branch (main/dev)'
         default: 'main'
         required: true
         type: choice
         options:
           - main
           - dev
-          - qa
 
 jobs:
   deploy:
@@ -31,21 +30,37 @@ jobs:
       - name: Deploy landing
         if: ${{ github.event.inputs.app == 'landing' }}
         run: |
+          cd apps/landing
+          npm ci
+          npm run build
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_MAIN }}"
-          elif [ "${{ github.event.inputs.branch }}" = "dev" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_DEV }}"
-          elif [ "${{ github.event.inputs.branch }}" = "qa" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_QA }}"
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_LANDING }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }} \
+              --prod
+          else
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_LANDING }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
           fi
 
       - name: Deploy calendar
         if: ${{ github.event.inputs.app == 'calendar' }}
         run: |
+          cd apps/calendar
+          npm ci
+          npm run build
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_MAIN }}"
-          elif [ "${{ github.event.inputs.branch }}" = "dev" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_DEV }}"
-          elif [ "${{ github.event.inputs.branch }}" = "qa" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_QA }}"
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_CALENDAR }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }} \
+              --prod
+          else
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_CALENDAR }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
           fi

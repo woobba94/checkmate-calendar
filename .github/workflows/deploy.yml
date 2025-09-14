@@ -5,7 +5,6 @@ on:
     branches:
       - main
       - dev
-      - qa
 
 jobs:
   deploy-landing:
@@ -24,19 +23,33 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Trigger landing deploy
+      - name: Build landing
         if: steps.landing_changes.outputs.changed == 'true'
         run: |
+          cd apps/landing
+          npm ci
+          npm run build
+
+      - name: Deploy landing
+        if: steps.landing_changes.outputs.changed == 'true'
+        run: |
+          cd apps/landing
           if [ "${{ github.ref_name }}" = "main" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_MAIN }}"
-          elif [ "${{ github.ref_name }}" = "dev" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_DEV }}"
-          elif [ "${{ github.ref_name }}" = "qa" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_QA }}"
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_LANDING }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }} \
+              --prod
+          else
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_LANDING }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
           fi
 
   deploy-calendar:
     runs-on: ubuntu-latest
+    if: contains(github.event.head_commit.message, '[skip calendar]') == false
     steps:
       - uses: actions/checkout@v3
 
@@ -50,13 +63,26 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Trigger calendar deploy
+      - name: Build calendar
         if: steps.calendar_changes.outputs.changed == 'true'
         run: |
+          cd apps/calendar
+          npm ci
+          npm run build
+
+      - name: Deploy calendar
+        if: steps.calendar_changes.outputs.changed == 'true'
+        run: |
+          cd apps/calendar
           if [ "${{ github.ref_name }}" = "main" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_MAIN }}"
-          elif [ "${{ github.ref_name }}" = "dev" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_DEV }}"
-          elif [ "${{ github.ref_name }}" = "qa" ]; then
-            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_QA }}"
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_CALENDAR }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }} \
+              --prod
+          else
+            npx vercel deploy --prebuilt \
+              --token=${{ secrets.VERCEL_TOKEN_CALENDAR }} \
+              --org ${{ secrets.VERCEL_ORG_ID }} \
+              --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
           fi
