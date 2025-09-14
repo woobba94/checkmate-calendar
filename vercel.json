@@ -1,8 +1,10 @@
 {
-    "rewrites": [
-        {
-            "source": "/(.*)",
-            "destination": "/index.html"
-        }
-    ]
+  "projects": {
+    "checkmate-calendar-landing": {
+      "root": "apps/landing"
+    },
+    "checkmate-calendar-app": {
+      "root": "apps/calendar"
+    }
+  }
 }
