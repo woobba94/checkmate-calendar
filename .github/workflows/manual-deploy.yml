@@ -35,13 +35,13 @@ jobs:
           npm run build
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN_LANDING }} \
+              --token=${{ secrets.VERCEL_TOKEN }} \
               --org ${{ secrets.VERCEL_ORG_ID }} \
               --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }} \
               --prod
           else
             npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN_LANDING }} \
+              --token=${{ secrets.VERCEL_TOKEN }} \
               --org ${{ secrets.VERCEL_ORG_ID }} \
               --project ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
           fi
@@ -54,13 +54,13 @@ jobs:
           npm run build
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN_CALENDAR }} \
+              --token=${{ secrets.VERCEL_TOKEN }} \
               --org ${{ secrets.VERCEL_ORG_ID }} \
               --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }} \
               --prod
           else
             npx vercel deploy --prebuilt \
-              --token=${{ secrets.VERCEL_TOKEN_CALENDAR }} \
+              --token=${{ secrets.VERCEL_TOKEN }} \
               --org ${{ secrets.VERCEL_ORG_ID }} \
               --project ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
           fi
