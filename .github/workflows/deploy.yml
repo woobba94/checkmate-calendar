@@ -4,6 +4,19 @@ on:
   push:
     branches:
       - main
+      - dev
+      - qa
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to deploy (main, dev, qa)'
+        default: 'main'
+        required: true
+        type: choice
+        options:
+          - main
+          - dev
+          - qa
 
 jobs:
   deploy-landing:
@@ -11,30 +24,42 @@ jobs:
     if: contains(github.event.head_commit.message, '[skip landing]') == false
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref_name }}
+
       - name: Check for landing changes
         id: landing_changes
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^apps/landing/"; then
+          git fetch origin ${{ github.event.inputs.branch || github.ref_name }} --depth=2
+          if git diff --name-only HEAD~1 HEAD | grep "^apps/landing/"; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
-            echo "changed=false" >> $GITHUB_OUTPUT 
+            echo "changed=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Trigger landing deploy
         if: steps.landing_changes.outputs.changed == 'true'
-        run: curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_tJDcVWcwFO423izSOCkuYwnIah8m/L4rDDXLFEV"
+        run: |
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_tJDcVWcwFO423izSOCkuYwnIah8m/L4rDDXLFEV"
 
   deploy-calendar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.inputs.branch || github.ref_name }}
+
       - name: Check for calendar changes
         id: calendar_changes
         run: |
-          if git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "^apps/calendar/"; then
+          git fetch origin ${{ github.event.inputs.branch || github.ref_name }} --depth=2
+          if git diff --name-only HEAD~1 HEAD | grep "^apps/calendar/"; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
+
       - name: Trigger calendar deploy
         if: steps.calendar_changes.outputs.changed == 'true'
-        run: curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_yzMHglFe4LmIKtazxACHgfphnJzs/tmtVy4XPGO"
+        run: |
+          curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_yzMHglFe4LmIKtazxACHgfphnJzs/tmtVy4XPGO"
