@@ -32,6 +32,8 @@ jobs:
         run: |
           cd apps/landing
           npm ci
+          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }} \
+            --environment=${{ github.event.inputs.branch == 'main' && 'production' || 'preview' }}
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
@@ -47,6 +49,8 @@ jobs:
         run: |
           cd apps/calendar
           npm ci
+          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }} \
+            --environment=${{ github.event.inputs.branch == 'main' && 'production' || 'preview' }}
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod

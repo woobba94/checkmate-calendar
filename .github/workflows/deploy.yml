@@ -23,6 +23,16 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Pull Vercel project settings (landing)
+        if: steps.landing_changes.outputs.changed == 'true'
+        run: |
+          cd apps/landing
+          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }} \
+            --environment=${{ github.ref_name == 'main' && 'production' || 'preview' }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
+
       - name: Build landing
         if: steps.landing_changes.outputs.changed == 'true'
         run: |
@@ -61,6 +71,16 @@ jobs:
           else
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
+
+      - name: Pull Vercel project settings (calendar)
+        if: steps.calendar_changes.outputs.changed == 'true'
+        run: |
+          cd apps/calendar
+          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }} \
+            --environment=${{ github.ref_name == 'main' && 'production' || 'preview' }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
 
       - name: Build calendar
         if: steps.calendar_changes.outputs.changed == 'true'
