@@ -23,15 +23,11 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Pull Vercel project settings (landing)
+      - name: Create Vercel config (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         run: |
-          cd apps/landing
-          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }} \
-            --environment=${{ github.ref_name == 'main' && 'production' || 'preview' }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
+          mkdir -p apps/landing/.vercel
+          echo "{\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\",\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID_LANDING }}\"}" > apps/landing/.vercel/project.json
 
       - name: Build landing
         if: steps.landing_changes.outputs.changed == 'true'
@@ -39,9 +35,6 @@ jobs:
           cd apps/landing
           npm ci
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
 
       - name: Deploy landing
         if: steps.landing_changes.outputs.changed == 'true'
@@ -52,9 +45,6 @@ jobs:
           else
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
 
   deploy-calendar:
     runs-on: ubuntu-latest
@@ -72,15 +62,11 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Pull Vercel project settings (calendar)
+      - name: Create Vercel config (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         run: |
-          cd apps/calendar
-          npx vercel pull --yes --token=${{ secrets.VERCEL_TOKEN }} \
-            --environment=${{ github.ref_name == 'main' && 'production' || 'preview' }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
+          mkdir -p apps/calendar/.vercel
+          echo "{\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\",\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}\"}" > apps/calendar/.vercel/project.json
 
       - name: Build calendar
         if: steps.calendar_changes.outputs.changed == 'true'
@@ -88,9 +74,6 @@ jobs:
           cd apps/calendar
           npm ci
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
 
       - name: Deploy calendar
         if: steps.calendar_changes.outputs.changed == 'true'
@@ -101,6 +84,3 @@ jobs:
           else
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
