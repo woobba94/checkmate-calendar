@@ -31,9 +31,21 @@ jobs:
       - name: Deploy landing
         if: ${{ github.event.inputs.app == 'landing' }}
         run: |
-          curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING }}"
+          if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_MAIN }}"
+          elif [ "${{ github.event.inputs.branch }}" = "dev" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_DEV }}"
+          elif [ "${{ github.event.inputs.branch }}" = "qa" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_QA }}"
+          fi
 
       - name: Deploy calendar
         if: ${{ github.event.inputs.app == 'calendar' }}
         run: |
-          curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR }}"
+          if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_MAIN }}"
+          elif [ "${{ github.event.inputs.branch }}" = "dev" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_DEV }}"
+          elif [ "${{ github.event.inputs.branch }}" = "qa" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_QA }}"
+          fi

@@ -1,4 +1,4 @@
-name: Deploy to Vercel
+name: Auto Deploy to Vercel
 
 on:
   push:
@@ -6,17 +6,6 @@ on:
       - main
       - dev
       - qa
-  workflow_dispatch:
-    inputs:
-      branch:
-        description: 'Branch to deploy (main, dev, qa)'
-        default: 'main'
-        required: true
-        type: choice
-        options:
-          - main
-          - dev
-          - qa
 
 jobs:
   deploy-landing:
@@ -24,13 +13,11 @@ jobs:
     if: contains(github.event.head_commit.message, '[skip landing]') == false
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch || github.ref_name }}
 
       - name: Check for landing changes
         id: landing_changes
         run: |
-          git fetch origin ${{ github.event.inputs.branch || github.ref_name }} --depth=2
+          git fetch origin ${{ github.ref_name }} --depth=2
           if git diff --name-only HEAD~1 HEAD | grep "^apps/landing/"; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
@@ -40,19 +27,23 @@ jobs:
       - name: Trigger landing deploy
         if: steps.landing_changes.outputs.changed == 'true'
         run: |
-          curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING }}"
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_MAIN }}"
+          elif [ "${{ github.ref_name }}" = "dev" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_DEV }}"
+          elif [ "${{ github.ref_name }}" = "qa" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_LANDING_QA }}"
+          fi
 
   deploy-calendar:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-        with:
-          ref: ${{ github.event.inputs.branch || github.ref_name }}
 
       - name: Check for calendar changes
         id: calendar_changes
         run: |
-          git fetch origin ${{ github.event.inputs.branch || github.ref_name }} --depth=2
+          git fetch origin ${{ github.ref_name }} --depth=2
           if git diff --name-only HEAD~1 HEAD | grep "^apps/calendar/"; then
             echo "changed=true" >> $GITHUB_OUTPUT
           else
@@ -62,4 +53,10 @@ jobs:
       - name: Trigger calendar deploy
         if: steps.calendar_changes.outputs.changed == 'true'
         run: |
-          curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR }}"
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_MAIN }}"
+          elif [ "${{ github.ref_name }}" = "dev" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_DEV }}"
+          elif [ "${{ github.ref_name }}" = "qa" ]; then
+            curl -X POST "${{ secrets.VERCEL_DEPLOY_CALENDAR_QA }}"
+          fi
