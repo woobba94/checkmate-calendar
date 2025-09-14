@@ -24,29 +24,8 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
 
-      - name: Context
-        shell: bash
-        run: |
-          echo "APP=${{ github.event.inputs.app }}"
-          echo "BRANCH=${{ github.event.inputs.branch }}"
-          echo "PWD=$(pwd)"
-          ls -la
-
       # -------- landing --------
-      - name: Prepare deps (landing)
-        if: ${{ github.event.inputs.app == 'landing' }}
-        shell: bash
-        run: |
-          echo "[landing] node/npm/vercel versions"
-          node -v || true
-          npm -v || true
-          npx vercel --version || true
-          echo "[landing] npm ci in repo root if needed (adjust as your monorepo requires)"
-          npm ci || true
-          echo "[landing] optional: workspace/local install"
-          if [ -f apps/landing/package.json ]; then (cd apps/landing && npm ci || true); fi
-
-      - name: vercel pull (landing) @ repo root
+      - name: vercel pull (landing)
         if: ${{ github.event.inputs.app == 'landing' }}
         shell: bash
         working-directory: .
@@ -54,56 +33,39 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
         run: |
-          echo "[landing] vercel pull environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview)"
+          echo "[landing] pull -> $([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview)"
           npx vercel pull --yes \
             --environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview) \
             --token=${{ secrets.VERCEL_TOKEN }}
-          echo "[landing] pulled files in .vercel:"
-          ls -la .vercel || true
-          test -s .vercel/project.json && echo ".vercel/project.json exists (>0 bytes)" || { echo "project.json missing"; exit 1; }
 
-      - name: vercel build (landing) @ repo root
+      - name: vercel build (landing)
         if: ${{ github.event.inputs.app == 'landing' }}
         shell: bash
         working-directory: .
         run: |
-          echo "[landing] vercel build start"
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            echo "[landing] build --prod"
             npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
+            echo "[landing] build (preview)"
             npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           fi
-          ls -la .vercel/output || true
-          du -sh .vercel/output || true
 
-      - name: vercel deploy (landing) @ repo root
+      - name: vercel deploy (landing)
         if: ${{ github.event.inputs.app == 'landing' }}
         shell: bash
         working-directory: .
         run: |
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
-            echo "[landing] deploy as PRODUCTION"
+            echo "[landing] deploy --prod"
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
-            echo "[landing] deploy as PREVIEW"
+            echo "[landing] deploy (preview)"
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       # -------- calendar --------
-      - name: Prepare deps (calendar)
-        if: ${{ github.event.inputs.app == 'calendar' }}
-        shell: bash
-        run: |
-          echo "[calendar] node/npm/vercel versions"
-          node -v || true
-          npm -v || true
-          npx vercel --version || true
-          echo "[calendar] npm ci in repo root if needed (adjust as your monorepo requires)"
-          npm ci || true
-          echo "[calendar] optional: workspace/local install"
-          if [ -f apps/calendar/package.json ]; then (cd apps/calendar && npm ci || true); fi
-
-      - name: vercel pull (calendar) @ repo root
+      - name: vercel pull (calendar)
         if: ${{ github.event.inputs.app == 'calendar' }}
         shell: bash
         working-directory: .
@@ -111,37 +73,33 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
         run: |
-          echo "[calendar] vercel pull environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview)"
+          echo "[calendar] pull -> $([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview)"
           npx vercel pull --yes \
             --environment=$([ '${{ github.event.inputs.branch }}' = 'main' ] && echo production || echo preview) \
             --token=${{ secrets.VERCEL_TOKEN }}
-          echo "[calendar] pulled files in .vercel:"
-          ls -la .vercel || true
-          test -s .vercel/project.json && echo ".vercel/project.json exists (>0 bytes)" || { echo "project.json missing"; exit 1; }
 
-      - name: vercel build (calendar) @ repo root
+      - name: vercel build (calendar)
         if: ${{ github.event.inputs.app == 'calendar' }}
         shell: bash
         working-directory: .
         run: |
-          echo "[calendar] vercel build start"
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            echo "[calendar] build --prod"
             npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
+            echo "[calendar] build (preview)"
             npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           fi
-          ls -la .vercel/output || true
-          du -sh .vercel/output || true
 
-      - name: vercel deploy (calendar) @ repo root
+      - name: vercel deploy (calendar)
         if: ${{ github.event.inputs.app == 'calendar' }}
         shell: bash
         working-directory: .
         run: |
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
-            echo "[calendar] deploy as PRODUCTION"
+            echo "[calendar] deploy --prod"
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
-            echo "[calendar] deploy as PREVIEW"
+            echo "[calendar] deploy (preview)"
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
