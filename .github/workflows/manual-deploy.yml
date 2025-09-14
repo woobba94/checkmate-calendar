@@ -68,8 +68,11 @@ jobs:
         working-directory: .
         run: |
           echo "[landing] vercel build start"
-          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-          echo "[landing] build output exists?"
+          if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
           ls -la .vercel/output || true
           du -sh .vercel/output || true
 
@@ -122,8 +125,11 @@ jobs:
         working-directory: .
         run: |
           echo "[calendar] vercel build start"
-          npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-          echo "[calendar] build output exists?"
+          if [ "${{ github.event.inputs.branch }}" = "main" ]; then
+            npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+          else
+            npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
+          fi
           ls -la .vercel/output || true
           du -sh .vercel/output || true
 
