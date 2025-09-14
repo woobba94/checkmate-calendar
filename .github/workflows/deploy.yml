@@ -15,6 +15,7 @@ jobs:
 
       - name: Check for landing changes
         id: landing_changes
+        shell: bash
         run: |
           git fetch origin ${{ github.ref_name }} --depth=2
           if git diff --name-only HEAD~1 HEAD | grep "^apps/landing/"; then
@@ -23,23 +24,17 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Vercel config (landing)
+      - name: Build & Deploy landing
         if: steps.landing_changes.outputs.changed == 'true'
+        shell: bash
+        working-directory: apps/landing
         run: |
-          mkdir -p apps/landing/.vercel
-          echo "{\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\",\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID_LANDING }}\"}" > apps/landing/.vercel/project.json
-
-      - name: Build landing
-        if: steps.landing_changes.outputs.changed == 'true'
-        run: |
-          cd apps/landing
           npm ci
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' \
+            "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_LANDING }}" > .vercel/project.json
+          test -f .vercel/project.json || { echo "project.json missing"; exit 1; }
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy landing
-        if: steps.landing_changes.outputs.changed == 'true'
-        run: |
-          cd apps/landing
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
@@ -54,6 +49,7 @@ jobs:
 
       - name: Check for calendar changes
         id: calendar_changes
+        shell: bash
         run: |
           git fetch origin ${{ github.ref_name }} --depth=2
           if git diff --name-only HEAD~1 HEAD | grep "^apps/calendar/"; then
@@ -62,23 +58,17 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Create Vercel config (calendar)
+      - name: Build & Deploy calendar
         if: steps.calendar_changes.outputs.changed == 'true'
+        shell: bash
+        working-directory: apps/calendar
         run: |
-          mkdir -p apps/calendar/.vercel
-          echo "{\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\",\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}\"}" > apps/calendar/.vercel/project.json
-
-      - name: Build calendar
-        if: steps.calendar_changes.outputs.changed == 'true'
-        run: |
-          cd apps/calendar
           npm ci
+          mkdir -p .vercel
+          printf '{"orgId":"%s","projectId":"%s"}' \
+            "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}" > .vercel/project.json
+          test -f .vercel/project.json || { echo "project.json missing"; exit 1; }
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
-
-      - name: Deploy calendar
-        if: steps.calendar_changes.outputs.changed == 'true'
-        run: |
-          cd apps/calendar
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else

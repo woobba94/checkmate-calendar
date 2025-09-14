@@ -29,34 +29,32 @@ jobs:
 
       - name: Deploy landing
         if: ${{ github.event.inputs.app == 'landing' }}
+        shell: bash
+        working-directory: apps/landing
         run: |
-          cd apps/landing
           npm ci
           mkdir -p .vercel
-          echo "{\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\",\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID_LANDING }}\"}" > .vercel/project.json
+          printf '{"orgId":"%s","projectId":"%s"}' "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_LANDING }}" > .vercel/project.json
+          test -f .vercel/project.json || { echo "project.json missing"; exit 1; }
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
 
       - name: Deploy calendar
         if: ${{ github.event.inputs.app == 'calendar' }}
+        shell: bash
+        working-directory: apps/calendar
         run: |
-          cd apps/calendar
           npm ci
           mkdir -p .vercel
-          echo "{\"orgId\":\"${{ secrets.VERCEL_ORG_ID }}\",\"projectId\":\"${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}\"}" > .vercel/project.json
+          printf '{"orgId":"%s","projectId":"%s"}' "${{ secrets.VERCEL_ORG_ID }}" "${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}" > .vercel/project.json
+          test -f .vercel/project.json || { echo "project.json missing"; exit 1; }
           npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           if [ "${{ github.event.inputs.branch }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
-        env:
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
