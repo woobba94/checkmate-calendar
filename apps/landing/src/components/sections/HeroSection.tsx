@@ -32,7 +32,7 @@ const HeroSection = () => {
             <br />
             일정은 체크메이트가 정리합니다.
           </h1>
-          <p className="text-lg leading-normal font-medium text-foreground mb-10">
+          <p className="text-lg leading-normal font-medium text-muted-foreground mb-10">
             여러 캘린더를 하나로, 누구와도 즉시 공유, 음성·프롬프트로 일정
             추가까지
           </p>
@@ -41,6 +41,7 @@ const HeroSection = () => {
               onClick={handleGetStarted}
               className="px-8 py-6 text-base font-medium"
               size="lg"
+              variant="primary"
             >
               시작하기
             </Button>

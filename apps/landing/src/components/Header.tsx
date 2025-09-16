@@ -1,17 +1,25 @@
 import { Button } from '@/components/ui/button';
-import { CheckSquare } from 'lucide-react';
 
 export function Header() {
   return (
-    <header className="fixed top-0 left-0 right-0 h-[60px] w-full bg-background border-b z-50">
+    <header
+      className="fixed top-0 left-0 right-0 h-[60px] w-full z-50"
+      style={{
+        background: 'var(--alpha-5, rgba(255, 255, 255, 0.95))',
+        backdropFilter: 'blur(calc(var(--blur-2xl, 40px) / 2))',
+      }}
+    >
       <div className="mx-auto max-w-[1024px] h-full px-4 flex items-center justify-between">
         {/* Logo */}
         <a
           href="https://checkmate-calendar.com"
           className="flex items-center gap-2 text-foreground hover:opacity-80 transition-opacity"
         >
-          <CheckSquare className="h-6 w-6" />
-          <span className="font-semibold text-lg">Checkmate</span>
+          <img
+            src="/simbol-and-text-logo.svg"
+            alt="Checkmate Logo"
+            className="h-8"
+          />
         </a>
 
         {/* CTA Button */}
@@ -19,7 +27,7 @@ export function Header() {
           onClick={() =>
             (window.location.href = 'https://app.checkmate-calendar.com')
           }
-          size="sm"
+          variant="primary"
         >
           시작하기
         </Button>
