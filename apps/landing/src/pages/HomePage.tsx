@@ -9,21 +9,19 @@ import {
 const HomePage = () => {
   return (
     <>
-      <main>
-        {/* Hero Section */}
-        <HeroSection />
+      {/* Hero Section */}
+      <HeroSection />
 
-        {/* Features Overview Section */}
-        <FeaturesSection />
+      {/* Features Overview Section */}
+      <FeaturesSection />
 
-        {/* Experience Section */}
-        <ExperienceSection />
+      {/* Experience Section */}
+      <ExperienceSection />
 
-        {/* Integration Section */}
-        <IntegrationSection />
+      {/* Integration Section */}
+      <IntegrationSection />
 
-        {/* 추가 섹션들은 나중에 디자인에 따라 구현 */}
-      </main>
+      {/* 추가 섹션들은 나중에 디자인에 따라 구현 */}
       <Footer />
     </>
   );
