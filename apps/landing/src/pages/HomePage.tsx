@@ -3,6 +3,7 @@ import {
   HeroSection,
   FeaturesSection,
   ExperienceSection,
+  IntegrationSection,
 } from '../components/sections';
 
 const HomePage = () => {
@@ -17,6 +18,9 @@ const HomePage = () => {
 
         {/* Experience Section */}
         <ExperienceSection />
+
+        {/* Integration Section */}
+        <IntegrationSection />
 
         {/* 추가 섹션들은 나중에 디자인에 따라 구현 */}
       </main>
