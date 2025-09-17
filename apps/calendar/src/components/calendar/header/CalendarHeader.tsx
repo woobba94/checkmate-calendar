@@ -1,7 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Info, PanelLeftClose, PanelLeft } from 'lucide-react';
+import {
+  Info,
+  PanelLeftClose,
+  PanelLeft,
+  PanelRightClose,
+  PanelRight,
+} from 'lucide-react';
 import {
   Tooltip,
   TooltipTrigger,
@@ -14,6 +20,8 @@ interface CalendarHeaderProps {
   isSidebarOpen?: boolean;
   onToggleSidebar?: () => void;
   currentDate?: Date;
+  isAgentPanelOpen?: boolean;
+  onToggleAgentPanel?: () => void;
 }
 
 const CalendarHeader: React.FC<CalendarHeaderProps> = ({
@@ -22,6 +30,8 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onToggleSidebar,
   isSidebarOpen,
   currentDate,
+  isAgentPanelOpen,
+  onToggleAgentPanel,
 }) => {
   // 현재 월에 오늘이 포함되어 있는지 확인
   const isTodayInCurrentMonth = () => {
@@ -85,6 +95,19 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           disabled={isTodayInCurrentMonth()}
         >
           오늘
+        </Button>
+        <Button
+          onClick={onToggleAgentPanel}
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          aria-label="agent panel toggle"
+        >
+          {isAgentPanelOpen ? (
+            <PanelRightClose className="h-4 w-4" />
+          ) : (
+            <PanelRight className="h-4 w-4" />
+          )}
         </Button>
       </div>
     </div>

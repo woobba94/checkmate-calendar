@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
+import AgentPanel from '@/components/agent/AgentPanel';
 import { useCalendarData } from '@/hooks/useCalendarData';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { updateCalendar } from '@/services/calendarService';
@@ -36,6 +37,7 @@ const DashboardPage: React.FC = () => {
   const [editDesc, setEditDesc] = useState('');
   const [editLoading, setEditLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(true);
   const queryClient = useQueryClient();
 
   // 캘린더 및 이벤트 데이터
@@ -255,6 +257,7 @@ const DashboardPage: React.FC = () => {
         currentDate={currentDate}
         onDateChange={setCurrentDate}
         isSidebarOpen={isSidebarOpen}
+        isAgentPanelOpen={isAgentPanelOpen}
       />
     );
   };
@@ -290,6 +293,8 @@ const DashboardPage: React.FC = () => {
             isSidebarOpen={isSidebarOpen}
             onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
             currentDate={currentDate}
+            isAgentPanelOpen={isAgentPanelOpen}
+            onToggleAgentPanel={() => setIsAgentPanelOpen(!isAgentPanelOpen)}
           />
           <ErrorMessage
             error={localError}
@@ -297,6 +302,15 @@ const DashboardPage: React.FC = () => {
           />
           <div className="h-full p-5 flex flex-col">
             {renderCalendarContent()}
+          </div>
+        </div>
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            isAgentPanelOpen ? 'w-80' : 'w-0'
+          } overflow-hidden flex-shrink-0`}
+        >
+          <div className="w-80 h-full">
+            <AgentPanel />
           </div>
         </div>
         <Dialog

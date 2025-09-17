@@ -14,6 +14,7 @@ interface CalendarProps {
   currentDate?: Date;
   onDateChange?: (date: Date) => void;
   isSidebarOpen?: boolean;
+  isAgentPanelOpen?: boolean;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -24,6 +25,7 @@ const Calendar: React.FC<CalendarProps> = ({
   currentDate,
   onDateChange,
   isSidebarOpen,
+  isAgentPanelOpen,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
   const calendarContainerRef = useRef<HTMLDivElement>(null);
@@ -158,18 +160,20 @@ const Calendar: React.FC<CalendarProps> = ({
     };
   }, [handleWheel]);
 
-  // 사이드바 상태 변경 시 캘린더 크기 재계산
+  // 레이아웃 변경 시 캘린더 크기 재계산 (사이드바, 에이전트 패널)
   useEffect(() => {
     if (calendarRef.current) {
-      // 사이드바 애니메이션이 완료될 때까지 대기
-      setTimeout(() => {
+      // 애니메이션이 완료될 때까지 대기
+      const resizeTimer = setTimeout(() => {
         const calendarApi = calendarRef.current?.getApi();
         if (calendarApi) {
           calendarApi.updateSize();
         }
-      }, 320); // 사이드바 애니메이션 duration(300ms) + 여유 시간
+      }, 320); // 애니메이션 duration(300ms) + 여유 시간
+
+      return () => clearTimeout(resizeTimer);
     }
-  }, [isSidebarOpen]);
+  }, [isSidebarOpen, isAgentPanelOpen]);
 
   return (
     <div
