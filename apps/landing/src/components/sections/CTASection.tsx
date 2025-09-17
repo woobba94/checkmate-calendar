@@ -1,8 +1,42 @@
+import { useRef, useEffect, useState } from 'react';
 import { Button } from '../ui/button';
+import './CTASection.scss';
 
 const CTASection = () => {
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+          }
+        });
+      },
+      {
+        threshold: 0.3, // 섹션의 30%가 보일 때 애니메이션 시작
+      }
+    );
+
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [isVisible]);
+
   return (
-    <section className="relative w-full h-[712px] flex items-center overflow-hidden">
+    <section
+      ref={sectionRef}
+      className="relative w-full h-[712px] flex items-center overflow-hidden"
+    >
       {/* Background */}
       <div
         className="absolute inset-0 w-full h-full"
@@ -17,9 +51,22 @@ const CTASection = () => {
         {/* Left Content */}
         <div className="flex flex-col gap-14">
           <h2 className="text-5xl leading-normal font-bold text-white">
-            체크메이트와 함께
-            <br />
-            일정관리를 시작하세요.
+            <span
+              className={`cta-section__typing-text ${isVisible ? 'animate' : ''}`}
+            >
+              {'체크메이트와 함께'.split('').map((char, index) => (
+                <span
+                  key={index}
+                  className="cta-section__typing-char"
+                  style={{ animationDelay: `${1 + index * 0.1}s` }}
+                >
+                  {char === ' ' ? '\u00A0' : char}
+                </span>
+              ))}
+            </span>
+            <span className="cta-section__static-text">
+              일정 관리를 시작하세요.
+            </span>
           </h2>
           <div>
             <Button variant="outline" size="lg">

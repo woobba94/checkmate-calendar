@@ -1,0 +1,30 @@
+.cta-section {
+  &__typing-text {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  &__typing-char {
+    opacity: 0;
+    display: inline-block;
+
+    .animate & {
+      animation: fadeInChar 0.1s ease-out forwards;
+    }
+  }
+
+  &__static-text {
+    display: block;
+  }
+}
+
+@keyframes fadeInChar {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
