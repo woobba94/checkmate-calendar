@@ -43,7 +43,11 @@ const GoogleCalendarIntegration: React.FC = () => {
 
   return (
     <div>
-      <Button onClick={handleGoogleConnect} variant="outline">
+      <Button
+        onClick={handleGoogleConnect}
+        variant="outline"
+        className="w-full whitespace-nowrap"
+      >
         구글 캘린더 연동
       </Button>
     </div>

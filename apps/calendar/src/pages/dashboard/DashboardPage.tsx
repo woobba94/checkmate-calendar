@@ -35,6 +35,7 @@ const DashboardPage: React.FC = () => {
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editLoading, setEditLoading] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const queryClient = useQueryClient();
 
   // 캘린더 및 이벤트 데이터
@@ -95,6 +96,7 @@ const DashboardPage: React.FC = () => {
     view,
     setView,
     currentDate,
+    setCurrentDate,
     handlePrev,
     handleNext,
     handleToday,
@@ -274,6 +276,7 @@ const DashboardPage: React.FC = () => {
         onDateClick={handleDateClick}
         currentView={view}
         currentDate={currentDate}
+        onDateChange={setCurrentDate}
       />
     );
   };
@@ -283,26 +286,32 @@ const DashboardPage: React.FC = () => {
   return (
     <Layout>
       <div className="flex flex-row w-full bg-[#f4f4f5]">
-        <AppSidebar
-          calendars={calendars}
-          selectedCalendarIds={selectedCalendarIds}
-          onCalendarChange={handleCalendarToggle}
-          onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
-          onEditCalendar={onEditCalendar}
-          user={user}
-          logout={logout}
-          colorMode={theme || 'light'}
-          toggleColorMode={toggleTheme}
-        />
+        <div
+          className={`transition-all duration-300 ease-in-out ${
+            isSidebarOpen ? 'w-64' : 'w-0'
+          } overflow-hidden flex-shrink-0`}
+        >
+          <div className="w-64 h-full">
+            <AppSidebar
+              calendars={calendars}
+              selectedCalendarIds={selectedCalendarIds}
+              onCalendarChange={handleCalendarToggle}
+              onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
+              onEditCalendar={onEditCalendar}
+              user={user}
+              logout={logout}
+              colorMode={theme || 'light'}
+              toggleColorMode={toggleTheme}
+            />
+          </div>
+        </div>
         <div className="flex flex-col flex-1 min-w-0 rounded-lg border border-zinc-300 bg-white m-2">
           <CalendarHeader
-            view={view}
-            onViewChange={setView}
-            onPrev={handlePrev}
-            onNext={handleNext}
             onToday={handleToday}
             title={getTitle()}
-            onAddEvent={handleAddEvent}
+            isSidebarOpen={isSidebarOpen}
+            onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)}
+            currentDate={currentDate}
           />
           <ErrorMessage
             error={localError}

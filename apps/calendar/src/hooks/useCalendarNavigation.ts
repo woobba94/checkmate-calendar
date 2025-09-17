@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
+import { ko } from 'date-fns/locale';
 import type { CalendarViewType } from '@/types/calendar';
 
 export const useCalendarNavigation = () => {
@@ -40,11 +41,11 @@ export const useCalendarNavigation = () => {
 
   const getTitle = () => {
     if (view === 'month') {
-      return format(currentDate, 'MMMM yyyy');
+      return format(currentDate, 'yyyy년 M월', { locale: ko });
     } else if (view === 'week') {
-      return `Week of ${format(currentDate, 'MMM d, yyyy')}`;
+      return `${format(currentDate, 'yyyy년 M월 d일', { locale: ko })} 주`;
     } else {
-      return format(currentDate, 'EEEE, MMMM d, yyyy');
+      return format(currentDate, 'yyyy년 M월 d일 EEEE', { locale: ko });
     }
   };
 
@@ -52,6 +53,7 @@ export const useCalendarNavigation = () => {
     view,
     setView,
     currentDate,
+    setCurrentDate,
     handlePrev,
     handleNext,
     handleToday,

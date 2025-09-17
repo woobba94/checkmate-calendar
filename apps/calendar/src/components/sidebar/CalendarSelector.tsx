@@ -40,10 +40,11 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
         size="default"
         className="w-full py-3"
       >
-        <CalendarPlus className="w-4 h-4 mr-2" />새 캘린더
+        <CalendarPlus className="w-4 h-4 mr-2 flex-shrink-0" />
+        <span className="whitespace-nowrap">새 캘린더</span>
       </Button>
       <div className="flex flex-col">
-        <p className="h-8 flex items-center px-2 text-sm font-medium text-muted-foreground">
+        <p className="h-8 flex items-center px-2 text-sm font-medium text-muted-foreground whitespace-nowrap">
           캘린더 목록
         </p>
         {calendars.length === 0 && (

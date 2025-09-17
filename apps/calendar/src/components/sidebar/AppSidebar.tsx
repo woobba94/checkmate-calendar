@@ -49,7 +49,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
   };
 
   return (
-    <aside className="w-[244px] flex flex-col justify-between">
+    <aside className="w-full h-full flex flex-col justify-between overflow-hidden">
       <div>
         <div className="py-3 px-4 text-center">
           <Link to="/">
@@ -80,16 +80,16 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
       </div>
       {user && (
         <div className="flex items-center gap-2 pl-4 pr-2 pt-2 pb-4 w-full h-16">
-          <div className="flex items-center gap-2 flex-1">
-            <Avatar className="h-10 w-10">
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <Avatar className="h-10 w-10 flex-shrink-0">
               <AvatarImage src={user.user_metadata?.avatar_url} />
               <AvatarFallback>{getUserInitials()}</AvatarFallback>
             </Avatar>
-            <div className="flex flex-col overflow-hidden">
-              <span className="text-sm font-medium truncate">
+            <div className="flex flex-col overflow-hidden flex-1">
+              <span className="text-sm font-medium truncate block">
                 {user.user_metadata?.display_name || user.email?.split('@')[0]}
               </span>
-              <span className="text-xs text-muted-foreground truncate">
+              <span className="text-xs text-muted-foreground truncate block">
                 {user.email}
               </span>
             </div>

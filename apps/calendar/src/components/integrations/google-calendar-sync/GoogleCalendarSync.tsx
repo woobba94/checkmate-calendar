@@ -41,6 +41,7 @@ const GoogleCalendarSync: React.FC = () => {
         onClick={() => mutation.mutate()}
         disabled={mutation.isPending}
         variant="outline"
+        className="w-full whitespace-nowrap"
       >
         {mutation.isPending ? '동기화 중...' : '구글 캘린더 동기화'}
       </Button>
