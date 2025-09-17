@@ -1,5 +1,3 @@
-import textLogoDark from '@/assets/images/text-logo-dark.svg';
-import textLogoLight from '@/assets/images/text-logo-light.svg';
 import GoogleCalendarIntegration from '@/components/integrations/google-calendar-integration/GoogleCalendarIntegration';
 import GoogleCalendarSync from '@/components/integrations/google-calendar-sync/GoogleCalendarSync';
 import type { Calendar as CalendarType, User } from '@/types/calendar';
@@ -39,7 +37,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
         <div className="app-sidebar__logo">
           <Link to="/">
             <img
-              src={colorMode === 'light' ? textLogoLight : textLogoDark}
+              src={
+                colorMode === 'light'
+                  ? '/text-logo-light.svg'
+                  : '/text-logo-dark.svg'
+              }
               alt="Checkmate Calendar Logo"
               className="app-sidebar__logo-img"
             />
