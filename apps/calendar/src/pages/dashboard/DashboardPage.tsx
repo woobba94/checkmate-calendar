@@ -277,6 +277,7 @@ const DashboardPage: React.FC = () => {
         currentView={view}
         currentDate={currentDate}
         onDateChange={setCurrentDate}
+        isSidebarOpen={isSidebarOpen}
       />
     );
   };

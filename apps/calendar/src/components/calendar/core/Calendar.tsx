@@ -13,6 +13,7 @@ interface CalendarProps {
   currentView: CalendarViewType;
   currentDate?: Date;
   onDateChange?: (date: Date) => void;
+  isSidebarOpen?: boolean;
 }
 
 const Calendar: React.FC<CalendarProps> = ({
@@ -22,6 +23,7 @@ const Calendar: React.FC<CalendarProps> = ({
   currentView,
   currentDate,
   onDateChange,
+  isSidebarOpen,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -154,6 +156,19 @@ const Calendar: React.FC<CalendarProps> = ({
       }
     };
   }, [handleWheel]);
+
+  // 사이드바 상태 변경 시 캘린더 크기 재계산
+  useEffect(() => {
+    if (calendarRef.current) {
+      // 사이드바 애니메이션이 완료될 때까지 대기
+      setTimeout(() => {
+        const calendarApi = calendarRef.current?.getApi();
+        if (calendarApi) {
+          calendarApi.updateSize();
+        }
+      }, 320); // 사이드바 애니메이션 duration(300ms) + 여유 시간
+    }
+  }, [isSidebarOpen]);
 
   return (
     <div
