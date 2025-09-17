@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import './SplashScreen.scss';
 
 export function SplashScreen() {
   const [fadeOut, setFadeOut] = useState(false);
@@ -32,16 +31,15 @@ export function SplashScreen() {
 
   return (
     <div
-      className={`splash-screen${fadeOut ? ' fade-out' : ''}`}
+      className={`fixed top-0 left-0 w-screen h-screen flex justify-center items-center z-[9999] transition-opacity duration-1000 ${
+        fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
+      }`}
       style={{ background: colorMode === 'light' ? '#fff' : '#18181b' }}
     >
       <img
         src={logoSrc}
         alt="Checkmate Calendar Logo"
-        style={{
-          height: 48,
-          filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.08))',
-        }}
+        className="h-12 drop-shadow-[0_2px_8px_rgba(0,0,0,0.08)]"
       />
     </div>
   );

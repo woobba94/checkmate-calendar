@@ -5,7 +5,6 @@ import CalendarHeader from '@/components/calendar/header/CalendarHeader';
 import EventModal from '@/components/calendar/modals/EventModal';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 import { useAuth } from '@/contexts/AuthContext';
-import './DashboardPage.scss';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
@@ -252,14 +251,18 @@ const DashboardPage: React.FC = () => {
   // renderCalendarContent도 병합된 이벤트로 변경
   const renderCalendarContent = () => {
     if (isLoading || eventsLoading) {
-      return <div className="loading">Loading calendar...</div>;
+      return (
+        <div className="flex justify-center items-center h-[400px] text-lg text-[var(--text-muted)]">
+          Loading calendar...
+        </div>
+      );
     }
     if (eventsError) {
-      return <div className="error-message">{eventsError}</div>;
+      return <div className="text-[var(--error-color)]">{eventsError}</div>;
     }
     if (!selectedCalendarIds.length) {
       return (
-        <div className="no-calendar-message">
+        <div className="flex justify-center items-center h-full text-gray-500">
           <p>좌측에서 하나 이상의 캘린더를 선택하세요.</p>
         </div>
       );
@@ -279,7 +282,7 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="dashboard-page">
+      <div className="flex flex-row w-full bg-[#f4f4f5]">
         <AppSidebar
           calendars={calendars}
           selectedCalendarIds={selectedCalendarIds}
@@ -291,7 +294,7 @@ const DashboardPage: React.FC = () => {
           colorMode={theme || 'light'}
           toggleColorMode={toggleTheme}
         />
-        <div className="calendar-main-content">
+        <div className="flex flex-col flex-1 min-w-0 rounded-lg border border-zinc-300 bg-white m-2">
           <CalendarHeader
             view={view}
             onViewChange={setView}
@@ -305,7 +308,9 @@ const DashboardPage: React.FC = () => {
             error={localError}
             onDismiss={() => setLocalError(null)}
           />
-          <div className="calendar-container">{renderCalendarContent()}</div>
+          <div className="h-full p-5 flex flex-col">
+            {renderCalendarContent()}
+          </div>
         </div>
         <Dialog
           open={isEditModalOpen}

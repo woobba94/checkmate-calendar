@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import './LoginPage.scss';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -32,9 +31,14 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="login-container">
-      <form onSubmit={handleSubmit} className="login-form">
-        <h2>로그인</h2>
+    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-primary)]">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[var(--bg-secondary)] rounded-xl shadow-[var(--shadow-lg)] p-10 pb-8 w-full max-w-[380px] flex flex-col gap-[18px]"
+      >
+        <h2 className="mb-2 text-[2rem] text-[var(--accent-color)] text-center">
+          로그인
+        </h2>
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">이메일</Label>
@@ -46,6 +50,7 @@ const LoginPage: React.FC = () => {
               onChange={(e) => setEmail(e.target.value)}
               autoComplete="username"
               required
+              className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] border-[var(--border-color)] rounded-md px-[14px] py-3 text-base w-full focus:outline-[var(--accent-color)] focus:outline-2 focus:border-[var(--accent-color)]"
             />
           </div>
           <div className="grid gap-2">
@@ -58,15 +63,25 @@ const LoginPage: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
+              className="bg-[var(--bg-tertiary)] text-[var(--text-primary)] border-[var(--border-color)] rounded-md px-[14px] py-3 text-base w-full focus:outline-[var(--accent-color)] focus:outline-2 focus:border-[var(--accent-color)]"
             />
           </div>
         </div>
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="bg-[var(--error-color)] text-white border border-[var(--error-color)] rounded-md px-3 py-2.5 mb-1 text-[15px] text-center">
+            {error}
+          </div>
+        )}
         <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? '로그인 중...' : '로그인'}
         </Button>
-        <div className="login-links">
-          <Link to="/signup">회원가입</Link>
+        <div className="mt-2.5 text-center text-[15px]">
+          <Link
+            to="/signup"
+            className="text-[var(--accent-color)] no-underline font-medium hover:underline"
+          >
+            회원가입
+          </Link>
         </div>
       </form>
     </div>

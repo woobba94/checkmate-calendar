@@ -34,11 +34,7 @@ body {
     sans-serif;
   color: var(--text-primary);
   background-color: var(--bg-primary);
-  margin: 0 !important;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  margin: 0;
 }
 
 h1 {
@@ -87,17 +83,23 @@ button {
   }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: $vite-text-dark;
-    background-color: $white;
-  }
+/* Checkbox 스타일 보정 */
+[type='checkbox'] {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
 
-  a:hover {
-    color: $vite-primary-light;
-  }
+/* Radix UI Checkbox 스타일 보정 */
+[data-radix-collection-item] {
+  box-sizing: border-box;
+}
 
-  button {
-    background-color: $vite-button-light;
-  }
+/* 체크박스가 찌그러지지 않도록 보정 */
+button[role='checkbox'] {
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
 }

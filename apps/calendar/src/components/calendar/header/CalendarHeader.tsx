@@ -1,6 +1,5 @@
 import React from 'react';
 import type { CalendarViewType } from '@/types/calendar';
-import './CalendarHeader.scss';
 import { Button } from '@/components/ui/button';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
@@ -24,12 +23,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   onAddEvent,
 }) => {
   return (
-    <div className="calendar-header">
-      <div className="calendar-header-left">
+    <div className="flex justify-between items-center p-3 flex-wrap gap-3 md:flex-nowrap">
+      <div className="flex items-center gap-4">
         <Button onClick={onToday} variant="secondary">
           Today
         </Button>
-        <div className="navigation-buttons">
+        <div className="flex gap-1">
           <Button onClick={onPrev} variant="secondary">
             &lt;
           </Button>
@@ -37,11 +36,11 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             &gt;
           </Button>
         </div>
-        <h2 className="calendar-title">{title}</h2>
+        <h2 className="text-lg font-semibold m-0">{title}</h2>
       </div>
 
-      <div className="calendar-header-right">
-        <div className="view-buttons">
+      <div className="flex items-center gap-4">
+        <div className="flex border border-[var(--border-color)] rounded overflow-hidden">
           <ToggleGroup
             type="single"
             value={view}

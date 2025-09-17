@@ -1,5 +1,4 @@
 import React from 'react';
-import './Layout.scss';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -7,8 +6,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="layout">
-      <main className="app-main">{children}</main>
+    <div className="flex flex-col min-h-screen box-border bg-[var(--bg-primary)]">
+      <main className="flex flex-1 w-full">{children}</main>
     </div>
   );
 };

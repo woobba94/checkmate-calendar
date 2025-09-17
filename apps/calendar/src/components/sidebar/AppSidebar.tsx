@@ -2,11 +2,19 @@ import GoogleCalendarIntegration from '@/components/integrations/google-calendar
 import GoogleCalendarSync from '@/components/integrations/google-calendar-sync/GoogleCalendarSync';
 import type { Calendar as CalendarType, User } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
-import React from 'react';
-import { Moon, Sun } from 'lucide-react';
+import React, { useState } from 'react';
+import { Settings, LogOut, MoreHorizontal } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import './AppSidebar.scss';
 import CalendarSelector from './CalendarSelector';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { UserSettingsDialog } from './UserSettingsDialog';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 interface AppSidebarProps {
   calendars: CalendarType[];
@@ -31,10 +39,19 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
   colorMode,
   toggleColorMode,
 }) => {
+  const [settingsOpen, setSettingsOpen] = useState(false);
+
+  const getUserInitials = () => {
+    if (user?.email) {
+      return user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
-    <aside className="app-sidebar">
+    <aside className="w-[244px] flex flex-col justify-between">
       <div>
-        <div className="app-sidebar__logo">
+        <div className="py-3 px-4 text-center">
           <Link to="/">
             <img
               src={
@@ -43,11 +60,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
                   : '/text-logo-dark.svg'
               }
               alt="Checkmate Calendar Logo"
-              className="app-sidebar__logo-img"
+              className="h-12"
             />
           </Link>
         </div>
-        <div className="app-sidebar__main">
+        <div className="flex-1 py-3 pl-2">
           <CalendarSelector
             calendars={calendars}
             selectedCalendarIds={selectedCalendarIds}
@@ -55,34 +72,59 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
             onCreateCalendarClick={onCreateCalendarClick}
             onEditCalendar={onEditCalendar}
           />
-          <div className="app-sidebar__integrations">
+          <div className="mt-4 flex flex-col gap-2">
             <GoogleCalendarIntegration />
             <GoogleCalendarSync />
           </div>
         </div>
       </div>
-      <div className="app-sidebar__footer">
-        <Button
-          onClick={toggleColorMode}
-          variant="ghost"
-          size="sm"
-          aria-label="색상 모드 토글"
-        >
-          {colorMode === 'light' ? (
-            <Moon className="h-4 w-4" />
-          ) : (
-            <Sun className="h-4 w-4" />
-          )}
-        </Button>
-        {user ? (
-          <>
-            <div className="app-sidebar__user-email">{user.email}</div>
-            <Button onClick={logout} variant="outline" size="sm">
-              Logout
-            </Button>
-          </>
-        ) : null}
-      </div>
+      {user && (
+        <div className="flex items-center gap-2 pl-4 pr-2 pt-2 pb-4 w-full h-16">
+          <div className="flex items-center gap-2 flex-1">
+            <Avatar className="h-10 w-10">
+              <AvatarImage src={user.user_metadata?.avatar_url} />
+              <AvatarFallback>{getUserInitials()}</AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col overflow-hidden">
+              <span className="text-sm font-medium truncate">
+                {user.user_metadata?.display_name || user.email?.split('@')[0]}
+              </span>
+              <span className="text-xs text-muted-foreground truncate">
+                {user.email}
+              </span>
+            </div>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 hover:bg-accent"
+                aria-label="더보기 메뉴"
+              >
+                <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-[160px]">
+              <DropdownMenuItem onClick={() => setSettingsOpen(true)}>
+                <Settings className="mr-2 h-4 w-4" />
+                <span>설정</span>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={logout}>
+                <LogOut className="mr-2 h-4 w-4" />
+                <span>로그아웃</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+      <UserSettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        colorMode={colorMode}
+        toggleColorMode={toggleColorMode}
+      />
     </aside>
   );
 };

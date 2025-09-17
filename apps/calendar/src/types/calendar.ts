@@ -38,6 +38,11 @@ export interface User {
   email: string;
   name?: string;
   avatarUrl?: string;
+  user_metadata?: {
+    display_name?: string;
+    avatar_url?: string;
+    [key: string]: any;
+  };
 }
 
 // 캘린더 뷰 타입

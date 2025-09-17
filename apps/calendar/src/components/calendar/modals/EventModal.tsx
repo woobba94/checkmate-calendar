@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
-import './EventModal.scss';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
