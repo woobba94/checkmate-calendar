@@ -3,12 +3,6 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -16,6 +10,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { CalendarPlus, MoreHorizontal, Edit, Trash } from 'lucide-react';
 import React from 'react';
+import TextWithTooltip from '@/components/common/text-with-tooltip/TextWithTooltip';
 
 interface CalendarSelectorProps {
   calendars: CalendarType[];
@@ -69,19 +64,11 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                     className="border-gray-300 data-[state=checked]:border-primary"
                   />
                 </div>
-                <div className="grid gap-1.5 font-normal flex-1 min-w-0">
-                  <TooltipProvider delayDuration={200}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <p className="text-sm leading-none font-medium truncate">
-                          {calendar.name}
-                        </p>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{calendar.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                <div className="flex items-center font-normal flex-1 min-w-0">
+                  <TextWithTooltip
+                    text={calendar.name}
+                    className="text-sm leading-5 font-medium"
+                  />
                 </div>
                 <DropdownMenu>
                   <DropdownMenuTrigger
