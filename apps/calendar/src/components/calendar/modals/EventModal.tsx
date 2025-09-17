@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
-import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -14,7 +12,6 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { useTheme } from '@/hooks/useTheme';
 
 interface EventModalProps {
   isOpen: boolean;
@@ -50,8 +47,6 @@ const EventModal: React.FC<EventModalProps> = ({
   const [calendarId, setCalendarId] = useState(
     defaultCalendarId || (calendars[0]?.id ?? '')
   );
-  const { user: _user } = useAuth();
-  const { theme } = useTheme();
 
   const isSingleCalendar = calendars.length === 1;
 

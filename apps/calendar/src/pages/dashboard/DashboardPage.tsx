@@ -92,16 +92,8 @@ const DashboardPage: React.FC = () => {
     (id) => eventsByCalendar[id] || []
   );
 
-  const {
-    view,
-    setView,
-    currentDate,
-    setCurrentDate,
-    handlePrev,
-    handleNext,
-    handleToday,
-    getTitle,
-  } = useCalendarNavigation();
+  const { view, currentDate, setCurrentDate, handleToday, getTitle } =
+    useCalendarNavigation();
 
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | undefined>(
     undefined
@@ -142,21 +134,6 @@ const DashboardPage: React.FC = () => {
     };
 
     setSelectedEvent(newEvent as CalendarEvent);
-    setIsEventModalOpen(true);
-  };
-
-  const handleAddEvent = () => {
-    if (!selectedCalendarIds.length) {
-      setLocalError('Please select or create a calendar first');
-      return;
-    }
-
-    if (!userId) {
-      setLocalError('Please log in to add events');
-      return;
-    }
-
-    setSelectedEvent(undefined);
     setIsEventModalOpen(true);
   };
 

@@ -26,6 +26,7 @@ const Calendar: React.FC<CalendarProps> = ({
   isSidebarOpen,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
+  const calendarContainerRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const lastScrollTime = useRef<number>(0);
   const isScrolling = useRef<boolean>(false);
@@ -142,7 +143,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
   // 캘린더 컨테이너에 휠 이벤트 리스너 추가
   useEffect(() => {
-    const calendarEl = calendarRef.current?.getApi().el;
+    const calendarEl = calendarContainerRef.current;
     if (!calendarEl) return;
 
     // 휠 이벤트 리스너 추가 (passive: false로 설정하여 preventDefault 허용)
@@ -172,6 +173,7 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div
+      ref={calendarContainerRef}
       style={{
         opacity: isTransitioning ? 0.3 : 1,
         transition: 'opacity 0.15s ease-in-out',
