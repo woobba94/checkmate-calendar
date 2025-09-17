@@ -13,8 +13,18 @@ import { useCalendarData } from '@/hooks/useCalendarData';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { updateCalendar } from '@/services/calendarService';
 import { useQueryClient } from '@tanstack/react-query';
-import { Button, Dialog, Portal, CloseButton, Theme } from '@chakra-ui/react';
-import { useColorModeToggle } from '@/components/ui/provider';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { useTheme } from '@/hooks/useTheme';
 
 const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
@@ -265,7 +275,7 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  const { colorMode, toggleColorMode } = useColorModeToggle();
+  const { theme, toggleTheme } = useTheme();
 
   return (
     <Layout>
@@ -278,8 +288,8 @@ const DashboardPage: React.FC = () => {
           onEditCalendar={onEditCalendar}
           user={user}
           logout={logout}
-          colorMode={colorMode}
-          toggleColorMode={toggleColorMode}
+          colorMode={theme || 'light'}
+          toggleColorMode={toggleTheme}
         />
         <div className="calendar-main-content">
           <CalendarHeader
@@ -297,83 +307,61 @@ const DashboardPage: React.FC = () => {
           />
           <div className="calendar-container">{renderCalendarContent()}</div>
         </div>
-        {isEditModalOpen && (
-          <Dialog.Root
-            open={isEditModalOpen}
-            onOpenChange={(v) => {
-              if (!v.open) handleEditCalendarCancel();
-            }}
-          >
-            <Portal>
-              <Dialog.Backdrop />
-              <Dialog.Positioner>
-                <Dialog.Content>
-                  <Theme appearance={colorMode}>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        handleEditCalendarSave();
-                      }}
-                      style={{ width: 400, maxWidth: '95vw' }}
-                    >
-                      <Dialog.Header>
-                        <Dialog.Title>캘린더 수정</Dialog.Title>
-                        <Dialog.CloseTrigger asChild>
-                          <CloseButton size="sm" aria-label="닫기" />
-                        </Dialog.CloseTrigger>
-                      </Dialog.Header>
-                      <Dialog.Body>
-                        <div className="form-group">
-                          <label>이름</label>
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            required
-                          />
-                        </div>
-                        <div className="form-group">
-                          <label>설명</label>
-                          <input
-                            type="text"
-                            value={editDesc}
-                            onChange={(e) => setEditDesc(e.target.value)}
-                          />
-                        </div>
-                      </Dialog.Body>
-                      <Dialog.Footer
-                        style={{
-                          display: 'flex',
-                          justifyContent: 'flex-end',
-                          gap: 8,
-                        }}
-                      >
-                        <Dialog.ActionTrigger asChild>
-                          <Button
-                            type="button"
-                            className="cancel-button"
-                            onClick={handleEditCalendarCancel}
-                            variant="surface"
-                          >
-                            취소
-                          </Button>
-                        </Dialog.ActionTrigger>
-                        <Button
-                          type="submit"
-                          className="save-button"
-                          disabled={editLoading}
-                          variant="surface"
-                        >
-                          {editLoading ? '저장 중...' : '저장'}
-                        </Button>
-                      </Dialog.Footer>
-                    </form>
-                  </Theme>
-                </Dialog.Content>
-              </Dialog.Positioner>
-            </Portal>
-          </Dialog.Root>
-        )}
+        <Dialog
+          open={isEditModalOpen}
+          onOpenChange={(open) => {
+            if (!open) handleEditCalendarCancel();
+          }}
+        >
+          <DialogContent className="sm:max-w-[425px]">
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleEditCalendarSave();
+              }}
+            >
+              <DialogHeader>
+                <DialogTitle>캘린더 수정</DialogTitle>
+                <DialogDescription>
+                  캘린더의 정보를 수정합니다.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="name">이름</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="description">설명</Label>
+                  <Input
+                    id="description"
+                    type="text"
+                    value={editDesc}
+                    onChange={(e) => setEditDesc(e.target.value)}
+                  />
+                </div>
+              </div>
+              <DialogFooter>
+                <Button
+                  type="button"
+                  onClick={handleEditCalendarCancel}
+                  variant="outline"
+                >
+                  취소
+                </Button>
+                <Button type="submit" disabled={editLoading}>
+                  {editLoading ? '저장 중...' : '저장'}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
         <EventModal
           isOpen={isEventModalOpen}
           onClose={() => setIsEventModalOpen(false)}

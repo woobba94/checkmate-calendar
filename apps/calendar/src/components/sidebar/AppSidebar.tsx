@@ -3,9 +3,9 @@ import textLogoLight from '@/assets/images/text-logo-light.svg';
 import GoogleCalendarIntegration from '@/components/integrations/google-calendar-integration/GoogleCalendarIntegration';
 import GoogleCalendarSync from '@/components/integrations/google-calendar-sync/GoogleCalendarSync';
 import type { Calendar as CalendarType, User } from '@/types/calendar';
-import { Button } from '@chakra-ui/react';
+import { Button } from '@/components/ui/button';
 import React from 'react';
-import { LuMoon, LuSun } from 'react-icons/lu';
+import { Moon, Sun } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import './AppSidebar.scss';
 import CalendarSelector from './CalendarSelector';
@@ -66,7 +66,11 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
           size="sm"
           aria-label="색상 모드 토글"
         >
-          {colorMode === 'light' ? <LuMoon /> : <LuSun />}
+          {colorMode === 'light' ? (
+            <Moon className="h-4 w-4" />
+          ) : (
+            <Sun className="h-4 w-4" />
+          )}
         </Button>
         {user ? (
           <>

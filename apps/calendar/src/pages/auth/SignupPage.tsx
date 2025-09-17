@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import './SignupPage.scss';
-import { Button } from '@chakra-ui/react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 const SignupPage: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -35,34 +37,46 @@ const SignupPage: React.FC = () => {
     <div className="signup-container">
       <form onSubmit={handleSubmit} className="signup-form">
         <h2>회원가입</h2>
-        <input
-          type="email"
-          placeholder="이메일"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          autoComplete="username"
-        />
-        <input
-          type="password"
-          placeholder="비밀번호"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          autoComplete="new-password"
-        />
-        <input
-          type="password"
-          placeholder="비밀번호 확인"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          autoComplete="new-password"
-        />
+        <div className="grid gap-4">
+          <div className="grid gap-2">
+            <Label htmlFor="email">이메일</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="이메일"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              autoComplete="username"
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="password">비밀번호</Label>
+            <Input
+              id="password"
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+          <div className="grid gap-2">
+            <Label htmlFor="confirmPassword">비밀번호 확인</Label>
+            <Input
+              id="confirmPassword"
+              type="password"
+              placeholder="비밀번호 확인"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              autoComplete="new-password"
+              required
+            />
+          </div>
+        </div>
         {error && <div className="error-message">{error}</div>}
-        <Button
-          type="submit"
-          loading={isLoading}
-          disabled={isLoading}
-          variant="surface"
-        >
+        <Button type="submit" disabled={isLoading} className="w-full">
           {isLoading ? '회원가입 중...' : '회원가입'}
         </Button>
         <div className="signup-links">

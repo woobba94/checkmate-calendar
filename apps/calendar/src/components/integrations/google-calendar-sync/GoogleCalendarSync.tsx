@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { createClient } from '@supabase/supabase-js';
 import { useState } from 'react';
-import { Button } from '@chakra-ui/react';
+import { Button } from '@/components/ui/button';
 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
@@ -40,7 +40,7 @@ const GoogleCalendarSync: React.FC = () => {
       <Button
         onClick={() => mutation.mutate()}
         disabled={mutation.isPending}
-        variant="surface"
+        variant="outline"
       >
         {mutation.isPending ? '동기화 중...' : '구글 캘린더 동기화'}
       </Button>

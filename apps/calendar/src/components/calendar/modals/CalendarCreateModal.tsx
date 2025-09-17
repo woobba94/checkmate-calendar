@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
-import { Button, Dialog, Portal, CloseButton, Theme } from '@chakra-ui/react';
-import { useColorModeToggle } from '@/components/ui/provider';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 
 interface CalendarCreateModalProps {
   isOpen: boolean;
@@ -15,7 +24,6 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
 }) => {
   const [newCalendarName, setNewCalendarName] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const { colorMode } = useColorModeToggle();
 
   const handleCreate = async () => {
     if (!newCalendarName.trim()) return;
@@ -32,61 +40,54 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
     }
   };
 
-  if (!isOpen) return null;
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleCreate();
+  };
 
   return (
-    <Dialog.Root
-      open={isOpen}
-      onOpenChange={(v) => {
-        if (!v.open) onClose();
-      }}
-    >
-      <Portal>
-        <Dialog.Backdrop />
-        <Dialog.Positioner>
-          <Dialog.Content>
-            <Theme appearance={colorMode}>
-              <Dialog.Header>
-                <Dialog.Title>새 캘린더 만들기</Dialog.Title>
-                <Dialog.CloseTrigger asChild>
-                  <CloseButton size="sm" aria-label="닫기" />
-                </Dialog.CloseTrigger>
-              </Dialog.Header>
-              <Dialog.Body>
-                <input
-                  type="text"
-                  placeholder="Calendar Name"
-                  value={newCalendarName}
-                  onChange={(e) => setNewCalendarName(e.target.value)}
-                  disabled={isCreating}
-                  style={{ width: '100%', marginBottom: 16 }}
-                />
-              </Dialog.Body>
-              <Dialog.Footer
-                style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}
-              >
-                <Dialog.ActionTrigger asChild>
-                  <Button
-                    onClick={onClose}
-                    disabled={isCreating}
-                    variant="surface"
-                  >
-                    Cancel
-                  </Button>
-                </Dialog.ActionTrigger>
-                <Button
-                  onClick={handleCreate}
-                  disabled={!newCalendarName.trim() || isCreating}
-                  variant="surface"
-                >
-                  {isCreating ? 'Creating...' : 'Create'}
-                </Button>
-              </Dialog.Footer>
-            </Theme>
-          </Dialog.Content>
-        </Dialog.Positioner>
-      </Portal>
-    </Dialog.Root>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="sm:max-w-[425px]">
+        <form onSubmit={handleSubmit}>
+          <DialogHeader>
+            <DialogTitle>새 캘린더 만들기</DialogTitle>
+            <DialogDescription>
+              새 캘린더의 이름을 입력하세요.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="name">캘린더 이름</Label>
+              <Input
+                id="name"
+                type="text"
+                placeholder="Calendar Name"
+                value={newCalendarName}
+                onChange={(e) => setNewCalendarName(e.target.value)}
+                disabled={isCreating}
+                required
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              type="button"
+              onClick={onClose}
+              disabled={isCreating}
+              variant="outline"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={!newCalendarName.trim() || isCreating}
+            >
+              {isCreating ? 'Creating...' : 'Create'}
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
 };
 

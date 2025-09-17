@@ -1,7 +1,8 @@
 import React from 'react';
 import type { CalendarViewType } from '@/types/calendar';
 import './CalendarHeader.scss';
-import { Button, SegmentGroup } from '@chakra-ui/react';
+import { Button } from '@/components/ui/button';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 interface CalendarHeaderProps {
   view: CalendarViewType;
@@ -25,14 +26,14 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   return (
     <div className="calendar-header">
       <div className="calendar-header-left">
-        <Button onClick={onToday} variant="surface">
+        <Button onClick={onToday} variant="secondary">
           Today
         </Button>
         <div className="navigation-buttons">
-          <Button onClick={onPrev} variant="surface">
+          <Button onClick={onPrev} variant="secondary">
             &lt;
           </Button>
-          <Button onClick={onNext} variant="surface">
+          <Button onClick={onNext} variant="secondary">
             &gt;
           </Button>
         </div>
@@ -41,24 +42,28 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
       <div className="calendar-header-right">
         <div className="view-buttons">
-          <SegmentGroup.Root
+          <ToggleGroup
+            type="single"
             value={view}
-            onValueChange={({ value }) =>
-              onViewChange(value as CalendarViewType)
-            }
+            onValueChange={(value) => {
+              if (value) onViewChange(value as CalendarViewType);
+            }}
           >
-            <SegmentGroup.Indicator />
-            <SegmentGroup.Items
-              items={[
-                { label: 'Month', value: 'month' },
-                { label: 'Week', value: 'week' },
-                { label: 'Day', value: 'day' },
-                { label: 'List', value: 'list' },
-              ]}
-            />
-          </SegmentGroup.Root>
+            <ToggleGroupItem value="month" aria-label="Month view">
+              Month
+            </ToggleGroupItem>
+            <ToggleGroupItem value="week" aria-label="Week view">
+              Week
+            </ToggleGroupItem>
+            <ToggleGroupItem value="day" aria-label="Day view">
+              Day
+            </ToggleGroupItem>
+            <ToggleGroupItem value="list" aria-label="List view">
+              List
+            </ToggleGroupItem>
+          </ToggleGroup>
         </div>
-        <Button onClick={onAddEvent} variant="surface">
+        <Button onClick={onAddEvent} variant="default">
           + Add Event
         </Button>
       </div>
