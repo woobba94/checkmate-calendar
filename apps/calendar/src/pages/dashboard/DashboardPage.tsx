@@ -9,6 +9,7 @@ import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
 import AgentPanel from '@/components/agent/AgentPanel';
+import { AgentProvider } from '@/contexts/AgentContext';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { updateCalendar } from '@/services/calendarService';
 import { useQueryClient } from '@tanstack/react-query';
@@ -267,7 +268,9 @@ const DashboardPage: React.FC = () => {
           } overflow-hidden flex-shrink-0`}
         >
           <div className="w-80 h-full">
-            <AgentPanel />
+            <AgentProvider>
+              <AgentPanel />
+            </AgentProvider>
           </div>
         </div>
         <Dialog

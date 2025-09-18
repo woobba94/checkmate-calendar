@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { Paperclip, Mic, ArrowUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useAgent } from '@/contexts/AgentContext';
 
 const AgentInput: React.FC = () => {
   const [inputValue, setInputValue] = useState('');
+  const { sendMessage, state } = useAgent();
+  const { isLoading } = state;
 
   const handleSend = () => {
-    if (inputValue.trim()) {
-      // TODO: 메시지 전송 로직
-      console.log('Sending:', inputValue);
+    if (inputValue.trim() && !isLoading) {
+      sendMessage(inputValue.trim());
       setInputValue('');
     }
   };
@@ -85,7 +87,7 @@ const AgentInput: React.FC = () => {
           size="icon"
           className="rounded-full h-8 w-8"
           aria-label="전송"
-          disabled={!inputValue.trim()}
+          disabled={!inputValue.trim() || isLoading}
         >
           <ArrowUp size={18} />
         </Button>
