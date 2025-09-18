@@ -9,10 +9,12 @@ import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
 import AgentPanel from '@/components/agent/AgentPanel';
-import { useCalendarData } from '@/hooks/useCalendarData';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
 import { updateCalendar } from '@/services/calendarService';
 import { useQueryClient } from '@tanstack/react-query';
+import { useCalendars } from '@/hooks/useCalendars';
+import { useEventsByCalendars } from '@/hooks/useEventsByCalendars';
+import { useEventMutations } from '@/hooks/useEventMutations';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -40,33 +42,8 @@ const DashboardPage: React.FC = () => {
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(true);
   const queryClient = useQueryClient();
 
-  // 캘린더 및 이벤트 데이터
-  const { calendars, isLoading, error, handleCreateCalendar, handleSaveEvent } =
-    useCalendarData(userId);
-
-  // 초기 진입 시 모든 캘린더 정보 한 번에 fetch
-  // TODO 진입 초반에 로딩화면 필요할듯
-  const [eventsByCalendar, setEventsByCalendar] = useState<{
-    [calendarId: string]: CalendarEvent[];
-  }>({});
-  const [eventsLoading, setEventsLoading] = useState(false);
-  const [eventsError, setEventsError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const loadEvents = async () => {
-      setEventsLoading(true);
-      setEventsError(null);
-      try {
-        const results = await fetchAllCalendarEvents(calendars);
-        setEventsByCalendar(results);
-      } catch {
-        setEventsError('이벤트 데이터를 불러오지 못했습니다.');
-      } finally {
-        setEventsLoading(false);
-      }
-    };
-    loadEvents();
-  }, [calendars]);
+  // 캘린더 데이터
+  const { calendars, isLoading: isLoadingCalendars, error: calendarsError, createCalendar } = useCalendars(userId);
 
   // 복수 선택된 캘린더 id
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>([]);
@@ -77,10 +54,17 @@ const DashboardPage: React.FC = () => {
     );
   };
 
-  // 병합된 이벤트
-  const mergedEvents: CalendarEvent[] = selectedCalendarIds.flatMap(
-    (id) => eventsByCalendar[id] || []
-  );
+  // 선택된 캘린더들의 이벤트 데이터
+  const { 
+    events: mergedEvents, 
+    eventsByCalendar, 
+    isLoading: isLoadingEvents, 
+    errors: eventsErrors,
+    refetch: refetchEvents 
+  } = useEventsByCalendars(selectedCalendarIds);
+
+  // 이벤트 변이 훅
+  const { createEvent, updateEvent, deleteEvent } = useEventMutations(userId);
 
   const { view, currentDate, setCurrentDate, handleToday, getTitle } =
     useCalendarNavigation();
@@ -93,10 +77,13 @@ const DashboardPage: React.FC = () => {
   const [localError, setLocalError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (error) {
-      setLocalError(error.message);
+    if (calendarsError) {
+      setLocalError(calendarsError.message);
     }
-  }, [error]);
+    if (eventsErrors && eventsErrors.length > 0) {
+      setLocalError(eventsErrors[0].message);
+    }
+  }, [calendarsError, eventsErrors]);
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -127,37 +114,8 @@ const DashboardPage: React.FC = () => {
     setIsEventModalOpen(true);
   };
 
-  // 모든 캘린더의 이벤트를 가져오는 함수
-  const fetchAllCalendarEvents = async (calendarList: CalendarType[]) => {
-    if (!calendarList.length) return {};
 
-    const results = await Promise.all(
-      calendarList.map(async (calendar) => {
-        try {
-          const res = await import('@/services/eventService').then((m) =>
-            m.getEvents(calendar.id)
-          );
-          return [calendar.id, res] as [string, CalendarEvent[]];
-        } catch {
-          return [calendar.id, []] as [string, CalendarEvent[]];
-        }
-      })
-    );
-    return Object.fromEntries(results);
-  };
-
-  // 모든 캘린더 이벤트 refetch 함수
-  const refetchEvents = async () => {
-    setEventsLoading(true);
-    try {
-      const results = await fetchAllCalendarEvents(calendars);
-      setEventsByCalendar(results);
-    } finally {
-      setEventsLoading(false);
-    }
-  };
-
-  const handleSaveEventWrapper = async (
+  const handleSaveEvent = async (
     eventData:
       | CalendarEvent
       | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>
@@ -168,22 +126,25 @@ const DashboardPage: React.FC = () => {
     }
 
     try {
-      await handleSaveEvent(eventData);
-      await refetchEvents();
+      if ('id' in eventData && eventData.id) {
+        await updateEvent(eventData as CalendarEvent);
+      } else {
+        await createEvent(eventData as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>);
+      }
       setIsEventModalOpen(false);
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : 'Failed to save event');
     }
   };
 
-  const handleCreateCalendarWrapper = async (name: string) => {
+  const handleCreateCalendar = async (name: string) => {
     if (!name.trim()) {
       setLocalError('Please enter a calendar name');
       return;
     }
 
     try {
-      await handleCreateCalendar(name);
+      await createCalendar({ name });
       setIsCalendarModalOpen(false);
     } catch (e) {
       setLocalError(
@@ -227,15 +188,15 @@ const DashboardPage: React.FC = () => {
 
   // renderCalendarContent도 병합된 이벤트로 변경
   const renderCalendarContent = () => {
-    if (isLoading || eventsLoading) {
+    if (isLoadingCalendars || isLoadingEvents) {
       return (
         <div className="flex justify-center items-center h-[400px] text-lg text-[var(--text-muted)]">
           Loading calendar...
         </div>
       );
     }
-    if (eventsError) {
-      return <div className="text-[var(--error-color)]">{eventsError}</div>;
+    if (eventsErrors && eventsErrors.length > 0) {
+      return <div className="text-[var(--error-color)]">{eventsErrors[0].message}</div>;
     }
     if (!selectedCalendarIds.length) {
       return (
@@ -368,7 +329,13 @@ const DashboardPage: React.FC = () => {
           isOpen={isEventModalOpen}
           onClose={() => setIsEventModalOpen(false)}
           event={selectedEvent}
-          onSave={handleSaveEventWrapper}
+          onSave={handleSaveEvent}
+          onDelete={async (eventId: string) => {
+            if (selectedEvent?.calendar_id) {
+              await deleteEvent({ eventId, calendarId: selectedEvent.calendar_id });
+              setIsEventModalOpen(false);
+            }
+          }}
           calendars={calendars.filter((c) =>
             selectedCalendarIds.includes(c.id)
           )}
@@ -380,7 +347,7 @@ const DashboardPage: React.FC = () => {
         <CalendarCreateModal
           isOpen={isCalendarModalOpen}
           onClose={() => setIsCalendarModalOpen(false)}
-          onCreateCalendar={handleCreateCalendarWrapper}
+          onCreateCalendar={handleCreateCalendar}
         />
       </div>
     </Layout>
