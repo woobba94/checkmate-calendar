@@ -1,0 +1,50 @@
+/* 캘린더 컨테이너 애니메이션 효과 */
+.calendar-container {
+  position: relative;
+  overflow: hidden;
+
+  .fc {
+    opacity: 1;
+  }
+
+  // 스크롤 다운 시 (다음달로 이동)
+  &.scroll-down .fc {
+    animation: slideUpFromBottom 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  // 스크롤 업 시 (이전달로 이동)
+  &.scroll-up .fc {
+    animation: slideDownFromTop 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  // FullCalendar의 달 전환 애니메이션 부드럽게
+  .fc-toolbar-chunk,
+  .fc-daygrid-body,
+  .fc-timegrid-body {
+    transition: opacity 0.2s ease-out;
+  }
+}
+
+// 아래에서 위로 올라오는 애니메이션 (다음달)
+@keyframes slideUpFromBottom {
+  0% {
+    transform: translateY(30px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+// 위에서 아래로 내려오는 애니메이션 (이전달)
+@keyframes slideDownFromTop {
+  0% {
+    transform: translateY(-30px);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

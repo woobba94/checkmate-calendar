@@ -7,6 +7,7 @@ import listPlugin from '@fullcalendar/list';
 import type { CalendarEvent, CalendarViewType } from '@/types/calendar';
 import { useResizeObserver } from '@/hooks/useResizeObserver';
 import { useThrottledCallback } from '@/hooks/useThrottledCallback';
+import './Calendar.scss';
 
 interface CalendarProps {
   events: CalendarEvent[];
@@ -28,7 +29,9 @@ const Calendar: React.FC<CalendarProps> = ({
   onDateChange,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [scrollDirection, setScrollDirection] = useState<'up' | 'down' | null>(
+    null
+  );
   const isScrollingRef = useRef(false);
   const scrollDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -62,7 +65,7 @@ const Calendar: React.FC<CalendarProps> = ({
     }
   }, [currentDate]);
 
-  const handleEventClick = (info: any) => {
+  const handleEventClick = (info: { event: any }) => {
     if (onEventClick) {
       // 이벤트 데이터를 CalendarEvent 형식으로 변환
       const event: CalendarEvent = {
@@ -101,11 +104,14 @@ const Calendar: React.FC<CalendarProps> = ({
         if (isScrollingRef.current) return;
 
         isScrollingRef.current = true;
-        setIsTransitioning(true);
 
         if (e.deltaY > 0) {
+          // 스크롤 다운: 다음달로 이동 (다음달이 아래에서 위로 올라옴)
+          setScrollDirection('down');
           calendarApi.next();
         } else {
+          // 스크롤 업: 이전달로 이동 (이전달이 위에서 아래로 내려옴)
+          setScrollDirection('up');
           calendarApi.prev();
         }
 
@@ -119,9 +125,12 @@ const Calendar: React.FC<CalendarProps> = ({
         }
 
         scrollDebounceRef.current = setTimeout(() => {
-          isScrollingRef.current = false;
-          setIsTransitioning(false);
-        }, 150); // 300ms에서 150ms로 줄임
+          setScrollDirection(null);
+          // 애니메이션이 완료된 후 스크롤 가능하도록 추가 지연
+          setTimeout(() => {
+            isScrollingRef.current = false;
+          }, 150);
+        }, 300);
       }
     },
     [currentView, onDateChange]
@@ -177,9 +186,8 @@ const Calendar: React.FC<CalendarProps> = ({
   return (
     <div
       ref={containerRef as React.RefObject<HTMLDivElement>}
+      className={`calendar-container ${scrollDirection ? `scroll-${scrollDirection}` : ''}`}
       style={{
-        opacity: isTransitioning ? 0.7 : 1,
-        transition: 'opacity 0.1s ease-in-out',
         height: '100%',
       }}
     >
