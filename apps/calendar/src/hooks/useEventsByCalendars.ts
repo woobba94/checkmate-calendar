@@ -5,20 +5,20 @@ import type { CalendarEvent } from '@/types/calendar';
 import { useMemo } from 'react';
 
 /**
- * Hook for fetching and merging events from multiple calendars
+ * 여러 캘린더에서 이벤트를 가져와 병합하는 Hook
  */
 export function useEventsByCalendars(selectedCalendarIds: string[]) {
-  // Create queries for each calendar
+  // 각 캘린더에 대한 query 생성
   const queries = useQueries({
     queries: selectedCalendarIds.map((calendarId) => ({
       queryKey: ['events', calendarId],
       queryFn: () => getEvents(calendarId),
       enabled: !!calendarId,
-      staleTime: 5 * 60 * 1000, // Consider data fresh for 5 minutes
+      staleTime: 5 * 60 * 1000, // 5분간 데이터를 fresh로 간주
     })),
   });
 
-  // Compute merged results
+  // 병합된 결과 계산
   const mergedData = useMemo(() => {
     const allEvents: CalendarEvent[] = [];
     const eventsByCalendar: Record<string, CalendarEvent[]> = {};
@@ -37,7 +37,7 @@ export function useEventsByCalendars(selectedCalendarIds: string[]) {
     };
   }, [queries, selectedCalendarIds]);
 
-  // Compute overall loading/error states
+  // 전체 loading/error 상태 계산
   const isLoading = queries.some((q) => q.isLoading);
   const isError = queries.some((q) => q.isError);
   const errors = queries

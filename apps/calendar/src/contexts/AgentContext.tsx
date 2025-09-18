@@ -74,7 +74,7 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(agentReducer, initialState);
 
   const sendMessage = useCallback(async (content: string) => {
-    // Create user message
+    // 사용자 메시지 생성
     const userMessage: Message = {
       id: `msg-${Date.now()}`,
       role: 'user',
@@ -88,8 +88,8 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
     dispatch({ type: 'SET_ERROR', payload: null });
 
     try {
-      // TODO: Implement actual server call
-      // For now, simulate a response
+      // TODO: 실제 서버 호출 구현
+      // 현재는 응답을 시뮬레이션
       setTimeout(() => {
         const assistantMessage: Message = {
           id: `msg-${Date.now() + 1}`,

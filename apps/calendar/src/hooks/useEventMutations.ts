@@ -9,12 +9,12 @@ interface OptimisticContext {
 }
 
 /**
- * Hook for managing event mutations with optimistic updates
+ * optimistic update를 사용한 이벤트 mutation 관리 Hook
  */
 export function useEventMutations(userId: string) {
   const queryClient = useQueryClient();
 
-  // Normalize event dates
+  // 이벤트 날짜 정규화
   const normalizeEventDates = <
     T extends { start?: string | Date; end?: string | Date },
   >(
@@ -30,7 +30,7 @@ export function useEventMutations(userId: string) {
     return normalized;
   };
 
-  // Create event mutation
+  // 이벤트 생성 mutation
   const createMutation = useMutation<
     CalendarEvent,
     Error,
@@ -44,20 +44,20 @@ export function useEventMutations(userId: string) {
     onMutate: async (newEvent) => {
       const calendarId = newEvent.calendar_id;
 
-      // Cancel outgoing refetches
+      // 진행 중인 refetch 취소
       await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
-      // Snapshot previous value
+      // 이전 값 스냅샷
       const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
         'events',
         calendarId,
       ]);
 
-      // Optimistically update
+      // Optimistic update 수행
       if (previousEvents) {
         const optimisticEvent: CalendarEvent = {
           ...normalizeEventDates(newEvent),
-          id: `temp-${Date.now()}`, // Temporary ID
+          id: `temp-${Date.now()}`, // 임시 ID
           created_by: userId,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
@@ -72,7 +72,7 @@ export function useEventMutations(userId: string) {
       return { previousEvents, calendarId };
     },
     onError: (err, newEvent, context) => {
-      // Rollback on error
+      // 에러 발생 시 롤백
       if (context?.previousEvents) {
         queryClient.setQueryData(
           ['events', context.calendarId],
@@ -81,14 +81,14 @@ export function useEventMutations(userId: string) {
       }
     },
     onSettled: (data, error, variables) => {
-      // Always refetch after error or success
+      // 에러나 성공 후 항상 refetch
       queryClient.invalidateQueries({
         queryKey: ['events', variables.calendar_id],
       });
     },
   });
 
-  // Update event mutation
+  // 이벤트 수정 mutation
   const updateMutation = useMutation<
     CalendarEvent,
     Error,
@@ -136,7 +136,7 @@ export function useEventMutations(userId: string) {
     },
   });
 
-  // Delete event mutation
+  // 이벤트 삭제 mutation
   const deleteMutation = useMutation<
     void,
     Error,

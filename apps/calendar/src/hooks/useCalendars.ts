@@ -3,12 +3,12 @@ import { getCalendars, createCalendar } from '@/services/calendarService';
 import type { Calendar } from '@/types/calendar';
 
 /**
- * Hook for managing calendar list and creation
+ * 캘린더 목록 및 생성 관리를 위한 Hook
  */
 export function useCalendars(userId: string) {
   const queryClient = useQueryClient();
 
-  // Fetch calendars
+  // 캘린더 fetch
   const {
     data: calendars,
     isLoading,
@@ -19,7 +19,7 @@ export function useCalendars(userId: string) {
     enabled: !!userId,
   });
 
-  // Create calendar mutation
+  // 캘린더 생성 mutation
   const createCalendarMutation = useMutation({
     mutationFn: ({
       name,
@@ -29,12 +29,12 @@ export function useCalendars(userId: string) {
       description?: string;
     }) => createCalendar(name, description, userId),
     onSuccess: (newCalendar) => {
-      // Optimistically update the cache
+      // cache를 optimistic하게 업데이트
       queryClient.setQueryData(
         ['calendars', userId],
         (old: Calendar[] = []) => [...old, newCalendar]
       );
-      // Then invalidate to ensure consistency
+      // 일관성을 보장하기 위해 invalidate
       queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
     },
   });

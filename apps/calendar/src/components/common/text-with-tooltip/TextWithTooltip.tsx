@@ -45,7 +45,7 @@ const TextWithTooltip: React.FC<TextWithTooltipProps> = ({
     };
 
     checkEllipsis();
-    // ResizeObserver를 사용해 컨테이너 크기 변경 감지
+    // ResizeObserver\ub97c \uc0ac\uc6a9\ud574 \ucee8\ud14c\uc774\ub108 \ud06c\uae30 \ubcc0\uacbd \uac10\uc9c0
     const resizeObserver = new ResizeObserver(checkEllipsis);
     const element = textRef.current;
     if (element) {

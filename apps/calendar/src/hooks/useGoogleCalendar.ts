@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from './use-toast';
 
 /**
- * Hook for Google Calendar integration
+ * Google Calendar 통합을 위한 Hook
  */
 export function useGoogleCalendarAuth() {
   const { user } = useAuth();
@@ -18,7 +18,7 @@ export function useGoogleCalendarAuth() {
       'https://accounts.google.com/o/oauth2/v2/auth'
     );
 
-    // OAuth parameters
+    // OAuth 파라미터
     googleAuthUrl.searchParams.append(
       'client_id',
       import.meta.env.VITE_GOOGLE_CLIENT_ID
@@ -35,7 +35,7 @@ export function useGoogleCalendarAuth() {
     googleAuthUrl.searchParams.append('access_type', 'offline');
     googleAuthUrl.searchParams.append('prompt', 'consent');
 
-    // Security: Add state parameter with user ID and timestamp
+    // 보안: user ID와 timestamp를 포함한 state 파라미터 추가
     const state = btoa(
       JSON.stringify({
         userId: user.id,
@@ -49,12 +49,12 @@ export function useGoogleCalendarAuth() {
 
   return {
     initiateAuth: initiateGoogleAuth,
-    isAuthenticated: false, // TODO: Check if user has Google tokens stored
+    isAuthenticated: false, // TODO: 사용자가 Google 토큰을 저장했는지 확인
   };
 }
 
 /**
- * Hook for Google Calendar sync with retry and cache invalidation
+ * 재시도 및 cache invalidation이 포함된 Google Calendar 동기화 Hook
  */
 export function useGoogleCalendarSync() {
   const { user } = useAuth();
@@ -87,7 +87,7 @@ export function useGoogleCalendarSync() {
         description: '구글 캘린더 동기화가 완료되었습니다.',
       });
 
-      // Invalidate all event caches to reflect synced events
+      // 동기화된 이벤트를 반영하기 위해 모든 이벤트 cache invalidate
       queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.invalidateQueries({ queryKey: ['calendars'] });
     },

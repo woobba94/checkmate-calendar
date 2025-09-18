@@ -7,7 +7,7 @@ const AgentHistory: React.FC = () => {
   const { messages, isLoading } = state;
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // \uc0c8 \uba54\uc2dc\uc9c0\uac00 \ub3c4\ucc29\ud558\uba74 \ud558\ub2e8\uc73c\ub85c \uc790\ub3d9 \uc2a4\ud06c\ub864
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;

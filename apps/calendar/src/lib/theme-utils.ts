@@ -1,12 +1,12 @@
 /**
- * Theme utilities
+ * 테마 유틸리티
  */
 
 const THEME_STORAGE_KEY = 'checkmate-theme';
 
 /**
- * Get initial theme from localStorage or system preference
- * This is used for SSR/initial render to avoid theme flash
+ * localStorage 또는 시스템 설정에서 초기 테마 가져오기
+ * SSR/초기 렌더링 시 테마 깜빡임을 방지하기 위해 사용
  */
 export function getInitialTheme(): 'light' | 'dark' {
   if (typeof window === 'undefined') {
@@ -19,7 +19,7 @@ export function getInitialTheme(): 'light' | 'dark' {
     return stored;
   }
 
-  // If 'system' or no value, check system preference
+  // 'system' 또는 값이 없으면 시스템 설정 확인
   return window.matchMedia('(prefers-color-scheme: dark)').matches
     ? 'dark'
     : 'light';

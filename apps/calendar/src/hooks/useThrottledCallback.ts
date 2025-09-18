@@ -1,7 +1,7 @@
 import { useCallback, useRef } from 'react';
 
 /**
- * Hook that throttles a callback using requestAnimationFrame
+ * requestAnimationFrame을 사용하여 callback을 throttle하는 Hook
  */
 export function useThrottledCallback<T extends (...args: any[]) => any>(
   callback: T,
@@ -21,7 +21,7 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
     }
   }, deps);
 
-  // Cleanup on unmount
+  // 언마운트 시 클린업
   useCallback(() => {
     if (frameRef.current !== null) {
       cancelAnimationFrame(frameRef.current);
