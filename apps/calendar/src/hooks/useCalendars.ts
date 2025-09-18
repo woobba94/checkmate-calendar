@@ -21,14 +21,19 @@ export function useCalendars(userId: string) {
 
   // Create calendar mutation
   const createCalendarMutation = useMutation({
-    mutationFn: ({ name, description }: { name: string; description?: string }) =>
-      createCalendar(name, description, userId),
+    mutationFn: ({
+      name,
+      description,
+    }: {
+      name: string;
+      description?: string;
+    }) => createCalendar(name, description, userId),
     onSuccess: (newCalendar) => {
       // Optimistically update the cache
-      queryClient.setQueryData(['calendars', userId], (old: Calendar[] = []) => [
-        ...old,
-        newCalendar,
-      ]);
+      queryClient.setQueryData(
+        ['calendars', userId],
+        (old: Calendar[] = []) => [...old, newCalendar]
+      );
       // Then invalidate to ensure consistency
       queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
     },

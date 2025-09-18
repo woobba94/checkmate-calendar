@@ -59,7 +59,9 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             <PanelLeft className="h-4 w-4" />
           )}
         </Button>
-        <h2 className="text-lg font-semibold m-0" aria-live="polite">{title}</h2>
+        <h2 className="text-lg font-semibold m-0" aria-live="polite">
+          {title}
+        </h2>
       </div>
 
       {/* 중앙 영역 - absolute positioning으로 정확히 중앙 배치 */}
@@ -78,9 +80,9 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       <div className="flex items-center gap-2 ml-auto">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               className="h-8 w-8"
               aria-label="사용 팁 보기"
             >
@@ -106,7 +108,9 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          aria-label={isAgentPanelOpen ? '에이전트 패널 닫기' : '에이전트 패널 열기'}
+          aria-label={
+            isAgentPanelOpen ? '에이전트 패널 닫기' : '에이전트 패널 열기'
+          }
         >
           {isAgentPanelOpen ? (
             <PanelRightClose className="h-4 w-4" />

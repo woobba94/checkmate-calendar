@@ -47,7 +47,10 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]" aria-describedby="calendar-modal-description">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        aria-describedby="calendar-modal-description"
+      >
         <form onSubmit={handleSubmit} aria-label="새 캘린더 생성 폼">
           <DialogHeader>
             <DialogTitle>새 캘린더 만들기</DialogTitle>

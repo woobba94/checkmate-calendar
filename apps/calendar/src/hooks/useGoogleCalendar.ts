@@ -14,21 +14,34 @@ export function useGoogleCalendarAuth() {
       throw new Error('로그인이 필요합니다');
     }
 
-    const googleAuthUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
-    
+    const googleAuthUrl = new URL(
+      'https://accounts.google.com/o/oauth2/v2/auth'
+    );
+
     // OAuth parameters
-    googleAuthUrl.searchParams.append('client_id', import.meta.env.VITE_GOOGLE_CLIENT_ID);
-    googleAuthUrl.searchParams.append('redirect_uri', `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-auth`);
+    googleAuthUrl.searchParams.append(
+      'client_id',
+      import.meta.env.VITE_GOOGLE_CLIENT_ID
+    );
+    googleAuthUrl.searchParams.append(
+      'redirect_uri',
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-auth`
+    );
     googleAuthUrl.searchParams.append('response_type', 'code');
-    googleAuthUrl.searchParams.append('scope', 'https://www.googleapis.com/auth/calendar.readonly email profile');
+    googleAuthUrl.searchParams.append(
+      'scope',
+      'https://www.googleapis.com/auth/calendar.readonly email profile'
+    );
     googleAuthUrl.searchParams.append('access_type', 'offline');
     googleAuthUrl.searchParams.append('prompt', 'consent');
-    
+
     // Security: Add state parameter with user ID and timestamp
-    const state = btoa(JSON.stringify({
-      userId: user.id,
-      timestamp: Date.now(),
-    }));
+    const state = btoa(
+      JSON.stringify({
+        userId: user.id,
+        timestamp: Date.now(),
+      })
+    );
     googleAuthUrl.searchParams.append('state', state);
 
     window.location.href = googleAuthUrl.toString();
@@ -52,9 +65,12 @@ export function useGoogleCalendarSync() {
     mutationFn: async () => {
       if (!user) throw new Error('로그인이 필요합니다');
 
-      const { data, error } = await supabase.functions.invoke('sync-google-calendar', {
-        body: { user_id: user.id },
-      });
+      const { data, error } = await supabase.functions.invoke(
+        'sync-google-calendar',
+        {
+          body: { user_id: user.id },
+        }
+      );
 
       if (error) throw error;
       return data;
@@ -78,7 +94,10 @@ export function useGoogleCalendarSync() {
     onError: (error) => {
       toast({
         title: '동기화 실패',
-        description: error instanceof Error ? error.message : '알 수 없는 오류가 발생했습니다.',
+        description:
+          error instanceof Error
+            ? error.message
+            : '알 수 없는 오류가 발생했습니다.',
         variant: 'destructive',
       });
     },

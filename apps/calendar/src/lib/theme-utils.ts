@@ -14,11 +14,13 @@ export function getInitialTheme(): 'light' | 'dark' {
   }
 
   const stored = localStorage.getItem(THEME_STORAGE_KEY);
-  
+
   if (stored === 'light' || stored === 'dark') {
     return stored;
   }
 
   // If 'system' or no value, check system preference
-  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches
+    ? 'dark'
+    : 'light';
 }

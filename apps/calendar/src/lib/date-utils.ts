@@ -11,13 +11,13 @@ export function ensureIsoString(value: string | Date): string {
   if (value instanceof Date) {
     return value.toISOString();
   }
-  
+
   // If it's already a string, validate and normalize it
   const date = new Date(value);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid date value: ${value}`);
   }
-  
+
   return date.toISOString();
 }
 
@@ -30,11 +30,11 @@ export function ensureDate(value: string | Date): Date {
   if (value instanceof Date) {
     return value;
   }
-  
+
   const date = new Date(value);
   if (isNaN(date.getTime())) {
     throw new Error(`Invalid date value: ${value}`);
   }
-  
+
   return date;
 }

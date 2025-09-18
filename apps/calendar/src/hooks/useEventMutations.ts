@@ -39,12 +39,15 @@ export function useEventMutations(userId: string) {
     },
     onMutate: async (newEvent) => {
       const calendarId = newEvent.calendar_id;
-      
+
       // Cancel outgoing refetches
       await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
       // Snapshot previous value
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(['events', calendarId]);
+      const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
+        'events',
+        calendarId,
+      ]);
 
       // Optimistically update
       if (previousEvents) {
@@ -67,27 +70,40 @@ export function useEventMutations(userId: string) {
     onError: (err, newEvent, context) => {
       // Rollback on error
       if (context?.previousEvents) {
-        queryClient.setQueryData(['events', context.calendarId], context.previousEvents);
+        queryClient.setQueryData(
+          ['events', context.calendarId],
+          context.previousEvents
+        );
       }
     },
     onSettled: (data, error, variables) => {
       // Always refetch after error or success
-      queryClient.invalidateQueries({ queryKey: ['events', variables.calendar_id] });
+      queryClient.invalidateQueries({
+        queryKey: ['events', variables.calendar_id],
+      });
     },
   });
 
   // Update event mutation
-  const updateMutation = useMutation<CalendarEvent, Error, CalendarEvent, OptimisticContext>({
+  const updateMutation = useMutation<
+    CalendarEvent,
+    Error,
+    CalendarEvent,
+    OptimisticContext
+  >({
     mutationFn: async (eventData) => {
       const normalized = normalizeEventDates(eventData);
       return updateEvent(normalized, userId);
     },
     onMutate: async (updatedEvent) => {
       const calendarId = updatedEvent.calendar_id;
-      
+
       await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(['events', calendarId]);
+      const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
+        'events',
+        calendarId,
+      ]);
 
       if (previousEvents) {
         const normalized = normalizeEventDates(updatedEvent);
@@ -103,11 +119,16 @@ export function useEventMutations(userId: string) {
     },
     onError: (err, updatedEvent, context) => {
       if (context?.previousEvents) {
-        queryClient.setQueryData(['events', context.calendarId], context.previousEvents);
+        queryClient.setQueryData(
+          ['events', context.calendarId],
+          context.previousEvents
+        );
       }
     },
     onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['events', variables.calendar_id] });
+      queryClient.invalidateQueries({
+        queryKey: ['events', variables.calendar_id],
+      });
     },
   });
 
@@ -122,7 +143,10 @@ export function useEventMutations(userId: string) {
     onMutate: async ({ eventId, calendarId }) => {
       await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>(['events', calendarId]);
+      const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
+        'events',
+        calendarId,
+      ]);
 
       if (previousEvents) {
         queryClient.setQueryData<CalendarEvent[]>(
@@ -135,11 +159,16 @@ export function useEventMutations(userId: string) {
     },
     onError: (err, variables, context) => {
       if (context?.previousEvents) {
-        queryClient.setQueryData(['events', context.calendarId], context.previousEvents);
+        queryClient.setQueryData(
+          ['events', context.calendarId],
+          context.previousEvents
+        );
       }
     },
     onSettled: (data, error, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['events', variables.calendarId] });
+      queryClient.invalidateQueries({
+        queryKey: ['events', variables.calendarId],
+      });
     },
   });
 

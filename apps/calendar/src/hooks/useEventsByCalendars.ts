@@ -21,11 +21,11 @@ export function useEventsByCalendars(selectedCalendarIds: string[]) {
   const mergedData = useMemo(() => {
     const allEvents: CalendarEvent[] = [];
     const eventsByCalendar: Record<string, CalendarEvent[]> = {};
-    
+
     queries.forEach((query, index) => {
       const calendarId = selectedCalendarIds[index];
       const events = query.data || [];
-      
+
       eventsByCalendar[calendarId] = events;
       allEvents.push(...events);
     });
@@ -40,7 +40,9 @@ export function useEventsByCalendars(selectedCalendarIds: string[]) {
   const isLoading = queries.some((q) => q.isLoading);
   const isError = queries.some((q) => q.isError);
   const errors = queries
-    .filter((q): q is UseQueryResult<CalendarEvent[], Error> => q.isError && !!q.error)
+    .filter(
+      (q): q is UseQueryResult<CalendarEvent[], Error> => q.isError && !!q.error
+    )
     .map((q) => q.error);
 
   return {

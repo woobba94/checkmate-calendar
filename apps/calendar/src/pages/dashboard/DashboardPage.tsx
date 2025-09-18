@@ -44,7 +44,12 @@ const DashboardPage: React.FC = () => {
   const queryClient = useQueryClient();
 
   // 캘린더 데이터
-  const { calendars, isLoading: isLoadingCalendars, error: calendarsError, createCalendar } = useCalendars(userId);
+  const {
+    calendars,
+    isLoading: isLoadingCalendars,
+    error: calendarsError,
+    createCalendar,
+  } = useCalendars(userId);
 
   // 복수 선택된 캘린더 id
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>([]);
@@ -56,12 +61,12 @@ const DashboardPage: React.FC = () => {
   };
 
   // 선택된 캘린더들의 이벤트 데이터
-  const { 
-    events: mergedEvents, 
-    eventsByCalendar, 
-    isLoading: isLoadingEvents, 
+  const {
+    events: mergedEvents,
+    eventsByCalendar,
+    isLoading: isLoadingEvents,
     errors: eventsErrors,
-    refetch: refetchEvents 
+    refetch: refetchEvents,
   } = useEventsByCalendars(selectedCalendarIds);
 
   // 이벤트 변이 훅
@@ -115,7 +120,6 @@ const DashboardPage: React.FC = () => {
     setIsEventModalOpen(true);
   };
 
-
   const handleSaveEvent = async (
     eventData:
       | CalendarEvent
@@ -130,7 +134,12 @@ const DashboardPage: React.FC = () => {
       if ('id' in eventData && eventData.id) {
         await updateEvent(eventData as CalendarEvent);
       } else {
-        await createEvent(eventData as Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>);
+        await createEvent(
+          eventData as Omit<
+            CalendarEvent,
+            'id' | 'created_by' | 'created_at' | 'updated_at'
+          >
+        );
       }
       setIsEventModalOpen(false);
     } catch (e) {
@@ -197,7 +206,11 @@ const DashboardPage: React.FC = () => {
       );
     }
     if (eventsErrors && eventsErrors.length > 0) {
-      return <div className="text-[var(--error-color)]">{eventsErrors[0].message}</div>;
+      return (
+        <div className="text-[var(--error-color)]">
+          {eventsErrors[0].message}
+        </div>
+      );
     }
     if (!selectedCalendarIds.length) {
       return (
@@ -335,7 +348,10 @@ const DashboardPage: React.FC = () => {
           onSave={handleSaveEvent}
           onDelete={async (eventId: string) => {
             if (selectedEvent?.calendar_id) {
-              await deleteEvent({ eventId, calendarId: selectedEvent.calendar_id });
+              await deleteEvent({
+                eventId,
+                calendarId: selectedEvent.calendar_id,
+              });
               setIsEventModalOpen(false);
             }
           }}

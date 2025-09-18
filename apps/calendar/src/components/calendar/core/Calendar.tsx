@@ -96,20 +96,21 @@ const Calendar: React.FC<CalendarProps> = ({
       }
 
       isScrollingRef.current = true;
-      
+
       const calendarApi = calendarRef.current?.getApi();
       if (!calendarApi) return;
 
       // deltaY 값으로 스크롤 방향 판단
-      if (Math.abs(e.deltaY) > 50) { // 민감도 조정
+      if (Math.abs(e.deltaY) > 50) {
+        // 민감도 조정
         setIsTransitioning(true);
-        
+
         if (e.deltaY > 0) {
           calendarApi.next();
         } else {
           calendarApi.prev();
         }
-        
+
         if (onDateChange) {
           onDateChange(calendarApi.getDate());
         }

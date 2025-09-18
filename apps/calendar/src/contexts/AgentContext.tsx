@@ -1,4 +1,9 @@
-import React, { createContext, useContext, useReducer, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useReducer,
+  useCallback,
+} from 'react';
 import type { Message, ConversationState } from '@/types/agent';
 
 interface AgentContextType {
@@ -9,7 +14,10 @@ interface AgentContextType {
 
 type AgentAction =
   | { type: 'ADD_MESSAGE'; payload: Message }
-  | { type: 'UPDATE_MESSAGE'; payload: { id: string; updates: Partial<Message> } }
+  | {
+      type: 'UPDATE_MESSAGE';
+      payload: { id: string; updates: Partial<Message> };
+    }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'CLEAR_MESSAGES' };
@@ -20,7 +28,10 @@ const initialState: ConversationState = {
   error: null,
 };
 
-function agentReducer(state: ConversationState, action: AgentAction): ConversationState {
+function agentReducer(
+  state: ConversationState,
+  action: AgentAction
+): ConversationState {
   switch (action.type) {
     case 'ADD_MESSAGE':
       return {
@@ -83,7 +94,8 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         const assistantMessage: Message = {
           id: `msg-${Date.now() + 1}`,
           role: 'assistant',
-          content: '네, 일정을 추가하는 것을 도와드리겠습니다. 어떤 일정을 추가하시겠습니까?',
+          content:
+            '네, 일정을 추가하는 것을 도와드리겠습니다. 어떤 일정을 추가하시겠습니까?',
           createdAt: new Date().toISOString(),
           status: 'sent',
         };
@@ -91,9 +103,12 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'SET_LOADING', payload: false });
       }, 1000);
     } catch (error) {
-      dispatch({ 
-        type: 'SET_ERROR', 
-        payload: error instanceof Error ? error.message : '메시지 전송 중 오류가 발생했습니다.' 
+      dispatch({
+        type: 'SET_ERROR',
+        payload:
+          error instanceof Error
+            ? error.message
+            : '메시지 전송 중 오류가 발생했습니다.',
       });
       dispatch({ type: 'SET_LOADING', payload: false });
     }
