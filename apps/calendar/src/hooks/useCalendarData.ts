@@ -48,7 +48,7 @@ export const useCalendarData = (userId: string) => {
 
   // 캘린더 생성
   const createCalendarMutation = useMutation({
-    mutationFn: (name: string) => createCalendar(name),
+    mutationFn: (name: string) => createCalendar(name, undefined, userId),
     onSuccess: (newCalendar) => {
       queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
       setSelectedCalendar(newCalendar);
@@ -69,10 +69,11 @@ export const useCalendarData = (userId: string) => {
           newEventData as Omit<
             CalendarEvent,
             'id' | 'created_by' | 'created_at' | 'updated_at'
-          >
+          >,
+          userId
         );
       } else {
-        return updateEvent(eventData as CalendarEvent);
+        return updateEvent(eventData as CalendarEvent, userId);
       }
     },
     onSuccess: () => {
@@ -84,7 +85,7 @@ export const useCalendarData = (userId: string) => {
 
   // 이벤트 삭제
   const deleteEventMutation = useMutation({
-    mutationFn: (eventId: string) => deleteEvent(eventId),
+    mutationFn: (eventId: string) => deleteEvent(eventId, userId),
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ['events', selectedCalendar?.id],

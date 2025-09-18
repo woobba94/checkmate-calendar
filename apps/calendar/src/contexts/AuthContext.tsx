@@ -36,7 +36,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     queryFn: getCurrentUser,
     retry: false,
     refetchOnWindowFocus: false,
-    staleTime: 0,
+    staleTime: 1000 * 60 * 5, // 5분 동안 캐시 유지
   });
 
   // 로그인 뮤테이션

@@ -85,3 +85,19 @@ export const getCurrentUser = async (): Promise<User | null> => {
 
   return null;
 };
+
+// userId를 확인하고 필요시 현재 사용자 ID를 가져오는 헬퍼 함수
+export const ensureUserId = async (userId?: string): Promise<string> => {
+  if (userId) {
+    return userId;
+  }
+
+  const { data: userData } = await supabase.auth.getUser();
+  const currentUserId = userData.user?.id;
+
+  if (!currentUserId) {
+    throw new Error('User not authenticated');
+  }
+
+  return currentUserId;
+};

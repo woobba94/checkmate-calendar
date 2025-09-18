@@ -53,31 +53,19 @@ const DashboardPage: React.FC = () => {
   const [eventsError, setEventsError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchAllEvents = async () => {
-      if (!calendars.length) return;
+    const loadEvents = async () => {
       setEventsLoading(true);
       setEventsError(null);
       try {
-        const results = await Promise.all(
-          calendars.map(async (calendar) => {
-            try {
-              const res = await import('@/services/eventService').then((m) =>
-                m.getEvents(calendar.id)
-              );
-              return [calendar.id, res] as [string, CalendarEvent[]];
-            } catch {
-              return [calendar.id, []] as [string, CalendarEvent[]];
-            }
-          })
-        );
-        setEventsByCalendar(Object.fromEntries(results));
+        const results = await fetchAllCalendarEvents(calendars);
+        setEventsByCalendar(results);
       } catch {
         setEventsError('이벤트 데이터를 불러오지 못했습니다.');
       } finally {
         setEventsLoading(false);
       }
     };
-    fetchAllEvents();
+    loadEvents();
   }, [calendars]);
 
   // 복수 선택된 캘린더 id
@@ -139,23 +127,31 @@ const DashboardPage: React.FC = () => {
     setIsEventModalOpen(true);
   };
 
+  // 모든 캘린더의 이벤트를 가져오는 함수
+  const fetchAllCalendarEvents = async (calendarList: CalendarType[]) => {
+    if (!calendarList.length) return {};
+
+    const results = await Promise.all(
+      calendarList.map(async (calendar) => {
+        try {
+          const res = await import('@/services/eventService').then((m) =>
+            m.getEvents(calendar.id)
+          );
+          return [calendar.id, res] as [string, CalendarEvent[]];
+        } catch {
+          return [calendar.id, []] as [string, CalendarEvent[]];
+        }
+      })
+    );
+    return Object.fromEntries(results);
+  };
+
   // 모든 캘린더 이벤트 refetch 함수
   const refetchEvents = async () => {
     setEventsLoading(true);
     try {
-      const results = await Promise.all(
-        calendars.map(async (calendar) => {
-          try {
-            const res = await import('@/services/eventService').then((m) =>
-              m.getEvents(calendar.id)
-            );
-            return [calendar.id, res] as [string, CalendarEvent[]];
-          } catch {
-            return [calendar.id, []] as [string, CalendarEvent[]];
-          }
-        })
-      );
-      setEventsByCalendar(Object.fromEntries(results));
+      const results = await fetchAllCalendarEvents(calendars);
+      setEventsByCalendar(results);
     } finally {
       setEventsLoading(false);
     }

@@ -1,18 +1,15 @@
 import { supabase } from './supabase';
+import { ensureUserId } from './authService';
 import type { Calendar, CalendarMember } from '@/types/calendar';
 
 // 캘린더 생성
 export const createCalendar = async (
   name: string,
-  description?: string
+  description?: string,
+  userId?: string
 ): Promise<Calendar> => {
-  // current user 가져오기
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData.user?.id;
-
-  if (!userId) {
-    throw new Error('User not authenticated');
-  }
+  // userId 확인 및 획득
+  const validUserId = await ensureUserId(userId);
 
   // 캘린더 생성 시작
   const { data: calendar, error: calendarError } = await supabase
@@ -20,7 +17,7 @@ export const createCalendar = async (
     .insert({
       name,
       description,
-      created_by: userId,
+      created_by: validUserId,
     })
     .select()
     .single();
@@ -34,7 +31,7 @@ export const createCalendar = async (
     .from('calendar_members')
     .insert({
       calendar_id: calendar.id,
-      user_id: userId,
+      user_id: validUserId,
       role: 'owner',
     });
 
@@ -180,35 +177,36 @@ export const checkCalendarMembership = async (
   calendarId: string,
   userId?: string
 ): Promise<{ isMember: boolean; role?: string }> => {
-  // 사용자 ID가 제공되지 않은 경우 현재 로그인한 사용자의 ID 사용
-  if (!userId) {
-    const { data: userData } = await supabase.auth.getUser();
-    userId = userData.user?.id;
+  // userId 확인 - 여기서는 에러를 발생시키지 않고 false 반환
+  try {
+    const validUserId = await ensureUserId(userId);
 
-    if (!userId) {
+    const { data, error } = await supabase
+      .from('calendar_members')
+      .select('role')
+      .eq('calendar_id', calendarId)
+      .eq('user_id', validUserId)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        // 결과가 없는 경우
+        return { isMember: false };
+      }
+      throw new Error(`Failed to check membership: ${error.message}`);
+    }
+
+    return {
+      isMember: true,
+      role: data.role,
+    };
+  } catch (error) {
+    // 사용자가 인증되지 않은 경우 false 반환
+    if (error instanceof Error && error.message === 'User not authenticated') {
       return { isMember: false };
     }
+    throw error;
   }
-
-  const { data, error } = await supabase
-    .from('calendar_members')
-    .select('role')
-    .eq('calendar_id', calendarId)
-    .eq('user_id', userId)
-    .single();
-
-  if (error) {
-    if (error.code === 'PGRST116') {
-      // 결과가 없는 경우
-      return { isMember: false };
-    }
-    throw new Error(`Failed to check membership: ${error.message}`);
-  }
-
-  return {
-    isMember: true,
-    role: data.role,
-  };
 };
 
 // 이메일로 사용자 찾기 (캘린더에 초대 시 필요)

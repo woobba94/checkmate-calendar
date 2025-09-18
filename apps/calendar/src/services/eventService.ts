@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { ensureUserId } from './authService';
 import type { CalendarEvent } from '@/types/calendar';
 
 // 특정 캘린더의 이벤트 조회
@@ -34,15 +35,11 @@ export const getEventById = async (eventId: string): Promise<CalendarEvent> => {
 
 // 이벤트 생성
 export const createEvent = async (
-  event: Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>
+  event: Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>,
+  userId?: string
 ): Promise<CalendarEvent> => {
-  // current user 가져오기
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData.user?.id;
-
-  if (!userId) {
-    throw new Error('User not authenticated');
-  }
+  // userId 확인 및 획듍
+  const validUserId = await ensureUserId(userId);
 
   // calendar_id가 없는 경우
   if (!event.calendar_id) {
@@ -53,7 +50,7 @@ export const createEvent = async (
     .from('events')
     .insert({
       ...event,
-      created_by: userId,
+      created_by: validUserId,
       created_at: new Date(),
       updated_at: new Date(),
     })
@@ -69,15 +66,11 @@ export const createEvent = async (
 
 // 이벤트 업데이트
 export const updateEvent = async (
-  event: Partial<CalendarEvent> & { id: string }
+  event: Partial<CalendarEvent> & { id: string },
+  userId?: string
 ): Promise<CalendarEvent> => {
-  // current user 가져오기
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData.user?.id;
-
-  if (!userId) {
-    throw new Error('User not authenticated');
-  }
+  // userId 확인 - 인증 확인만 하고 RLS에 의존
+  await ensureUserId(userId);
 
   // 이벤트 ID가 없는 경우 에러
   if (!event.id) {
@@ -102,15 +95,12 @@ export const updateEvent = async (
 };
 
 // 이벤트 삭제
-export const deleteEvent = async (eventId: string): Promise<void> => {
-  // current user 가져오기
-  // TODO 계속 이렇게 가져와야하는지? 그냥 매개변수로 받는게 나을지 고민
-  const { data: userData } = await supabase.auth.getUser();
-  const userId = userData.user?.id;
-
-  if (!userId) {
-    throw new Error('User not authenticated');
-  }
+export const deleteEvent = async (
+  eventId: string,
+  userId?: string
+): Promise<void> => {
+  // userId 확인 - 인증 확인만 하고 RLS에 의존
+  await ensureUserId(userId);
 
   const { error } = await supabase.from('events').delete().eq('id', eventId);
 
