@@ -15,7 +15,9 @@ export function useEventMutations(userId: string) {
   const queryClient = useQueryClient();
 
   // Normalize event dates
-  const normalizeEventDates = <T extends { start?: string | Date; end?: string | Date }>(
+  const normalizeEventDates = <
+    T extends { start?: string | Date; end?: string | Date },
+  >(
     event: T
   ): T => {
     const normalized = { ...event };
