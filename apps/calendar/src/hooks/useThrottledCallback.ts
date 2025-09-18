@@ -8,7 +8,7 @@ export function useThrottledCallback<T extends (...args: any[]) => any>(
   deps: React.DependencyList = []
 ): T {
   const frameRef = useRef<number | null>(null);
-  const lastArgsRef = useRef<any[]>();
+  const lastArgsRef = useRef<any[]>([]);
 
   const throttledCallback = useCallback((...args: any[]) => {
     lastArgsRef.current = args;
