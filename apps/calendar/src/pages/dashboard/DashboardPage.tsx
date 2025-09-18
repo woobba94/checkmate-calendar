@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Layout from '@/components/layout/Layout';
 import Calendar from '@/components/calendar/core/Calendar';
 import CalendarHeader from '@/components/calendar/header/CalendarHeader';

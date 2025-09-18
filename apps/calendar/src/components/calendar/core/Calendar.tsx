@@ -5,6 +5,8 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
 import type { CalendarEvent, CalendarViewType } from '@/types/calendar';
+import { useResizeObserver } from '@/hooks/useResizeObserver';
+import { useThrottledCallback } from '@/hooks/useThrottledCallback';
 
 interface CalendarProps {
   events: CalendarEvent[];
@@ -28,11 +30,9 @@ const Calendar: React.FC<CalendarProps> = ({
   isAgentPanelOpen,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
-  const calendarContainerRef = useRef<HTMLDivElement>(null);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const lastScrollTime = useRef<number>(0);
-  const isScrolling = useRef<boolean>(false);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const isScrollingRef = useRef(false);
+  const scrollDebounceRef = useRef<NodeJS.Timeout | null>(null);
 
   // 뷰 타입 매핑
   const getFullCalendarView = (view: CalendarViewType): string => {
@@ -84,68 +84,63 @@ const Calendar: React.FC<CalendarProps> = ({
     }
   };
 
-  // 스크롤 핸들러
-  const handleWheel = useCallback(
+  // 스크롤 핸들러 (쓰로틀링 적용)
+  const handleWheel = useThrottledCallback(
     (e: WheelEvent) => {
       // month view에서만 작동
-      if (currentView !== 'month') return;
+      if (currentView !== 'month' || isScrollingRef.current) return;
 
-      const now = Date.now();
-      const timeSinceLastScroll = now - lastScrollTime.current;
-
-      // 연속된 스크롤 이벤트를 하나로 묶기 위한 디바운싱
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      // 디바운싱을 위한 타이머 설정
+      if (scrollDebounceRef.current) {
+        clearTimeout(scrollDebounceRef.current);
       }
 
-      if (!isScrolling.current || timeSinceLastScroll > 500) {
-        isScrolling.current = true;
-        lastScrollTime.current = now;
+      isScrollingRef.current = true;
+      
+      const calendarApi = calendarRef.current?.getApi();
+      if (!calendarApi) return;
 
-        // deltaY 값으로 스크롤 방향 판단
+      // deltaY 값으로 스크롤 방향 판단
+      if (Math.abs(e.deltaY) > 50) { // 민감도 조정
+        setIsTransitioning(true);
+        
         if (e.deltaY > 0) {
-          // 스크롤 다운 - 다음 월로 이동
-          if (calendarRef.current) {
-            setIsTransitioning(true);
-            setTimeout(() => {
-              const calendarApi = calendarRef.current!.getApi();
-              calendarApi.next();
-              if (onDateChange) {
-                onDateChange(calendarApi.getDate());
-              }
-              setTimeout(() => setIsTransitioning(false), 50);
-            }, 150);
-          }
-        } else if (e.deltaY < 0) {
-          // 스크롤 업 - 이전 월로 이동
-          if (calendarRef.current) {
-            setIsTransitioning(true);
-            setTimeout(() => {
-              const calendarApi = calendarRef.current!.getApi();
-              calendarApi.prev();
-              if (onDateChange) {
-                onDateChange(calendarApi.getDate());
-              }
-              setTimeout(() => setIsTransitioning(false), 50);
-            }, 150);
-          }
+          calendarApi.next();
+        } else {
+          calendarApi.prev();
+        }
+        
+        if (onDateChange) {
+          onDateChange(calendarApi.getDate());
         }
       }
 
-      // 일정 시간 후 스크롤 상태 리셋
-      scrollTimeoutRef.current = setTimeout(() => {
-        isScrolling.current = false;
-      }, 500);
+      // 스크롤 상태 리셋
+      scrollDebounceRef.current = setTimeout(() => {
+        isScrollingRef.current = false;
+        setIsTransitioning(false);
+      }, 300);
 
       // 기본 스크롤 동작 방지
       e.preventDefault();
     },
-    [currentView, setIsTransitioning, onDateChange]
+    [currentView, onDateChange]
+  );
+
+  // ResizeObserver를 사용하여 크기 변경 감지
+  const containerRef = useResizeObserver(
+    useCallback(() => {
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        calendarApi.updateSize();
+      }
+    }, []),
+    { debounce: 100 }
   );
 
   // 캘린더 컨테이너에 휠 이벤트 리스너 추가
   useEffect(() => {
-    const calendarEl = calendarContainerRef.current;
+    const calendarEl = containerRef.current;
     if (!calendarEl) return;
 
     // 휠 이벤트 리스너 추가 (passive: false로 설정하여 preventDefault 허용)
@@ -154,30 +149,34 @@ const Calendar: React.FC<CalendarProps> = ({
     // 클린업
     return () => {
       calendarEl.removeEventListener('wheel', handleWheel);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
+      if (scrollDebounceRef.current) {
+        clearTimeout(scrollDebounceRef.current);
       }
     };
   }, [handleWheel]);
 
-  // 레이아웃 변경 시 캘린더 크기 재계산 (사이드바, 에이전트 패널)
+  // 레이아웃 변경 시 transitionend 이벤트로 크기 재계산
   useEffect(() => {
-    if (calendarRef.current) {
-      // 애니메이션이 완료될 때까지 대기
-      const resizeTimer = setTimeout(() => {
-        const calendarApi = calendarRef.current?.getApi();
-        if (calendarApi) {
-          calendarApi.updateSize();
-        }
-      }, 320); // 애니메이션 duration(300ms) + 여유 시간
+    const handleTransitionEnd = () => {
+      const calendarApi = calendarRef.current?.getApi();
+      if (calendarApi) {
+        calendarApi.updateSize();
+      }
+    };
 
-      return () => clearTimeout(resizeTimer);
+    // 컨테이너에 transitionend 이벤트 리스너 추가
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('transitionend', handleTransitionEnd);
+      return () => {
+        container.removeEventListener('transitionend', handleTransitionEnd);
+      };
     }
-  }, [isSidebarOpen, isAgentPanelOpen]);
+  }, []);
 
   return (
     <div
-      ref={calendarContainerRef}
+      ref={containerRef}
       style={{
         opacity: isTransitioning ? 0.3 : 1,
         transition: 'opacity 0.15s ease-in-out',
@@ -221,4 +220,4 @@ const Calendar: React.FC<CalendarProps> = ({
   );
 };
 
-export default Calendar;
+export default React.memo(Calendar);
