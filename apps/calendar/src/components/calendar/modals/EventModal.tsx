@@ -118,8 +118,8 @@ const EventModal: React.FC<EventModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
-        <form onSubmit={handleSubmit}>
+      <DialogContent className="sm:max-w-[425px]" aria-describedby="event-modal-description">
+        <form onSubmit={handleSubmit} aria-label={event ? "이벤트 수정 폼" : "새 이벤트 생성 폼"}>
           <DialogHeader>
             <DialogTitle>
               {event && 'id' in event ? '이벤트 수정' : '이벤트 생성'}

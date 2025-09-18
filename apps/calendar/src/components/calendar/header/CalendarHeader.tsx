@@ -51,7 +51,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          aria-label="sidebar/header button"
+          aria-label={isSidebarOpen ? '사이드바 닫기' : '사이드바 열기'}
         >
           {isSidebarOpen ? (
             <PanelLeftClose className="h-4 w-4" />
@@ -59,12 +59,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             <PanelLeft className="h-4 w-4" />
           )}
         </Button>
-        <h2 className="text-lg font-semibold m-0">{title}</h2>
+        <h2 className="text-lg font-semibold m-0" aria-live="polite">{title}</h2>
       </div>
 
       {/* 중앙 영역 - absolute positioning으로 정확히 중앙 배치 */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <Tabs value="month" className="w-[200px]">
+        <Tabs value="month" className="w-[200px]" aria-label="캘린더 보기 모드">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="month">월별 보기</TabsTrigger>
             <TabsTrigger value="today-tomorrow" disabled>
@@ -78,7 +78,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       <div className="flex items-center gap-2 ml-auto">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              className="h-8 w-8"
+              aria-label="사용 팁 보기"
+            >
               <Info className="h-4 w-4" />
             </Button>
           </TooltipTrigger>
@@ -101,7 +106,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          aria-label="agent panel toggle"
+          aria-label={isAgentPanelOpen ? '에이전트 패널 닫기' : '에이전트 패널 열기'}
         >
           {isAgentPanelOpen ? (
             <PanelRightClose className="h-4 w-4" />
