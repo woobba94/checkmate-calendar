@@ -29,12 +29,3 @@ export function Provider({
     </NextThemesProvider>
   );
 }
-
-export const useColorModeToggle = () => {
-  const { theme, setTheme } = React.useContext(React.createContext<any>({}));
-
-  return {
-    colorMode: theme as 'light' | 'dark',
-    toggleColorMode: () => setTheme(theme === 'light' ? 'dark' : 'light'),
-  };
-};

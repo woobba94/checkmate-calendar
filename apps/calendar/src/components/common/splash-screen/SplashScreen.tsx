@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { getInitialTheme } from '@/lib/theme-utils';
 
 export function SplashScreen() {
   const [fadeOut, setFadeOut] = useState(false);
@@ -18,23 +19,16 @@ export function SplashScreen() {
 
   if (hide) return null;
 
-  let colorMode = 'light';
-  if (typeof window !== 'undefined') {
-    colorMode =
-      localStorage.getItem('colorMode') ||
-      (window.matchMedia('(prefers-color-scheme: dark)').matches
-        ? 'dark'
-        : 'light');
-  }
+  const theme = getInitialTheme();
   const logoSrc =
-    colorMode === 'light' ? '/text-logo-light.svg' : '/text-logo-dark.svg';
+    theme === 'light' ? '/text-logo-light.svg' : '/text-logo-dark.svg';
 
   return (
     <div
       className={`fixed top-0 left-0 w-screen h-screen flex justify-center items-center z-[9999] transition-opacity duration-1000 ${
         fadeOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
-      style={{ background: colorMode === 'light' ? '#fff' : '#18181b' }}
+      style={{ background: theme === 'light' ? '#fff' : '#18181b' }}
     >
       <img
         src={logoSrc}
