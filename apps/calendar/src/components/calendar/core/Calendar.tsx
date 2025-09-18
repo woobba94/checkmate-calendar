@@ -88,21 +88,21 @@ const Calendar: React.FC<CalendarProps> = ({
   const handleWheel = useThrottledCallback(
     (e: WheelEvent) => {
       // month view에서만 작동
-      if (currentView !== 'month' || isScrollingRef.current) return;
-
-      // 디바운싱을 위한 타이머 설정
-      if (scrollDebounceRef.current) {
-        clearTimeout(scrollDebounceRef.current);
-      }
-
-      isScrollingRef.current = true;
+      if (currentView !== 'month') return;
 
       const calendarApi = calendarRef.current?.getApi();
       if (!calendarApi) return;
 
+      // 기본 스크롤 동작 방지
+      e.preventDefault();
+
       // deltaY 값으로 스크롤 방향 판단
-      if (Math.abs(e.deltaY) > 50) {
-        // 민감도 조정
+      // 민감도를 높여서 작은 스크롤에도 반응하도록 조정
+      if (Math.abs(e.deltaY) > 10) {
+        // 이미 전환 중이면 무시
+        if (isScrollingRef.current) return;
+
+        isScrollingRef.current = true;
         setIsTransitioning(true);
 
         if (e.deltaY > 0) {
@@ -114,16 +114,17 @@ const Calendar: React.FC<CalendarProps> = ({
         if (onDateChange) {
           onDateChange(calendarApi.getDate());
         }
+
+        // 스크롤 상태 리셋 - 시간을 줄여서 더 빠르게 다음 스크롤 가능
+        if (scrollDebounceRef.current) {
+          clearTimeout(scrollDebounceRef.current);
+        }
+
+        scrollDebounceRef.current = setTimeout(() => {
+          isScrollingRef.current = false;
+          setIsTransitioning(false);
+        }, 150); // 300ms에서 150ms로 줄임
       }
-
-      // 스크롤 상태 리셋
-      scrollDebounceRef.current = setTimeout(() => {
-        isScrollingRef.current = false;
-        setIsTransitioning(false);
-      }, 300);
-
-      // 기본 스크롤 동작 방지
-      e.preventDefault();
     },
     [currentView, onDateChange]
   );
@@ -177,10 +178,10 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div
-      ref={containerRef}
+      ref={containerRef as React.RefObject<HTMLDivElement>}
       style={{
-        opacity: isTransitioning ? 0.3 : 1,
-        transition: 'opacity 0.15s ease-in-out',
+        opacity: isTransitioning ? 0.7 : 1,
+        transition: 'opacity 0.1s ease-in-out',
         height: '100%',
       }}
     >
