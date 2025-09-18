@@ -1,0 +1,16 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://checkmate-calendar.com/sitemap.xml
+
+# Crawl-delay (in seconds)
+Crawl-delay: 1
+
+# Disallow specific bots if needed
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
