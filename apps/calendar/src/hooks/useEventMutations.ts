@@ -15,13 +15,15 @@ export function useEventMutations(userId: string) {
   const queryClient = useQueryClient();
 
   // Normalize event dates
-  const normalizeEventDates = (event: any): any => {
+  const normalizeEventDates = <T extends { start?: string | Date; end?: string | Date }>(
+    event: T
+  ): T => {
     const normalized = { ...event };
     if (normalized.start) {
-      normalized.start = ensureIsoString(normalized.start);
+      normalized.start = ensureIsoString(normalized.start) as T['start'];
     }
     if (normalized.end) {
-      normalized.end = ensureIsoString(normalized.end);
+      normalized.end = ensureIsoString(normalized.end) as T['end'];
     }
     return normalized;
   };

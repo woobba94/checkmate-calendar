@@ -1,4 +1,5 @@
-import { useQueries, UseQueryResult } from '@tanstack/react-query';
+import { useQueries } from '@tanstack/react-query';
+import type { UseQueryResult } from '@tanstack/react-query';
 import { getEvents } from '@/services/eventService';
 import type { CalendarEvent } from '@/types/calendar';
 import { useMemo } from 'react';
