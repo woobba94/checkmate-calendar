@@ -17,15 +17,15 @@ const IntegrationSection = () => {
   ];
 
   return (
-    <section className="pt-[50px] pb-[200px]">
-      <div className="flex flex-col gap-16 max-w-[1024px] mx-auto">
+    <section className="pt-12 pb-20 md:pt-[50px] md:pb-[200px]">
+      <div className="flex flex-col gap-10 md:gap-16 max-w-[1024px] mx-auto px-5 md:px-6">
         {/* 메인 영역 */}
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-6 md:gap-8">
           <div className="flex flex-col gap-3">
-            <h2 className="text-5xl leading-normal font-semibold text-foreground">
+            <h2 className="text-2xl md:text-5xl leading-normal font-bold md:font-semibold text-foreground">
               분산된 일정들을 하나로 모으세요.
             </h2>
-            <p className="text-lg leading-normal font-medium text-muted-foreground">
+            <p className="text-sm md:text-lg leading-normal font-medium text-muted-foreground">
               다른 사람의 일정 부터, 다른 캘린더에 있는 일정까지.
               <br />
               분산되어 있던 당신의 모든 일정, 간단하게 한번에 보세요.
@@ -33,27 +33,27 @@ const IntegrationSection = () => {
           </div>
 
           {/* Full-width 이미지 영역 */}
-          <div className="w-full h-[512px] bg-gray-200 flex items-center justify-center">
-            <span className="text-xl font-medium text-gray-500">
+          <div className="w-full h-[200px] md:h-[512px] bg-gray-200 rounded-2xl md:rounded-3xl flex items-center justify-center">
+            <span className="text-base md:text-xl font-medium text-gray-500">
               추가 기능 전체 이미지 영역
             </span>
           </div>
         </div>
 
-        {/* 서브 영역 - 카드 2개 */}
-        <div className="grid grid-cols-2 gap-8">
+        {/* 서브 영역 - 데스크톱: 가로 배치, 모바일: 세로 배치 */}
+        <div className="flex flex-col md:grid md:grid-cols-2 gap-10 md:gap-8">
           {integrationCards.map((card) => (
-            <div key={card.id} className="flex flex-col gap-5">
-              <div key={card.id} className="flex flex-col gap-3">
-                <h3 className="text-2xl leading-tight font-semibold text-foreground">
+            <div key={card.id} className="flex flex-col gap-4 md:gap-5">
+              <div className="flex flex-col gap-2 md:gap-3">
+                <h3 className="text-lg md:text-2xl leading-none md:leading-tight font-semibold text-foreground">
                   {card.title}
                 </h3>
-                <p className="text-base leading-relaxed text-muted-foreground">
+                <p className="text-sm md:text-base leading-normal md:leading-relaxed text-muted-foreground">
                   {card.description}
                 </p>
               </div>
-              <div className="h-[330px] bg-gray-200 mt-2 flex items-center justify-center">
-                <span className="text-base font-medium text-gray-500">
+              <div className="h-[180px] md:h-[330px] bg-gray-200 rounded-2xl md:rounded-3xl md:mt-2 flex items-center justify-center">
+                <span className="text-sm md:text-base font-medium text-gray-500">
                   {card.imageAlt}
                 </span>
               </div>

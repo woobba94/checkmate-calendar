@@ -25,21 +25,21 @@ const HeroSection = () => {
 
   return (
     <>
-      <section className="py-32">
-        <div className="max-w-[1024px] mx-auto px-6 relative z-10">
-          <h1 className="text-6xl leading-normal font-bold text-foreground mb-6">
+      <section className="py-16 md:py-32">
+        <div className="max-w-[1024px] mx-auto px-5 md:px-6 relative z-10 text-center md:text-left">
+          <h1 className="text-4xl md:text-6xl leading-normal font-bold text-foreground mb-4 md:mb-6">
             말씀만 하세요,
             <br />
             일정은 체크메이트가 정리합니다.
           </h1>
-          <p className="text-lg leading-normal font-medium text-muted-foreground mb-10">
+          <p className="text-base md:text-lg leading-normal font-medium text-muted-foreground mb-6 md:mb-10">
             여러 캘린더를 하나로, 누구와도 즉시 공유, 음성·프롬프트로 일정
             추가까지
           </p>
-          <div className="flex">
+          <div className="flex justify-center md:justify-start">
             <Button
               onClick={handleGetStarted}
-              className="px-8 py-6 text-base font-medium"
+              className="w-full md:w-auto px-8 py-6 text-base font-medium"
               size="lg"
               variant="primary"
             >

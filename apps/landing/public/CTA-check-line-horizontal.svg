@@ -1,0 +1,16 @@
+<svg width="375" height="44" viewBox="0 0 375 44" fill="none" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+<rect width="375" height="43" transform="translate(0 0.500488)" fill="url(#pattern0_883_1770)"/>
+<defs>
+<pattern id="pattern0_883_1770" patternUnits="userSpaceOnUse" patternTransform="matrix(30.192 0 0 30.192 0 0)" preserveAspectRatio="none" viewBox="0 0 50.32 50.32" width="1" height="1">
+<use xlink:href="#pattern0_883_1770_inner" transform="translate(-50.32 -50.32)"/>
+<use xlink:href="#pattern0_883_1770_inner" transform="translate(0 -50.32)"/>
+<use xlink:href="#pattern0_883_1770_inner" transform="translate(-50.32 0)"/>
+<g id="pattern0_883_1770_inner">
+<rect x="74" width="24.6667" height="24.6667" transform="rotate(90 74 0)" fill="white"/>
+<rect x="74" y="49.3333" width="24.6667" height="24.6667" transform="rotate(90 74 49.3333)" fill="white"/>
+<rect x="24.6667" width="24.6667" height="24.6667" transform="rotate(90 24.6667 0)" fill="white"/>
+<rect x="24.6667" y="49.3333" width="24.6667" height="24.6667" transform="rotate(90 24.6667 49.3333)" fill="white"/>
+<rect x="49.3333" y="24.6667" width="24.6667" height="24.6667" transform="rotate(90 49.3333 24.6667)" fill="white"/>
+</g>
+</pattern></defs>
+</svg>

@@ -35,7 +35,7 @@ const CTASection = () => {
   return (
     <section
       ref={sectionRef}
-      className="relative w-full h-[712px] flex items-center overflow-hidden"
+      className="relative w-full h-[219px] md:h-[712px] pt-6 md:pt-0 md:flex md:items-center overflow-hidden"
     >
       {/* Background */}
       <div
@@ -47,10 +47,10 @@ const CTASection = () => {
       />
 
       {/* Content Container */}
-      <div className="relative z-10 max-w-[1024px] mx-auto px-4 w-full h-full flex items-center justify-between">
-        {/* Left Content */}
-        <div className="flex flex-col gap-14">
-          <h2 className="text-5xl leading-normal font-bold text-white">
+      <div className="relative z-10 max-w-[1024px] mx-auto px-5 md:px-4 w-full h-full flex flex-col md:flex-row items-center md:justify-between">
+        {/* Desktop: Left Content, Mobile: Center Content */}
+        <div className="flex flex-col items-center md:items-start gap-8 md:gap-14">
+          <h2 className="text-xl md:text-5xl leading-none md:leading-normal font-bold text-white text-center md:text-left">
             <span
               className={`cta-section__typing-text ${isVisible ? 'animate' : ''}`}
             >
@@ -64,25 +64,42 @@ const CTASection = () => {
                 </span>
               ))}
             </span>
+            <br className="block md:hidden" />
             <span className="cta-section__static-text">
               일정 관리를 시작하세요.
             </span>
           </h2>
-          <div>
-            <Button variant="outline" size="lg">
+          <div className="w-full md:w-auto">
+            <Button
+              variant="outline"
+              size="lg"
+              className="w-full md:w-auto"
+              onClick={() =>
+                (window.location.href = 'https://app.checkmate-calendar.com')
+              }
+            >
               시작하기
             </Button>
           </div>
         </div>
 
-        {/* Right Pattern Banner */}
-        <div className="absolute right-0 top-0 h-full w-[163px]">
+        {/* Desktop: Right Pattern Banner */}
+        <div className="hidden md:block absolute right-0 top-0 h-full w-[163px]">
           <img
-            src="/CTA Banner.svg"
+            src="/CTA-check-line-vertical.svg"
             alt=""
             className="h-full w-full object-cover"
           />
         </div>
+      </div>
+
+      {/* Mobile: Bottom Pattern Banner */}
+      <div className="block md:hidden absolute bottom-0 left-0 right-0 w-full">
+        <img
+          src="/CTA-check-line-horizontal.svg"
+          alt=""
+          className="w-full object-cover"
+        />
       </div>
     </section>
   );

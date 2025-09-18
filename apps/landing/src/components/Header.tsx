@@ -9,7 +9,7 @@ export function Header() {
         backdropFilter: 'blur(calc(var(--blur-2xl, 40px) / 2))',
       }}
     >
-      <div className="mx-auto max-w-[1024px] h-full px-4 flex items-center justify-between">
+      <div className="mx-auto max-w-[1024px] h-full px-5 md:px-4 flex items-center justify-between">
         {/* Logo */}
         <a
           href="https://checkmate-calendar.com"
