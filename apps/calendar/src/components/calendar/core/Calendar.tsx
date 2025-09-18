@@ -26,8 +26,6 @@ const Calendar: React.FC<CalendarProps> = ({
   currentView,
   currentDate,
   onDateChange,
-  isSidebarOpen,
-  isAgentPanelOpen,
 }) => {
   const calendarRef = useRef<FullCalendar>(null);
   const [isTransitioning, setIsTransitioning] = useState(false);
@@ -97,8 +95,8 @@ const Calendar: React.FC<CalendarProps> = ({
       e.preventDefault();
 
       // deltaY 값으로 스크롤 방향 판단
-      // 민감도를 높여서 작은 스크롤에도 반응하도록 조정
-      if (Math.abs(e.deltaY) > 10) {
+      // 스크롤 민감도
+      if (Math.abs(e.deltaY) > 3) {
         // 이미 전환 중이면 무시
         if (isScrollingRef.current) return;
 
