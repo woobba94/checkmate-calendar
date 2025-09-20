@@ -1,0 +1,55 @@
+@import '@/styles/color-tokens';
+
+.mobile-sidebar-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  visibility: hidden;
+  transition: background-color 0.3s ease, visibility 0.3s ease;
+  z-index: 999;
+  
+  &--open {
+    visibility: visible;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+}
+
+.mobile-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 85%;
+  max-width: 320px;
+  background-color: var(--color-surface);
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  
+  &--open {
+    transform: translateX(0);
+  }
+  
+  &__content {
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+// 다크 모드 지원
+[data-theme='dark'] {
+  .mobile-sidebar-overlay {
+    &--open {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  }
+  
+  .mobile-sidebar {
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
+  }
+}

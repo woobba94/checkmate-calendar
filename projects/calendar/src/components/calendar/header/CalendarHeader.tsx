@@ -7,12 +7,16 @@ import {
   PanelLeft,
   PanelRightClose,
   PanelRight,
+  Menu,
+  X,
 } from 'lucide-react';
 import {
   Tooltip,
   TooltipTrigger,
   TooltipContent,
 } from '@/components/ui/tooltip';
+import { useResponsive } from '@/hooks/useResponsive';
+import { cn } from '@/lib/utils';
 
 interface CalendarHeaderProps {
   onToday: () => void;
@@ -22,6 +26,8 @@ interface CalendarHeaderProps {
   currentDate?: Date;
   isAgentPanelOpen?: boolean;
   onToggleAgentPanel?: () => void;
+  viewMode?: 'month' | 'today-tomorrow';
+  onViewModeChange?: (mode: 'month' | 'today-tomorrow') => void;
 }
 
 const CalendarHeader: React.FC<CalendarHeaderProps> = ({
@@ -32,7 +38,10 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   currentDate,
   isAgentPanelOpen,
   onToggleAgentPanel,
+  viewMode = 'month',
+  onViewModeChange,
 }) => {
+  const { isMobile } = useResponsive();
   // 현재 월에 오늘이 포함되어 있는지 확인
   const isTodayInCurrentMonth = () => {
     if (!currentDate) return false;
@@ -53,72 +62,116 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           className="h-8 w-8"
           aria-label={isSidebarOpen ? '사이드바 닫기' : '사이드바 열기'}
         >
-          {isSidebarOpen ? (
-            <PanelLeftClose className="h-4 w-4" />
+          {isMobile ? (
+            // 모바일: 햄버거 메뉴 아이콘
+            isSidebarOpen ? (
+              <X className="h-4 w-4" />
+            ) : (
+              <Menu className="h-4 w-4" />
+            )
           ) : (
-            <PanelLeft className="h-4 w-4" />
+            // 데스크톱: 패널 아이콘
+            isSidebarOpen ? (
+              <PanelLeftClose className="h-4 w-4" />
+            ) : (
+              <PanelLeft className="h-4 w-4" />
+            )
           )}
         </Button>
-        <h2 className="text-lg font-semibold m-0" aria-live="polite">
-          {title}
-        </h2>
+        {!isMobile && (
+          <h2 className="text-lg font-semibold m-0" aria-live="polite">
+            {title}
+          </h2>
+        )}
       </div>
 
-      {/* 중앙 영역 - absolute positioning으로 정확히 중앙 배치 */}
-      <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-        <Tabs value="month" className="w-[200px]" aria-label="캘린더 보기 모드">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="month">월별 보기</TabsTrigger>
-            <TabsTrigger value="today-tomorrow" disabled>
-              오늘 내일
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
-      </div>
+      {/* 중앙 영역 */}
+      {isMobile ? (
+        // 모바일: 동적 타이틀 표시
+        <div className="flex-1 text-center">
+          <h2 className="text-lg font-semibold m-0" aria-live="polite">
+            {isSidebarOpen ? '캘린더 목록' : title}
+          </h2>
+        </div>
+      ) : (
+        // 데스크톱: 캘린더 뷰 토글
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+          <Tabs 
+            value={viewMode} 
+            onValueChange={(value) => onViewModeChange?.(value as 'month' | 'today-tomorrow')}
+            className="w-[200px]" 
+            aria-label="캘린더 보기 모드"
+          >
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="month">월별 보기</TabsTrigger>
+              <TabsTrigger value="today-tomorrow">
+                오늘 내일
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      )}
 
       {/* 오른쪽 영역 */}
-      <div className="flex items-center gap-2 ml-auto">
-        <Tooltip>
-          <TooltipTrigger asChild>
+      {isMobile ? (
+        // 모바일: 뷰 토글 버튼 (사이드바 열림 시 숨김)
+        !isSidebarOpen && (
+          <div className="flex items-center gap-2">
             <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8"
-              aria-label="사용 팁 보기"
+              onClick={() => onViewModeChange?.(viewMode === 'month' ? 'today-tomorrow' : 'month')}
+              variant="outline"
+              size="sm"
+              className="text-xs"
             >
-              <Info className="h-4 w-4" />
+              {viewMode === 'month' ? '오늘 내일' : '월별 보기'}
             </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>스크롤로 월을 이동할 수 있습니다</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              ↑ 이전 월 | ↓ 다음 월
-            </p>
-          </TooltipContent>
-        </Tooltip>
-        <Button
-          onClick={onToday}
-          variant="outline"
-          disabled={isTodayInCurrentMonth()}
-        >
-          오늘
-        </Button>
-        <Button
-          onClick={onToggleAgentPanel}
-          variant="ghost"
-          size="icon"
-          className="h-8 w-8"
-          aria-label={
-            isAgentPanelOpen ? '에이전트 패널 닫기' : '에이전트 패널 열기'
-          }
-        >
-          {isAgentPanelOpen ? (
-            <PanelRightClose className="h-4 w-4" />
-          ) : (
-            <PanelRight className="h-4 w-4" />
-          )}
-        </Button>
-      </div>
+          </div>
+        )
+      ) : (
+        // 데스크톱: 기존 버튼들
+        <div className="flex items-center gap-2 ml-auto">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8"
+                aria-label="사용 팁 보기"
+              >
+                <Info className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>스크롤로 월을 이동할 수 있습니다</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                ↑ 이전 월 | ↓ 다음 월
+              </p>
+            </TooltipContent>
+          </Tooltip>
+          <Button
+            onClick={onToday}
+            variant="outline"
+            disabled={isTodayInCurrentMonth()}
+          >
+            오늘
+          </Button>
+          <Button
+            onClick={onToggleAgentPanel}
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8"
+            aria-label={
+              isAgentPanelOpen ? '에이전트 패널 닫기' : '에이전트 패널 열기'
+            }
+          >
+            {isAgentPanelOpen ? (
+              <PanelRightClose className="h-4 w-4" />
+            ) : (
+              <PanelRight className="h-4 w-4" />
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
