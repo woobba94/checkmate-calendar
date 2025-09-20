@@ -8,7 +8,6 @@ import type { CalendarEvent, CalendarViewType } from '@/types/calendar';
 import { useResizeObserver } from '@/hooks/useResizeObserver';
 import { useThrottledCallback } from '@/hooks/useThrottledCallback';
 import { useResponsive } from '@/hooks/useResponsive';
-import { EventColorBar } from './EventColorBar';
 import './Calendar.scss';
 
 interface CalendarProps {
@@ -298,6 +297,8 @@ const Calendar: React.FC<CalendarProps> = ({
           meridiem: false,
         }}
         // 모바일에서 이벤트를 색상 바로 표시
+        // FullCalendar의 eventContent는 React 컴포넌트를 직접 지원하지 않아서
+        // EventColorBar 컴포넌트 대신 inline HTML을 사용
         eventContent={
           isMobile
             ? (arg) => {
