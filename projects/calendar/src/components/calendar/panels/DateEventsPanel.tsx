@@ -2,7 +2,7 @@ import React, { useMemo } from 'react';
 import { format } from 'date-fns';
 import { ko } from 'date-fns/locale';
 import { Plus } from 'lucide-react';
-import { CalendarEvent, Calendar } from '@/types/calendar';
+import type { CalendarEvent, Calendar } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
 import { cn } from '@/lib/utils';
@@ -15,8 +15,9 @@ interface EventItemProps {
 }
 
 const EventItem: React.FC<EventItemProps> = ({ event, calendar, onClick }) => {
-  const formattedTime = event.start_time
-    ? format(new Date(`${event.date}T${event.start_time}`), 'HH:mm', { locale: ko })
+  const eventDate = typeof event.start === 'string' ? new Date(event.start) : event.start;
+  const formattedTime = !event.allDay
+    ? format(eventDate, 'HH:mm', { locale: ko })
     : '종일';
 
   return (
@@ -33,7 +34,7 @@ const EventItem: React.FC<EventItemProps> = ({ event, calendar, onClick }) => {
     >
       <div
         className="event-item__color-indicator"
-        style={{ backgroundColor: calendar?.color || '#e5e5e5' }}
+        style={{ backgroundColor: '#e5e5e5' }}
       />
       <div className="event-item__content">
         <div className="event-item__header">
@@ -86,10 +87,9 @@ export const DateEventsPanel: React.FC<DateEventsPanelProps> = ({
   // 시간 순으로 이벤트 정렬
   const sortedEvents = useMemo(() => {
     return [...events].sort((a, b) => {
-      if (!a.start_time && !b.start_time) return 0;
-      if (!a.start_time) return 1;
-      if (!b.start_time) return -1;
-      return a.start_time.localeCompare(b.start_time);
+      const aDate = typeof a.start === 'string' ? new Date(a.start) : a.start;
+      const bDate = typeof b.start === 'string' ? new Date(b.start) : b.start;
+      return aDate.getTime() - bDate.getTime();
     });
   }, [events]);
 

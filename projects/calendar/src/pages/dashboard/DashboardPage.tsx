@@ -228,7 +228,10 @@ const DashboardPage: React.FC = () => {
   // 날짜별 이벤트 필터링
   const getEventsForDate = (date: Date) => {
     return mergedEvents.filter(
-      (event) => event.date === date.toISOString().split('T')[0]
+      (event) => {
+        const eventDate = typeof event.start === 'string' ? new Date(event.start) : event.start;
+        return eventDate.toISOString().split('T')[0] === date.toISOString().split('T')[0];
+      }
     );
   };
 
@@ -251,17 +254,21 @@ const DashboardPage: React.FC = () => {
     if (!selectedCalendarIds.length) {
       return (
         <div className="flex justify-center items-center h-full text-gray-500">
-          <p>{좌측에서 하나 이상의 캘린더를 선택하세요.</p>
+          <p>좌측에서 하나 이상의 캘린더를 선택하세요.</p>
         </div>
       );
     }
     
-    // 모지 택트 도 곗 서텍 랄
+    // 뷰 모드에 따라 다른 컴포넌트 렌더링
     if (viewMode === 'today-tomorrow') {
       return (
         <TodayTomorrowView
           events={mergedEvents}
-          calendars={calendars}
+          calendars={calendars.map((cal) => ({
+            id: cal.id,
+            name: cal.name,
+            color: '#3b82f6' // 기본 색상
+          }))}
           onEventClick={handleEventClick}
           className="h-full"
         />
@@ -454,7 +461,7 @@ const DashboardPage: React.FC = () => {
             position="bottom-center"
             show={!isTodayInCurrentMonth && viewMode === 'month'}
             onClick={handleToday}
-            variant="outline"
+            className="bg-white border border-gray-300"
           >
             <Target className="h-4 w-4 mr-2" />
             오늘

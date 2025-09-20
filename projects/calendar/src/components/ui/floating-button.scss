@@ -69,24 +69,31 @@
   
   // 애니메이션
   animation: fadeInUp 0.3s ease;
+  
+  &--bottom-center {
+    animation: fadeInUpCenter 0.3s ease;
+  }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
     transform: translateY(20px);
-    
-    .floating-button--bottom-center & {
-      transform: translateX(-50%) translateY(20px);
-    }
   }
   to {
     opacity: 1;
     transform: translateY(0);
-    
-    .floating-button--bottom-center & {
-      transform: translateX(-50%) translateY(0);
-    }
+  }
+}
+
+@keyframes fadeInUpCenter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
   }
 }
 
