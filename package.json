@@ -4,15 +4,15 @@
   "version": "1.0.0",
   "description": "Checkmate Calendar - Monorepo",
   "workspaces": [
-    "apps/*"
+    "projects/*"
   ],
   "scripts": {
-    "dev:landing": "npm run dev --workspace=apps/landing",
-    "dev:calendar": "npm run dev --workspace=apps/calendar",
-    "build:landing": "npm run build --workspace=apps/landing",
-    "build:calendar": "npm run build --workspace=apps/calendar",
-    "preview:landing": "npm run preview --workspace=apps/landing",
-    "preview:calendar": "npm run preview --workspace=apps/calendar"
+    "dev:landing": "npm run dev --workspace=projects/landing",
+    "dev:calendar": "npm run dev --workspace=projects/calendar",
+    "build:landing": "npm run build --workspace=projects/landing",
+    "build:calendar": "npm run build --workspace=projects/calendar",
+    "preview:landing": "npm run preview --workspace=projects/landing",
+    "preview:calendar": "npm run preview --workspace=projects/calendar"
   },
   "engines": {
     "node": ">=18.0.0",

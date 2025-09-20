@@ -10,7 +10,7 @@
 
 ```
 checkmate-calendar/
-├── apps/
+├── projects/
 │   ├── landing/     # 랜딩페이지 (checkmate-calendar.com)
 │   └── calendar/    # 캘린더 앱 (app.checkmate-calendar.com)
 └── package.json     # 워크스페이스 설정
@@ -81,8 +81,8 @@ GitHub Actions를 통해 각 앱의 변경사항이 있을 때만 해당 앱이 
    - `checkmate-calendar-app`
 
 2. 각 프로젝트의 Root Directory 설정:
-   - Landing: `apps/landing`
-   - Calendar: `apps/calendar`
+   - Landing: `projects/landing`
+   - Calendar: `projects/calendar`
 
 3. 환경 변수 설정:
    - GitHub Secrets에 다음 값들 추가:
