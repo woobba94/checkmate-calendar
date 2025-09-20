@@ -1,0 +1,135 @@
+@import '@/styles/color-tokens';
+
+.bottom-sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s ease;
+  z-index: 999;
+  
+  &--open {
+    opacity: 1;
+    visibility: visible;
+    background-color: rgba(0, 0, 0, 0.5);
+  }
+  
+  &--closing {
+    opacity: 0;
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: var(--color-surface);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  
+  &--open {
+    transform: translateY(0);
+  }
+  
+  &--closing {
+    transform: translateY(100%);
+  }
+  
+  &__handle {
+    padding: 0.5rem 0;
+    display: flex;
+    justify-content: center;
+    cursor: grab;
+    
+    &:active {
+      cursor: grabbing;
+    }
+  }
+  
+  &__handle-bar {
+    width: 32px;
+    height: 4px;
+    background-color: var(--color-border);
+    border-radius: 2px;
+  }
+  
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1rem 0.75rem 1rem;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  &__title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin: 0;
+  }
+  
+  &__close {
+    width: 32px;
+    height: 32px;
+    
+    &:hover {
+      background-color: var(--color-surface-secondary);
+    }
+  }
+  
+  &__content {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 1rem;
+    
+    // 안전 영역 패딩 (iOS)
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+  }
+}
+
+// 태블릿 이상에서는 중앙 정렬
+@media (min-width: 768px) {
+  .bottom-sheet {
+    left: 50%;
+    transform: translateX(-50%) translateY(100%);
+    max-width: 600px;
+    width: calc(100% - 2rem);
+    margin: 0 1rem;
+    border-radius: 16px;
+    
+    &--open {
+      transform: translateX(-50%) translateY(0);
+    }
+    
+    &--closing {
+      transform: translateX(-50%) translateY(100%);
+    }
+  }
+}
+
+// 다크 모드 지원
+[data-theme='dark'] {
+  .bottom-sheet-overlay {
+    &--open {
+      background-color: rgba(0, 0, 0, 0.7);
+    }
+  }
+  
+  .bottom-sheet {
+    box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.3);
+  }
+}
