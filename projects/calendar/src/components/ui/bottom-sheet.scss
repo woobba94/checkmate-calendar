@@ -6,7 +6,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0);
+  background: var(--tailwind-colors-zinc-100, #F4F4F5);
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s ease;
@@ -15,12 +15,12 @@
   &--open {
     opacity: 1;
     visibility: visible;
-    background-color: rgba(0, 0, 0, 0.5);
+    background: var(--tailwind-colors-zinc-100, #F4F4F5);
   }
   
   &--closing {
     opacity: 0;
-    background-color: rgba(0, 0, 0, 0);
+    background: var(--tailwind-colors-zinc-100, #F4F4F5);
   }
 }
 
@@ -29,7 +29,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--color-surface);
+  background: #ffffff;
   border-top-left-radius: 16px;
   border-top-right-radius: 16px;
   box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.1);

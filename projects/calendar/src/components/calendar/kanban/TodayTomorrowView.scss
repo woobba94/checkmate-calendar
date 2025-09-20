@@ -6,11 +6,11 @@
   height: 100%;
   padding: 1rem;
   
-  // 모바일에서는 세로 스크롤
+  // 모바일에서도 가로(row) 배치 유지
   @media (max-width: 767px) {
-    flex-direction: column;
-    overflow-y: auto;
-    gap: 1.5rem;
+    flex-direction: row;
+    overflow-x: auto;
+    gap: 1rem;
   }
   
   // 태블릿 이상에서는 가로 배치

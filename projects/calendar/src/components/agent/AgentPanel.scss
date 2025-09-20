@@ -18,7 +18,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: var(--color-surface);
+  background: var(--tailwind-colors-zinc-100, #F4F4F5);
   border-top: 1px solid var(--color-border);
   z-index: 999;
   transition:
@@ -45,7 +45,7 @@
 
   &__input {
     padding: 0.75rem;
-    background-color: var(--color-surface);
+    background: var(--tailwind-colors-zinc-100, #F4F4F5);
     border-top: 1px solid var(--color-border);
 
     // 안전 영역 고려 (iOS)

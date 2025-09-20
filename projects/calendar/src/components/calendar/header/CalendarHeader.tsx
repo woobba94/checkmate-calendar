@@ -87,9 +87,13 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
       {/* 중앙 영역 */}
       {isMobile ? (
-        // 모바일: 동적 타이틀 표시
-        <div className="flex-1 text-center">
-          <h2 className="text-lg font-semibold m-0" aria-live="polite">
+        // 모바일: 동적 타이틀 표시 (fit-content 중앙 정렬)
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 max-w-[90vw]">
+          <h2
+            className="text-base font-semibold m-0 mx-auto truncate"
+            style={{ width: 'fit-content' }}
+            aria-live="polite"
+          >
             {isSidebarOpen ? '캘린더 목록' : title}
           </h2>
         </div>
