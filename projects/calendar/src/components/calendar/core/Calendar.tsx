@@ -96,48 +96,51 @@ const Calendar: React.FC<CalendarProps> = ({
     touchStartYRef.current = e.touches[0].clientY;
   }, []);
 
-  const handleTouchEnd = useCallback((e: TouchEvent) => {
-    if (currentView !== 'month' || isScrollingRef.current) return;
+  const handleTouchEnd = useCallback(
+    (e: TouchEvent) => {
+      if (currentView !== 'month' || isScrollingRef.current) return;
 
-    const touchEndX = e.changedTouches[0].clientX;
-    const touchEndY = e.changedTouches[0].clientY;
-    const deltaX = touchStartXRef.current - touchEndX;
-    const deltaY = touchStartYRef.current - touchEndY;
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      const deltaX = touchStartXRef.current - touchEndX;
+      const deltaY = touchStartYRef.current - touchEndY;
 
-    // 수평 스와이프가 더 크고, 최소 50px 이상 움직였을 때
-    if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
-      const calendarApi = calendarRef.current?.getApi();
-      if (!calendarApi) return;
+      // 수평 스와이프가 더 크고, 최소 50px 이상 움직였을 때
+      if (Math.abs(deltaX) > Math.abs(deltaY) && Math.abs(deltaX) > 50) {
+        const calendarApi = calendarRef.current?.getApi();
+        if (!calendarApi) return;
 
-      isScrollingRef.current = true;
+        isScrollingRef.current = true;
 
-      if (deltaX > 0) {
-        // 왼쪽으로 스와이프: 다음 달
-        setScrollDirection('down');
-        calendarApi.next();
-      } else {
-        // 오른쪽으로 스와이프: 이전 달
-        setScrollDirection('up');
-        calendarApi.prev();
+        if (deltaX > 0) {
+          // 왼쪽으로 스와이프: 다음 달
+          setScrollDirection('down');
+          calendarApi.next();
+        } else {
+          // 오른쪽으로 스와이프: 이전 달
+          setScrollDirection('up');
+          calendarApi.prev();
+        }
+
+        if (onDateChange) {
+          onDateChange(calendarApi.getDate());
+        }
+
+        setTimeout(() => {
+          setScrollDirection(null);
+          isScrollingRef.current = false;
+        }, 300);
       }
-
-      if (onDateChange) {
-        onDateChange(calendarApi.getDate());
-      }
-
-      setTimeout(() => {
-        setScrollDirection(null);
-        isScrollingRef.current = false;
-      }, 300);
-    }
-  }, [currentView, onDateChange]);
+    },
+    [currentView, onDateChange]
+  );
 
   // 스크롤 핸들러 (쓰로틀링 적용)
   const handleWheel = useThrottledCallback(
     (e: WheelEvent) => {
       // 모바일에서는 스크롤 비활성화
       if (isMobile) return;
-      
+
       // month view에서만 작동
       if (currentView !== 'month') return;
 
@@ -204,11 +207,15 @@ const Calendar: React.FC<CalendarProps> = ({
 
     // 휠 이벤트 리스너 추가 (passive: false로 설정하여 preventDefault 허용)
     calendarEl.addEventListener('wheel', handleWheel, { passive: false });
-    
+
     // 모바일 터치 이벤트 리스너 추가
     if (isMobile) {
-      calendarEl.addEventListener('touchstart', handleTouchStart, { passive: true });
-      calendarEl.addEventListener('touchend', handleTouchEnd, { passive: true });
+      calendarEl.addEventListener('touchstart', handleTouchStart, {
+        passive: true,
+      });
+      calendarEl.addEventListener('touchend', handleTouchEnd, {
+        passive: true,
+      });
     }
 
     // 클린업
@@ -288,14 +295,18 @@ const Calendar: React.FC<CalendarProps> = ({
         eventTimeFormat={{
           hour: 'numeric',
           minute: '2-digit',
-          meridiem: false
+          meridiem: false,
         }}
         // 모바일에서 이벤트를 색상 바로 표시
-        eventContent={isMobile ? (arg) => {
-          return {
-            html: `<div class="fc-event-color-bar" style="background-color: ${arg.event.backgroundColor}"></div>`
-          };
-        } : undefined}
+        eventContent={
+          isMobile
+            ? (arg) => {
+                return {
+                  html: `<div class="fc-event-color-bar" style="background-color: ${arg.event.backgroundColor}"></div>`,
+                };
+              }
+            : undefined
+        }
       />
     </div>
   );
