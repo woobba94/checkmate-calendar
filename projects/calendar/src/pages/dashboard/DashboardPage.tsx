@@ -28,10 +28,20 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useTheme } from '@/hooks/useTheme';
+import { useResponsive } from '@/hooks/useResponsive';
+import { MobileSidebarWrapper } from '@/components/sidebar/MobileSidebarWrapper';
+import { TodayTomorrowView } from '@/components/calendar/kanban/TodayTomorrowView';
+import { DateEventsPanel } from '@/components/calendar/panels/DateEventsPanel';
+import { FloatingButton } from '@/components/ui/floating-button';
+import { BottomSheet } from '@/components/ui/bottom-sheet';
+import { Target } from 'lucide-react';
+import { isToday } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 const DashboardPage: React.FC = () => {
   const { user, logout } = useAuth();
   const userId = user?.id || '';
+  const { isMobile } = useResponsive();
   const [editingCalendar, setEditingCalendar] = useState<CalendarType | null>(
     null
   );
@@ -39,8 +49,11 @@ const DashboardPage: React.FC = () => {
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
   const [editLoading, setEditLoading] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
+  const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(!isMobile);
+  const [viewMode, setViewMode] = useState<'month' | 'today-tomorrow'>('month');
+  const [selectedDateForPanel, setSelectedDateForPanel] = useState<Date | null>(null);
+  const [isDatePanelOpen, setIsDatePanelOpen] = useState(false);
   const queryClient = useQueryClient();
 
   // 캘린더 데이터
@@ -107,17 +120,24 @@ const DashboardPage: React.FC = () => {
       return;
     }
 
-    const newEvent: Omit<
-      CalendarEvent,
-      'id' | 'created_by' | 'created_at' | 'updated_at'
-    > = {
-      title: '',
-      start: date,
-      calendar_id: selectedCalendarIds[0], // TODO 일단 첫 번째 선택된 캘린더로 이벤트 생성 -> 기획 결정 필요
-    };
+    if (isMobile) {
+      // 모바일: 날짜 이벤트 패널 열기
+      setSelectedDateForPanel(date);
+      setIsDatePanelOpen(true);
+    } else {
+      // 데스크톱: 직접 이벤트 추가 모달 열기
+      const newEvent: Omit<
+        CalendarEvent,
+        'id' | 'created_by' | 'created_at' | 'updated_at'
+      > = {
+        title: '',
+        start: date,
+        calendar_id: selectedCalendarIds[0],
+      };
 
-    setSelectedEvent(newEvent as CalendarEvent);
-    setIsEventModalOpen(true);
+      setSelectedEvent(newEvent as CalendarEvent);
+      setIsEventModalOpen(true);
+    }
   };
 
   const handleSaveEvent = async (
@@ -196,6 +216,22 @@ const DashboardPage: React.FC = () => {
     setEditingCalendar(null);
   };
 
+  // 오늘 날짜가 현재 월에 포함되어 있는지 확인
+  const isTodayInCurrentMonth = useMemo(() => {
+    const today = new Date();
+    return (
+      currentDate.getMonth() === today.getMonth() &&
+      currentDate.getFullYear() === today.getFullYear()
+    );
+  }, [currentDate]);
+
+  // 날짜별 이벤트 필터링
+  const getEventsForDate = (date: Date) => {
+    return mergedEvents.filter(
+      (event) => event.date === date.toISOString().split('T')[0]
+    );
+  };
+
   // renderCalendarContent도 병합된 이벤트로 변경
   const renderCalendarContent = () => {
     if (isLoadingCalendars || isLoadingEvents) {
@@ -215,10 +251,23 @@ const DashboardPage: React.FC = () => {
     if (!selectedCalendarIds.length) {
       return (
         <div className="flex justify-center items-center h-full text-gray-500">
-          <p>좌측에서 하나 이상의 캘린더를 선택하세요.</p>
+          <p>{좌측에서 하나 이상의 캘린더를 선택하세요.</p>
         </div>
       );
     }
+    
+    // 모지 택트 도 곗 서텍 랄
+    if (viewMode === 'today-tomorrow') {
+      return (
+        <TodayTomorrowView
+          events={mergedEvents}
+          calendars={calendars}
+          onEventClick={handleEventClick}
+          className="h-full"
+        />
+      );
+    }
+    
     return (
       <Calendar
         events={mergedEvents}
@@ -237,13 +286,13 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex flex-row w-full bg-[#f4f4f5]">
-        <div
-          className={`transition-all duration-300 ease-in-out ${
-            isSidebarOpen ? 'w-64' : 'w-0'
-          } overflow-hidden flex-shrink-0`}
-        >
-          <div className="w-64 h-full">
+      <div className={cn("flex flex-row w-full bg-[#f4f4f5]", isMobile && "flex-col")}>
+        {/* 사이드바 */}
+        {isMobile ? (
+          <MobileSidebarWrapper
+            isOpen={isSidebarOpen}
+            onClose={() => setIsSidebarOpen(false)}
+          >
             <AppSidebar
               calendars={calendars}
               selectedCalendarIds={selectedCalendarIds}
@@ -255,9 +304,32 @@ const DashboardPage: React.FC = () => {
               colorMode={theme || 'light'}
               toggleColorMode={toggleTheme}
             />
+          </MobileSidebarWrapper>
+        ) : (
+          <div
+            className={`transition-all duration-300 ease-in-out ${
+              isSidebarOpen ? 'w-64' : 'w-0'
+            } overflow-hidden flex-shrink-0`}
+          >
+            <div className="w-64 h-full">
+              <AppSidebar
+                calendars={calendars}
+                selectedCalendarIds={selectedCalendarIds}
+                onCalendarChange={handleCalendarToggle}
+                onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
+                onEditCalendar={onEditCalendar}
+                user={user}
+                logout={logout}
+                colorMode={theme || 'light'}
+                toggleColorMode={toggleTheme}
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col flex-1 min-w-0 rounded-lg border border-zinc-300 bg-white m-2">
+        )}
+        <div className={cn(
+          "flex flex-col flex-1 min-w-0 bg-white",
+          !isMobile && "rounded-lg border border-zinc-300 m-2"
+        )}>
           <CalendarHeader
             onToday={handleToday}
             title={getTitle()}
@@ -266,6 +338,8 @@ const DashboardPage: React.FC = () => {
             currentDate={currentDate}
             isAgentPanelOpen={isAgentPanelOpen}
             onToggleAgentPanel={() => setIsAgentPanelOpen(!isAgentPanelOpen)}
+            viewMode={viewMode}
+            onViewModeChange={setViewMode}
           />
           <ErrorMessage
             error={localError}
@@ -275,17 +349,24 @@ const DashboardPage: React.FC = () => {
             {renderCalendarContent()}
           </div>
         </div>
-        <div
-          className={`transition-all duration-300 ease-in-out ${
-            isAgentPanelOpen ? 'w-80' : 'w-0'
-          } overflow-hidden flex-shrink-0`}
-        >
-          <div className="w-80 h-full">
-            <AgentProvider>
-              <AgentPanel />
-            </AgentProvider>
+        {/* 에이전트 패널 */}
+        {isMobile ? (
+          <AgentProvider>
+            <AgentPanel />
+          </AgentProvider>
+        ) : (
+          <div
+            className={`transition-all duration-300 ease-in-out ${
+              isAgentPanelOpen ? 'w-80' : 'w-0'
+            } overflow-hidden flex-shrink-0`}
+          >
+            <div className="w-80 h-full">
+              <AgentProvider>
+                <AgentPanel />
+              </AgentProvider>
+            </div>
           </div>
-        </div>
+        )}
         <Dialog
           open={isEditModalOpen}
           onOpenChange={(open) => {
@@ -341,27 +422,99 @@ const DashboardPage: React.FC = () => {
             </form>
           </DialogContent>
         </Dialog>
-        <EventModal
-          isOpen={isEventModalOpen}
-          onClose={() => setIsEventModalOpen(false)}
-          event={selectedEvent}
-          onSave={handleSaveEvent}
-          onDelete={async (eventId: string) => {
-            if (selectedEvent?.calendar_id) {
-              await deleteEvent({
-                eventId,
-                calendarId: selectedEvent.calendar_id,
-              });
-              setIsEventModalOpen(false);
+        {/* 모바일: 날짜 이벤트 패널 */}
+        {isMobile && (
+          <DateEventsPanel
+            isOpen={isDatePanelOpen}
+            date={selectedDateForPanel}
+            events={selectedDateForPanel ? getEventsForDate(selectedDateForPanel) : []}
+            calendars={calendars}
+            onClose={() => setIsDatePanelOpen(false)}
+            onEventClick={handleEventClick}
+            onAddClick={() => {
+              if (selectedDateForPanel) {
+                const newEvent: Omit<
+                  CalendarEvent,
+                  'id' | 'created_by' | 'created_at' | 'updated_at'
+                > = {
+                  title: '',
+                  start: selectedDateForPanel,
+                  calendar_id: selectedCalendarIds[0],
+                };
+                setSelectedEvent(newEvent as CalendarEvent);
+                setIsEventModalOpen(true);
+              }
+            }}
+          />
+        )}
+
+        {/* 플로팅 오늘 버튼 */}
+        {isMobile && (
+          <FloatingButton
+            position="bottom-center"
+            show={!isTodayInCurrentMonth && viewMode === 'month'}
+            onClick={handleToday}
+            variant="outline"
+          >
+            <Target className="h-4 w-4 mr-2" />
+            오늘
+          </FloatingButton>
+        )}
+
+        {/* 이벤트 모달 / 바텀 시트 */}
+        {isMobile ? (
+          <BottomSheet
+            isOpen={isEventModalOpen}
+            onClose={() => setIsEventModalOpen(false)}
+            title={selectedEvent?.id ? '일정 수정' : '새 일정'}
+            height="70%"
+          >
+            {/* TODO: EventModal 내용을 모바일용으로 수정 필요 */}
+            <EventModal
+              isOpen={true}
+              onClose={() => setIsEventModalOpen(false)}
+              event={selectedEvent}
+              onSave={handleSaveEvent}
+              onDelete={async (eventId: string) => {
+                if (selectedEvent?.calendar_id) {
+                  await deleteEvent({
+                    eventId,
+                    calendarId: selectedEvent.calendar_id,
+                  });
+                  setIsEventModalOpen(false);
+                }
+              }}
+              calendars={calendars.filter((c) =>
+                selectedCalendarIds.includes(c.id)
+              )}
+              defaultCalendarId={
+                selectedCalendarIds[selectedCalendarIds.length - 1]
+              }
+            />
+          </BottomSheet>
+        ) : (
+          <EventModal
+            isOpen={isEventModalOpen}
+            onClose={() => setIsEventModalOpen(false)}
+            event={selectedEvent}
+            onSave={handleSaveEvent}
+            onDelete={async (eventId: string) => {
+              if (selectedEvent?.calendar_id) {
+                await deleteEvent({
+                  eventId,
+                  calendarId: selectedEvent.calendar_id,
+                });
+                setIsEventModalOpen(false);
+              }
+            }}
+            calendars={calendars.filter((c) =>
+              selectedCalendarIds.includes(c.id)
+            )}
+            defaultCalendarId={
+              selectedCalendarIds[selectedCalendarIds.length - 1]
             }
-          }}
-          calendars={calendars.filter((c) =>
-            selectedCalendarIds.includes(c.id)
-          )}
-          defaultCalendarId={
-            selectedCalendarIds[selectedCalendarIds.length - 1]
-          }
-        />
+          />
+        )}
 
         <CalendarCreateModal
           isOpen={isCalendarModalOpen}
