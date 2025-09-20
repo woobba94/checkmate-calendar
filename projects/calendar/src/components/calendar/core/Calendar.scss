@@ -1,3 +1,5 @@
+@import '@/styles/color-tokens';
+
 /* 캘린더 컨테이너 애니메이션 효과 */
 .calendar-container {
   position: relative;
@@ -22,6 +24,55 @@
   .fc-daygrid-body,
   .fc-timegrid-body {
     transition: opacity 0.2s ease-out;
+  }
+
+  // 모바일 최적화
+  @media (max-width: 767px) {
+    .fc {
+      font-size: 0.875rem;
+    }
+
+    // 날짜 셀 패딩 축소
+    .fc-daygrid-day {
+      padding: 0.25rem;
+    }
+
+    // 날짜 번호 크기 축소
+    .fc-daygrid-day-number {
+      font-size: 0.75rem;
+      padding: 0.25rem;
+    }
+
+    // 이벤트 색상 바 스타일
+    .fc-event-color-bar {
+      width: 32px;
+      height: 6px;
+      border-radius: 3px;
+      margin: 2px auto;
+      display: block;
+    }
+
+    // 이벤트 컨테이너 스타일
+    .fc-daygrid-event-harness {
+      margin: 0;
+    }
+
+    .fc-event {
+      border: none;
+      background: transparent;
+      padding: 0;
+      margin: 0;
+    }
+
+    // 오늘 날짜 강조
+    .fc-day-today {
+      background-color: var(--color-primary-alpha-10) !important;
+      
+      .fc-daygrid-day-number {
+        color: var(--color-primary);
+        font-weight: 600;
+      }
+    }
   }
 }
 
