@@ -45,7 +45,7 @@ export const useLongPress = ({
       }
 
       cancel();
-      
+
       // 길게 누르기가 실행되지 않았을 때만 클릭 이벤트 실행
       if (!isLongPressRef.current && onClick) {
         onClick();

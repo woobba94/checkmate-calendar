@@ -39,7 +39,9 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ className }) => {
     if (isMobile && isExpanded) {
       setIsExpanded(false);
       // input blur 처리
-      const input = document.querySelector('.agent-input textarea, .agent-input input');
+      const input = document.querySelector(
+        '.agent-input textarea, .agent-input input'
+      );
       if (input instanceof HTMLElement) {
         input.blur();
       }
@@ -69,7 +71,7 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ className }) => {
             aria-hidden="true"
           />
         )}
-        
+
         {/* 모바일 에이전트 패널 */}
         <div
           className={cn(

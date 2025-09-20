@@ -31,7 +31,8 @@ const EventCard: React.FC<EventCardProps> = ({
   onDelete,
 }) => {
   const [showMenu, setShowMenu] = useState(false);
-  const eventDate = typeof event.start === 'string' ? new Date(event.start) : event.start;
+  const eventDate =
+    typeof event.start === 'string' ? new Date(event.start) : event.start;
   const formattedTime = !event.allDay
     ? format(eventDate, 'HH:mm', { locale: ko })
     : null;
@@ -56,7 +57,10 @@ const EventCard: React.FC<EventCardProps> = ({
             }
           }}
         >
-          <div className="event-card__color-bar" style={{ backgroundColor: calendarColor }} />
+          <div
+            className="event-card__color-bar"
+            style={{ backgroundColor: calendarColor }}
+          />
           <div className="event-card__content">
             {formattedTime && (
               <span className="event-card__time">{formattedTime}</span>
@@ -121,7 +125,7 @@ const Column: React.FC<ColumnProps> = ({
   onEventDelete,
 }) => {
   const dateString = format(date, 'M월 d일 EEEE', { locale: ko });
-  
+
   // 시간 순으로 정렬
   const sortedEvents = useMemo(() => {
     return [...events].sort((a, b) => {
@@ -182,7 +186,7 @@ export const TodayTomorrowView: React.FC<TodayTomorrowViewProps> = ({
 }) => {
   const today = new Date();
   const tomorrow = addDays(today, 1);
-  
+
   // 캘린더 맵 생성
   const calendarMap = useMemo(() => {
     const map = new Map<string, { name: string; color: string }>();
@@ -198,7 +202,8 @@ export const TodayTomorrowView: React.FC<TodayTomorrowViewProps> = ({
     const tomorrowEvts: CalendarEvent[] = [];
 
     events.forEach((event) => {
-      const eventDate = typeof event.start === 'string' ? new Date(event.start) : event.start;
+      const eventDate =
+        typeof event.start === 'string' ? new Date(event.start) : event.start;
       if (isToday(eventDate)) {
         todayEvts.push(event);
       } else if (isTomorrow(eventDate)) {

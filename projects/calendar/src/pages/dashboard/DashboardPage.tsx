@@ -52,7 +52,9 @@ const DashboardPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(!isMobile);
   const [viewMode, setViewMode] = useState<'month' | 'today-tomorrow'>('month');
-  const [selectedDateForPanel, setSelectedDateForPanel] = useState<Date | null>(null);
+  const [selectedDateForPanel, setSelectedDateForPanel] = useState<Date | null>(
+    null
+  );
   const [isDatePanelOpen, setIsDatePanelOpen] = useState(false);
   const queryClient = useQueryClient();
 
@@ -227,12 +229,14 @@ const DashboardPage: React.FC = () => {
 
   // 날짜별 이벤트 필터링
   const getEventsForDate = (date: Date) => {
-    return mergedEvents.filter(
-      (event) => {
-        const eventDate = typeof event.start === 'string' ? new Date(event.start) : event.start;
-        return eventDate.toISOString().split('T')[0] === date.toISOString().split('T')[0];
-      }
-    );
+    return mergedEvents.filter((event) => {
+      const eventDate =
+        typeof event.start === 'string' ? new Date(event.start) : event.start;
+      return (
+        eventDate.toISOString().split('T')[0] ===
+        date.toISOString().split('T')[0]
+      );
+    });
   };
 
   // renderCalendarContent도 병합된 이벤트로 변경
@@ -258,7 +262,7 @@ const DashboardPage: React.FC = () => {
         </div>
       );
     }
-    
+
     // 뷰 모드에 따라 다른 컴포넌트 렌더링
     if (viewMode === 'today-tomorrow') {
       return (
@@ -267,14 +271,14 @@ const DashboardPage: React.FC = () => {
           calendars={calendars.map((cal) => ({
             id: cal.id,
             name: cal.name,
-            color: '#3b82f6' // 기본 색상
+            color: '#3b82f6', // 기본 색상
           }))}
           onEventClick={handleEventClick}
           className="h-full"
         />
       );
     }
-    
+
     return (
       <Calendar
         events={mergedEvents}
@@ -293,7 +297,12 @@ const DashboardPage: React.FC = () => {
 
   return (
     <Layout>
-      <div className={cn("flex flex-row w-full bg-[#f4f4f5]", isMobile && "flex-col")}>
+      <div
+        className={cn(
+          'flex flex-row w-full bg-[#f4f4f5]',
+          isMobile && 'flex-col'
+        )}
+      >
         {/* 사이드바 */}
         {isMobile ? (
           <MobileSidebarWrapper
@@ -333,10 +342,12 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         )}
-        <div className={cn(
-          "flex flex-col flex-1 min-w-0 bg-white",
-          !isMobile && "rounded-lg border border-zinc-300 m-2"
-        )}>
+        <div
+          className={cn(
+            'flex flex-col flex-1 min-w-0 bg-white',
+            !isMobile && 'rounded-lg border border-zinc-300 m-2'
+          )}
+        >
           <CalendarHeader
             onToday={handleToday}
             title={getTitle()}
@@ -434,7 +445,9 @@ const DashboardPage: React.FC = () => {
           <DateEventsPanel
             isOpen={isDatePanelOpen}
             date={selectedDateForPanel}
-            events={selectedDateForPanel ? getEventsForDate(selectedDateForPanel) : []}
+            events={
+              selectedDateForPanel ? getEventsForDate(selectedDateForPanel) : []
+            }
             calendars={calendars}
             onClose={() => setIsDatePanelOpen(false)}
             onEventClick={handleEventClick}

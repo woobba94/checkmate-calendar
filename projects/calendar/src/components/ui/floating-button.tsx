@@ -3,7 +3,8 @@ import { Button } from './button';
 import { cn } from '@/lib/utils';
 import './floating-button.scss';
 
-interface FloatingButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+interface FloatingButtonProps
+  extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   position?: 'bottom-center' | 'bottom-right' | 'bottom-left';
   show?: boolean;
   children: React.ReactNode;

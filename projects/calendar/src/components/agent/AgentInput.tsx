@@ -11,7 +11,11 @@ interface AgentInputProps {
   isExpanded?: boolean;
 }
 
-const AgentInput: React.FC<AgentInputProps> = ({ onFocus, onBlur, isExpanded = false }) => {
+const AgentInput: React.FC<AgentInputProps> = ({
+  onFocus,
+  onBlur,
+  isExpanded = false,
+}) => {
   const { isMobile } = useResponsive();
   const [inputValue, setInputValue] = useState('');
   const { sendMessage, state } = useAgent();
@@ -37,8 +41,8 @@ const AgentInput: React.FC<AgentInputProps> = ({ onFocus, onBlur, isExpanded = f
   return (
     <div
       className={cn(
-        "p-3 border bg-white rounded-md border-gray-200",
-        isMobile && "border-0 rounded-none bg-transparent"
+        'p-3 border bg-white rounded-md border-gray-200',
+        isMobile && 'border-0 rounded-none bg-transparent'
       )}
       style={{
         display: 'flex',

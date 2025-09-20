@@ -15,7 +15,8 @@ interface EventItemProps {
 }
 
 const EventItem: React.FC<EventItemProps> = ({ event, calendar, onClick }) => {
-  const eventDate = typeof event.start === 'string' ? new Date(event.start) : event.start;
+  const eventDate =
+    typeof event.start === 'string' ? new Date(event.start) : event.start;
   const formattedTime = !event.allDay
     ? format(eventDate, 'HH:mm', { locale: ko })
     : '종일';
@@ -74,7 +75,7 @@ export const DateEventsPanel: React.FC<DateEventsPanelProps> = ({
   calendarWeekView,
 }) => {
   const dateString = date ? format(date, 'M월 d일 EEEE', { locale: ko }) : '';
-  
+
   // 캘린더 맵 생성
   const calendarMap = useMemo(() => {
     const map = new Map<string, Calendar>();
@@ -104,9 +105,7 @@ export const DateEventsPanel: React.FC<DateEventsPanelProps> = ({
       >
         {/* 선택된 주 캘린더 뷰 */}
         {calendarWeekView && (
-          <div className="date-events-panel__week-view">
-            {calendarWeekView}
-          </div>
+          <div className="date-events-panel__week-view">{calendarWeekView}</div>
         )}
 
         {/* 일정 목록 */}
