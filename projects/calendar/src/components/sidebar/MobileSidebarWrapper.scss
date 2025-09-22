@@ -1,19 +1,21 @@
-@import '@/styles/color-tokens';
-
 .mobile-sidebar-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: var(--tailwind-colors-zinc-100, #F4F4F5);
+  background: rgba(0, 0, 0, 0.6);
   visibility: hidden;
-  transition: background-color 0.3s ease, visibility 0.3s ease;
-  z-index: 999;
-  
+  transition:
+    background-color 0.3s ease,
+    visibility 0.3s ease;
+  z-index: 49;
+  pointer-events: none;
+
   &--open {
     visibility: visible;
-    background: var(--tailwind-colors-zinc-100, #F4F4F5);
+    background: rgba(0, 0, 0, 0.6);
+    pointer-events: auto;
   }
 }
 
@@ -22,18 +24,19 @@
   top: 0;
   left: 0;
   bottom: 0;
-  width: 85%;
+  width: 75%;
   max-width: 320px;
-  background-color: var(--color-surface);
+  background-color: #fff;
   transform: translateX(-100%);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  
+  z-index: 50;
+  pointer-events: auto;
+
   &--open {
     transform: translateX(0);
   }
-  
+
   &__content {
     height: 100%;
     overflow-y: auto;
@@ -48,8 +51,9 @@
       background-color: rgba(0, 0, 0, 0.7);
     }
   }
-  
+
   .mobile-sidebar {
+    background-color: hsl(222.2, 84%, 4.9%); // 다크 모드 배경색
     box-shadow: 2px 0 12px rgba(0, 0, 0, 0.5);
   }
 }

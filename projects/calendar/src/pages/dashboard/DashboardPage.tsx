@@ -32,10 +32,8 @@ import { useResponsive } from '@/hooks/useResponsive';
 import { MobileSidebarWrapper } from '@/components/sidebar/MobileSidebarWrapper';
 import { TodayTomorrowView } from '@/components/calendar/kanban/TodayTomorrowView';
 import { DateEventsPanel } from '@/components/calendar/panels/DateEventsPanel';
-import { FloatingButton } from '@/components/ui/floating-button';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { Target } from 'lucide-react';
-import { isToday } from 'date-fns';
+import { Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const DashboardPage: React.FC = () => {
@@ -78,10 +76,10 @@ const DashboardPage: React.FC = () => {
   // 선택된 캘린더들의 이벤트 데이터
   const {
     events: mergedEvents,
-    eventsByCalendar,
+    eventsByCalendar: _eventsByCalendar,
     isLoading: isLoadingEvents,
     errors: eventsErrors,
-    refetch: refetchEvents,
+    refetch: _refetchEvents,
   } = useEventsByCalendars(selectedCalendarIds);
 
   // 이벤트 변이 훅
@@ -469,16 +467,16 @@ const DashboardPage: React.FC = () => {
         )}
 
         {/* 플로팅 오늘 버튼 */}
-        {isMobile && (
-          <FloatingButton
-            position="bottom-center"
-            show={!isTodayInCurrentMonth && viewMode === 'month'}
+        {isMobile && !isTodayInCurrentMonth && viewMode === 'month' && (
+          <Button
+            variant="primary"
+            size="default"
+            className="fixed bottom-[120px] left-1/2 transform -translate-x-1/2 z-[900] shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
             onClick={handleToday}
-            className="bg-white border border-gray-300"
           >
-            <Target className="h-4 w-4 mr-2" />
             오늘
-          </FloatingButton>
+            <Crosshair className="h-4 w-4 ml-2" />
+          </Button>
         )}
 
         {/* 이벤트 모달 / 바텀 시트 */}

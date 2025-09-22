@@ -15,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useResponsive } from '@/hooks/useResponsive';
 
 interface AppSidebarProps {
   calendars: CalendarType[];
@@ -48,6 +49,8 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
     return 'U';
   };
 
+  const { isMobile } = useResponsive();
+
   return (
     <aside className="w-full h-full flex flex-col justify-between overflow-hidden">
       <div>
@@ -64,7 +67,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
             />
           </Link>
         </div>
-        <div className="flex-1 py-3 pl-2">
+        <div className={`flex-1 py-3 pl-2 ${isMobile ? 'pr-2' : ''}`}>
           <CalendarSelector
             calendars={calendars}
             selectedCalendarIds={selectedCalendarIds}

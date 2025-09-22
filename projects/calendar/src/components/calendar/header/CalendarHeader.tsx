@@ -8,7 +8,8 @@ import {
   PanelRightClose,
   PanelRight,
   Menu,
-  X,
+  Grid3X3,
+  Columns2,
 } from 'lucide-react';
 import {
   Tooltip,
@@ -16,7 +17,6 @@ import {
   TooltipContent,
 } from '@/components/ui/tooltip';
 import { useResponsive } from '@/hooks/useResponsive';
-import { cn } from '@/lib/utils';
 
 interface CalendarHeaderProps {
   onToday: () => void;
@@ -52,7 +52,7 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
     );
   };
   return (
-    <div className="relative flex h-[56px] px-[10px] items-center">
+    <div className="relative flex h-[56px] px-[10px] items-center justify-between">
       {/* 좌측 영역 */}
       <div className="flex items-center gap-2">
         <Button
@@ -63,19 +63,12 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
           aria-label={isSidebarOpen ? '사이드바 닫기' : '사이드바 열기'}
         >
           {isMobile ? (
-            // 모바일: 햄버거 메뉴 아이콘
-            isSidebarOpen ? (
-              <X className="h-4 w-4" />
-            ) : (
-              <Menu className="h-4 w-4" />
-            )
+            <Menu className="h-4 w-4" />
+          ) : // 데스크톱: 패널 아이콘
+          isSidebarOpen ? (
+            <PanelLeftClose className="h-4 w-4" />
           ) : (
-            // 데스크톱: 패널 아이콘
-            isSidebarOpen ? (
-              <PanelLeftClose className="h-4 w-4" />
-            ) : (
-              <PanelLeft className="h-4 w-4" />
-            )
+            <PanelLeft className="h-4 w-4" />
           )}
         </Button>
         {!isMobile && (
@@ -94,23 +87,23 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
             style={{ width: 'fit-content' }}
             aria-live="polite"
           >
-            {isSidebarOpen ? '캘린더 목록' : title}
+            {title}
           </h2>
         </div>
       ) : (
         // 데스크톱: 캘린더 뷰 토글
         <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-          <Tabs 
-            value={viewMode} 
-            onValueChange={(value) => onViewModeChange?.(value as 'month' | 'today-tomorrow')}
-            className="w-[200px]" 
+          <Tabs
+            value={viewMode}
+            onValueChange={(value) =>
+              onViewModeChange?.(value as 'month' | 'today-tomorrow')
+            }
+            className="w-[200px]"
             aria-label="캘린더 보기 모드"
           >
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="month">월별 보기</TabsTrigger>
-              <TabsTrigger value="today-tomorrow">
-                오늘 내일
-              </TabsTrigger>
+              <TabsTrigger value="today-tomorrow">오늘 내일</TabsTrigger>
             </TabsList>
           </Tabs>
         </div>
@@ -118,19 +111,18 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({
 
       {/* 오른쪽 영역 */}
       {isMobile ? (
-        // 모바일: 뷰 토글 버튼 (사이드바 열림 시 숨김)
-        !isSidebarOpen && (
-          <div className="flex items-center gap-2">
-            <Button
-              onClick={() => onViewModeChange?.(viewMode === 'month' ? 'today-tomorrow' : 'month')}
-              variant="outline"
-              size="sm"
-              className="text-xs"
-            >
-              {viewMode === 'month' ? '오늘 내일' : '월별 보기'}
-            </Button>
-          </div>
-        )
+        <Button
+          onClick={() =>
+            onViewModeChange?.(
+              viewMode === 'month' ? 'today-tomorrow' : 'month'
+            )
+          }
+          variant="ghost"
+          size="sm"
+          className="text-xs"
+        >
+          {viewMode === 'month' ? <Columns2 /> : <Grid3X3 />}
+        </Button>
       ) : (
         // 데스크톱: 기존 버튼들
         <div className="flex items-center gap-2 ml-auto">
