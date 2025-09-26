@@ -1,8 +1,11 @@
 import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
 import { useMetaTags } from '../hooks/useMetaTags';
+import { useI18n } from '@/contexts/I18nContext';
 
 const PricingPage = () => {
+  const { t } = useI18n();
+
   useMetaTags({
     title: '가격 - 체크메이트 캘린더',
     description:
@@ -14,39 +17,39 @@ const PricingPage = () => {
     {
       name: 'Free',
       price: '$0',
-      period: '월',
-      description: '개인 사용자를 위한 기본 기능',
+      period: t('@월@'),
+      description: t('@개인_사용자를_위한_기본_기능@'),
       features: [
-        '5개까지 캘린더 스페이스 생성',
-        '공유 무제한',
-        '타 캘린더 연동',
-        'AI Agent 기본 사용량',
+        t('@5개까지_캘린더_스페이스_생성@'),
+        t('@공유_무제한@'),
+        t('@타_캘린더_연동@'),
+        t('@AI_Agent_기본_사용량@'),
       ],
       isPopular: false,
     },
     {
       name: 'Pro',
       price: '$1',
-      period: '월',
-      description: '개인 사용자를 위한 프리미엄 기능',
+      period: t('@월@'),
+      description: t('@개인_사용자를_위한_프리미엄_기능@'),
       features: [
-        'Free 플랜의 모든 기능',
-        '무제한 캘린더 스페이스',
-        'AI Agent 10배 확장',
-        '광고 없음',
+        t('@Free_플랜의_모든_기능@'),
+        t('@무제한_캘린더_스페이스@'),
+        t('@AI_Agent_10배_확장@'),
+        t('@광고_없음@'),
       ],
       isPopular: true,
     },
     {
       name: 'Business',
       price: '$1',
-      period: '사용자당/월',
-      description: '팀과 조직을 위한 완전한 기능',
+      period: t('@사용자당_월@'),
+      description: t('@팀과_조직을_위한_완전한_기능@'),
       features: [
-        'Pro 플랜의 모든 기능',
-        '어드민 관리 기능',
-        '팀 통계 및 분석',
-        '우선 고객 지원',
+        t('@Pro_플랜의_모든_기능@'),
+        t('@어드민_관리_기능@'),
+        t('@팀_통계_및_분석@'),
+        t('@우선_고객_지원@'),
       ],
       isPopular: false,
     },
@@ -59,10 +62,10 @@ const PricingPage = () => {
         <section className="py-16 md:py-24">
           <div className="max-w-[1200px] mx-auto px-5 text-center">
             <h1 className="text-4xl md:text-6xl font-bold text-foreground mb-4">
-              간단하고 투명한 가격
+              {t('@간단하고_투명한_가격@')}
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-12 max-w-2xl mx-auto">
-              필요한 기능만 선택하세요. 언제든 업그레이드하거나 다운그레이드할 수 있습니다.
+              {t('@필요한_기능만_선택하세요@')}
             </p>
           </div>
         </section>
@@ -83,7 +86,7 @@ const PricingPage = () => {
                   {plan.isPopular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                        가장 인기
+                        {t('@가장_인기@')}
                       </span>
                     </div>
                   )}
@@ -127,7 +130,7 @@ const PricingPage = () => {
                     variant={plan.isPopular ? 'primary' : 'outline'}
                     className="w-full"
                   >
-                    {plan.name === 'Free' ? '무료로 시작하기' : '시작하기'}
+                    {plan.name === 'Free' ? t('@무료로_시작하기@') : t('@시작하기@')}
                   </Button>
                 </div>
               ))}
@@ -140,38 +143,35 @@ const PricingPage = () => {
           <div className="max-w-[1200px] mx-auto px-5">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-                자주 묻는 질문
+                {t('@자주_묻는_질문@')}
               </h2>
             </div>
 
             <div className="max-w-3xl mx-auto space-y-6">
               <div className="bg-white rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  언제든 플랜을 변경할 수 있나요?
+                  {t('@언제든_플랜을_변경할_수_있나요@')}
                 </h3>
                 <p className="text-gray-600">
-                  네, 언제든지 플랜을 업그레이드하거나 다운그레이드할 수 있습니다.
-                  변경 사항은 즉시 적용됩니다.
+                  {t('@네_언제든지_플랜을_업그레이드하거나_다운그레이드할_수_있습니다@')}
                 </p>
               </div>
 
               <div className="bg-white rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  무료 플랜으로 시작할 수 있나요?
+                  {t('@무료_플랜으로_시작할_수_있나요@')}
                 </h3>
                 <p className="text-gray-600">
-                  물론입니다. 무료 플랜으로 시작해서 필요에 따라 언제든 유료 플랜으로
-                  업그레이드하실 수 있습니다.
+                  {t('@물론입니다_무료_플랜으로_시작해서@')}
                 </p>
               </div>
 
               <div className="bg-white rounded-lg p-6 border border-gray-200">
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  비즈니스 플랜은 어떤 기능이 추가되나요?
+                  {t('@비즈니스_플랜은_어떤_기능이_추가되나요@')}
                 </h3>
                 <p className="text-gray-600">
-                  비즈니스 플랜은 팀 관리를 위한 어드민 기능과 팀 사용량 통계,
-                  우선 고객 지원을 제공합니다.
+                  {t('@비즈니스_플랜은_팀_관리를_위한@')}
                 </p>
               </div>
             </div>
