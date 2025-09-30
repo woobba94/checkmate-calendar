@@ -74,7 +74,7 @@ const PricingPage = () => {
         <section className="pb-16 md:pb-24">
           <div className="max-w-[1200px] mx-auto px-5">
             <div className="grid md:grid-cols-3 gap-6 md:gap-8">
-              {plans.map((plan, index) => (
+              {plans.map((plan) => (
                 <div
                   key={plan.name}
                   className={`relative rounded-2xl border p-6 md:p-8 bg-white ${
@@ -125,12 +125,15 @@ const PricingPage = () => {
 
                   <Button
                     onClick={() =>
-                      (window.location.href = 'https://app.checkmate-calendar.com')
+                      (window.location.href =
+                        'https://app.checkmate-calendar.com')
                     }
                     variant={plan.isPopular ? 'primary' : 'outline'}
                     className="w-full"
                   >
-                    {plan.name === 'Free' ? t('@무료로_시작하기@') : t('@시작하기@')}
+                    {plan.name === 'Free'
+                      ? t('@무료로_시작하기@')
+                      : t('@시작하기@')}
                   </Button>
                 </div>
               ))}
@@ -153,7 +156,9 @@ const PricingPage = () => {
                   {t('@언제든_플랜을_변경할_수_있나요@')}
                 </h3>
                 <p className="text-gray-600">
-                  {t('@네_언제든지_플랜을_업그레이드하거나_다운그레이드할_수_있습니다@')}
+                  {t(
+                    '@네_언제든지_플랜을_업그레이드하거나_다운그레이드할_수_있습니다@'
+                  )}
                 </p>
               </div>
 
