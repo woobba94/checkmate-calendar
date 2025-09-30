@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom';
+import { useI18n } from '@/contexts/I18nContext';
 
 const Footer = () => {
+  const { t } = useI18n();
+
   return (
     <footer className="bg-background py-12 md:py-20">
       <div className="max-w-[1200px] mx-auto px-5">
@@ -21,7 +24,7 @@ const Footer = () => {
           <div className="flex flex-col md:contents gap-6 md:gap-8">
             <div>
               <h3 className="text-lg font-semibold mb-4 text-foreground">
-                Product
+                {t('@Product@')}
               </h3>
               <ul className="space-y-2">
                 <li>
@@ -29,14 +32,14 @@ const Footer = () => {
                     to="/pricing"
                     className="text-gray-400 hover:text-foreground transition-colors"
                   >
-                    Pricing
+{t('@Pricing@')}
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4 text-foreground">
-                Company
+                {t('@Company@')}
               </h3>
               <ul className="space-y-2">
                 <li>
@@ -44,14 +47,14 @@ const Footer = () => {
                     to="/contact"
                     className="text-gray-400 hover:text-foreground transition-colors"
                   >
-                    Contact
+{t('@Contact@')}
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4 text-foreground">
-                Legal
+                {t('@Legal@')}
               </h3>
               <ul className="space-y-2">
                 <li>
@@ -59,7 +62,7 @@ const Footer = () => {
                     to="/terms"
                     className="text-gray-400 hover:text-foreground transition-colors"
                   >
-                    Terms of Service
+{t('@Terms_of_Service@')}
                   </Link>
                 </li>
                 <li>
@@ -67,7 +70,7 @@ const Footer = () => {
                     to="/privacy"
                     className="text-gray-400 hover:text-foreground transition-colors"
                   >
-                    Privacy Policy
+{t('@Privacy_Policy@')}
                   </Link>
                 </li>
               </ul>
@@ -76,7 +79,7 @@ const Footer = () => {
         </div>
         <div className="text-center md:text-center pt-8">
           <p className="text-gray-400 text-sm md:text-base">
-            &copy; 2025 Checkmate Calendar Inc. All rights reserved.
+{t('@©_2025_Checkmate_Calendar_Inc._All_rights_reserved.@')}
           </p>
         </div>
       </div>
