@@ -24,26 +24,6 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Debug - Environment Info
-        run: |
-          echo "=== Debug Information ==="
-          echo "Current directory: $(pwd)"
-          echo "Shell: $SHELL"
-          echo "PATH: $PATH"
-          echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "Target app: ${{ github.event.inputs.app }}"
-          echo "Deploy env: ${{ github.event.inputs.deploy_env }}"
-          echo ""
-          echo "=== Directory structure ==="
-          ls -la
-          echo ""
-          echo "=== projects/${{ github.event.inputs.app }} structure ==="
-          ls -la projects/${{ github.event.inputs.app }}/
-          echo ""
-          echo "=== vercel.json content ==="
-          cat projects/${{ github.event.inputs.app }}/vercel.json || echo "vercel.json not found"
-
       # landing
       - name: vercel pull (landing)
         if: ${{ github.event.inputs.app == 'landing' }}
@@ -53,38 +33,18 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
         run: |
-          echo "=== Running vercel pull for landing ==="
-          echo "Working directory: $(pwd)"
-          echo "VERCEL_ORG_ID is set: ${{ secrets.VERCEL_ORG_ID != '' }}"
-          echo "VERCEL_PROJECT_ID is set: ${{ secrets.VERCEL_PROJECT_ID_LANDING != '' }}"
-
-          npx vercel@48.0.3 pull --yes --environment=${{ github.event.inputs.deploy_env }} \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --cwd projects/landing \
-            --debug 2>&1 || {
-              echo "=== Vercel pull failed with exit code $? ==="
-              echo "=== Checking error details ==="
-              ls -la projects/landing/.vercel/ 2>/dev/null || echo "No .vercel directory"
-              exit 1
-            }
-
-          echo "=== After vercel pull ==="
-          ls -la projects/landing/.vercel/
+          npx vercel pull --yes --environment=${{ github.event.inputs.deploy_env }} \
+            --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: vercel build (landing)
         if: ${{ github.event.inputs.app == 'landing' }}
         shell: bash
         working-directory: .
         run: |
-          echo "=== Running vercel build for landing ==="
-          echo "Working directory: $(pwd)"
-
           if [ "${{ github.event.inputs.deploy_env }}" = "production" ]; then
-            echo "Building for production"
-            npx vercel@48.0.3 build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd projects/landing --debug 2>&1
+            npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
-            echo "Building for preview"
-            npx vercel@48.0.3 build --token=${{ secrets.VERCEL_TOKEN }} --cwd projects/landing --debug 2>&1
+            npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       - name: vercel deploy (landing)
@@ -93,9 +53,9 @@ jobs:
         working-directory: .
         run: |
           if [ "${{ github.event.inputs.deploy_env }}" = "production" ]; then
-            npx vercel@48.0.3 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod --cwd projects/landing
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
-            npx vercel@48.0.3 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd projects/landing
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       # calendar
@@ -107,33 +67,18 @@ jobs:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
         run: |
-          echo "=== Running vercel pull for calendar ==="
-          echo "Working directory: $(pwd)"
-          echo "VERCEL_ORG_ID is set: ${{ secrets.VERCEL_ORG_ID != '' }}"
-          echo "VERCEL_PROJECT_ID is set: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR != '' }}"
-
-          npx vercel@48.0.3 pull --yes --environment=${{ github.event.inputs.deploy_env }} \
-            --token=${{ secrets.VERCEL_TOKEN }} \
-            --cwd projects/calendar \
-            --debug 2>&1 || {
-              echo "=== Vercel pull failed with exit code $? ==="
-              exit 1
-            }
+          npx vercel pull --yes --environment=${{ github.event.inputs.deploy_env }} \
+            --token=${{ secrets.VERCEL_TOKEN }}
 
       - name: vercel build (calendar)
         if: ${{ github.event.inputs.app == 'calendar' }}
         shell: bash
         working-directory: .
         run: |
-          echo "=== Running vercel build for calendar ==="
-          echo "Working directory: $(pwd)"
-
           if [ "${{ github.event.inputs.deploy_env }}" = "production" ]; then
-            echo "Building for production"
-            npx vercel@48.0.3 build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd projects/calendar --debug 2>&1
+            npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
           else
-            echo "Building for preview"
-            npx vercel@48.0.3 build --token=${{ secrets.VERCEL_TOKEN }} --cwd projects/calendar --debug 2>&1
+            npx vercel build --token=${{ secrets.VERCEL_TOKEN }}
           fi
 
       - name: vercel deploy (calendar)
@@ -142,7 +87,7 @@ jobs:
         working-directory: .
         run: |
           if [ "${{ github.event.inputs.deploy_env }}" = "production" ]; then
-            npx vercel@48.0.3 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod --cwd projects/calendar
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
           else
-            npx vercel@48.0.3 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --cwd projects/calendar
+            npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }}
           fi
