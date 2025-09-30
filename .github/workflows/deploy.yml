@@ -11,6 +11,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'projects/landing/package-lock.json'
+
       - name: Check for landing changes
         id: landing_changes
         shell: bash
@@ -22,10 +29,15 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Install dependencies (landing)
+        if: steps.landing_changes.outputs.changed == 'true'
+        working-directory: projects/landing
+        run: npm install
+
       - name: vercel pull (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/landing
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
@@ -37,7 +49,7 @@ jobs:
       - name: vercel build (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/landing
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
@@ -48,7 +60,7 @@ jobs:
       - name: vercel deploy (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/landing
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
@@ -62,6 +74,13 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'projects/calendar/package.json'
+
       - name: Check for calendar changes
         id: calendar_changes
         shell: bash
@@ -73,10 +92,15 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
+      - name: Install dependencies (calendar)
+        if: steps.calendar_changes.outputs.changed == 'true'
+        working-directory: projects/calendar
+        run: npm install
+
       - name: vercel pull (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/calendar
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
@@ -88,7 +112,7 @@ jobs:
       - name: vercel build (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/calendar
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
@@ -99,7 +123,7 @@ jobs:
       - name: vercel deploy (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/calendar
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
