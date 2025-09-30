@@ -25,7 +25,7 @@ jobs:
       - name: vercel pull (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/landing
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_LANDING }}
@@ -37,7 +37,7 @@ jobs:
       - name: vercel build (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/landing
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel@48.0.3 build --prod --token=${{ secrets.VERCEL_TOKEN }}
@@ -48,7 +48,7 @@ jobs:
       - name: vercel deploy (landing)
         if: steps.landing_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/landing
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel@48.0.3 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
@@ -76,7 +76,7 @@ jobs:
       - name: vercel pull (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/calendar
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID_CALENDAR }}
@@ -88,7 +88,7 @@ jobs:
       - name: vercel build (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/calendar
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel@48.0.3 build --prod --token=${{ secrets.VERCEL_TOKEN }}
@@ -99,7 +99,7 @@ jobs:
       - name: vercel deploy (calendar)
         if: steps.calendar_changes.outputs.changed == 'true'
         shell: bash
-        working-directory: .
+        working-directory: projects/calendar
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             npx vercel@48.0.3 deploy --prebuilt --token=${{ secrets.VERCEL_TOKEN }} --prod
