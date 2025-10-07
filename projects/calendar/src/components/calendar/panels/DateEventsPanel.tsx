@@ -35,7 +35,7 @@ const EventItem: React.FC<EventItemProps> = ({ event, calendar, onClick }) => {
     >
       <div
         className="event-item__color-indicator"
-        style={{ backgroundColor: '#e5e5e5' }}
+        style={{ backgroundColor: calendar?.color || '#e5e5e5' }}
       />
       <div className="event-item__content">
         <div className="event-item__header">

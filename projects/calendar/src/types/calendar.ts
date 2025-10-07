@@ -3,6 +3,7 @@ export interface Calendar {
   id: string;
   name: string;
   description?: string;
+  color: string; // HEX 형식 (예: #ffffff)
   created_by: string; // 캘린더를 생성한 사용자 ID
   created_at: string | Date;
   updated_at: string | Date;

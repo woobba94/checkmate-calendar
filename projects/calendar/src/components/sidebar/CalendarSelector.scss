@@ -1,0 +1,49 @@
+.calendar-selector {
+  &__checkbox {
+    position: relative;
+
+    // 체크박스 커스텀 색상 적용
+    &[data-state='checked'] {
+      border-color: transparent !important;
+
+      &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 4px;
+        opacity: 1;
+      }
+
+      // 체크 아이콘 색상 대비를 위해 흰색으로 설정
+      svg {
+        color: white;
+        z-index: 1;
+        position: relative;
+      }
+    }
+  }
+
+  &__item {
+    position: relative;
+
+    &:hover {
+      .calendar-selector__checkbox[data-state='unchecked'] {
+        border-color: var(--color-border-hover);
+      }
+    }
+  }
+}
+
+// 다크 모드 지원
+[data-theme='dark'] {
+  .calendar-selector {
+    &__checkbox {
+      &[data-state='checked'] {
+        // 다크 모드에서도 체크 아이콘이 잘 보이도록
+        svg {
+          color: white;
+        }
+      }
+    }
+  }
+}

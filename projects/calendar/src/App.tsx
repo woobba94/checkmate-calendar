@@ -4,6 +4,7 @@ import DashboardPage from './pages/dashboard/DashboardPage';
 import LoginPage from './pages/auth/LoginPage';
 import SignupPage from './pages/auth/SignupPage';
 import NotFoundPage from './pages/NotFoundPage';
+import InvitePage from './pages/InvitePage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SplashScreen } from '@/components/common/splash-screen/SplashScreen';
 
@@ -34,8 +35,17 @@ function AppMain() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/invite" element={<InvitePage />} />
         <Route
           path="/"
+          element={
+            <ProtectedRoute>
+              <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <DashboardPage />

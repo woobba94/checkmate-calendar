@@ -10,12 +10,33 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { X, Plus } from 'lucide-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 
 interface CalendarCreateModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onCreateCalendar: (name: string) => Promise<void>;
+  onCreateCalendar: (
+    name: string,
+    color: string,
+    inviteEmails: string[]
+  ) => Promise<void>;
 }
+
+// 프리셋 색상 목록
+const PRESET_COLORS = [
+  '#02B1F0', // 파란색
+  '#05AA5B', // 초록색
+  '#97D045', // 연두색
+  '#FFC828', // 노란색
+  '#FF562C', // 주황색
+  '#FF4E9D', // 분홍색
+  '#50419C', // 보라색
+];
 
 const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
   isOpen,
@@ -23,15 +44,58 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
   onCreateCalendar,
 }) => {
   const [newCalendarName, setNewCalendarName] = useState('');
+  const [selectedColor, setSelectedColor] = useState('#02B1F0');
+  const [customColor, setCustomColor] = useState('#000000');
+  const [isCustomColor, setIsCustomColor] = useState(false);
+  const [inviteEmails, setInviteEmails] = useState<string[]>([]);
+  const [currentEmail, setCurrentEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const handleAddEmail = () => {
+    if (!currentEmail.trim()) return;
+
+    if (!validateEmail(currentEmail)) {
+      setEmailError('올바른 이메일 형식이 아닙니다.');
+      return;
+    }
+
+    if (inviteEmails.includes(currentEmail)) {
+      setEmailError('이미 추가된 이메일입니다.');
+      return;
+    }
+
+    setInviteEmails([...inviteEmails, currentEmail]);
+    setCurrentEmail('');
+    setEmailError('');
+  };
+
+  const handleRemoveEmail = (email: string) => {
+    setInviteEmails(inviteEmails.filter((e) => e !== email));
+  };
 
   const handleCreate = async () => {
     if (!newCalendarName.trim()) return;
 
     try {
       setIsCreating(true);
-      await onCreateCalendar(newCalendarName.trim());
+      const finalColor = isCustomColor ? customColor : selectedColor;
+      await onCreateCalendar(newCalendarName.trim(), finalColor, inviteEmails);
+
+      // 초기화
       setNewCalendarName('');
+      setSelectedColor('#02B1F0');
+      setCustomColor('#000000');
+      setIsCustomColor(false);
+      setInviteEmails([]);
+      setCurrentEmail('');
+      setEmailError('');
+
       onClose();
     } catch {
       // 부모에서 처리됨
@@ -45,31 +109,155 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
     handleCreate();
   };
 
+  const handleEmailKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleAddEmail();
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="sm:max-w-[425px]"
+        className="sm:max-w-[500px]"
         aria-describedby="calendar-modal-description"
       >
         <form onSubmit={handleSubmit} aria-label="새 캘린더 생성 폼">
           <DialogHeader>
             <DialogTitle>새 캘린더 만들기</DialogTitle>
             <DialogDescription id="calendar-modal-description">
-              새 캘린더의 이름을 입력하세요.
+              캘린더를 생성하고 멤버를 초대하세요.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
+            {/* 캘린더 이름 */}
             <div className="grid gap-2">
               <Label htmlFor="name">캘린더 이름</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="Calendar Name"
+                placeholder="캘린더 이름을 입력하세요"
                 value={newCalendarName}
                 onChange={(e) => setNewCalendarName(e.target.value)}
                 disabled={isCreating}
                 required
               />
+            </div>
+
+            {/* 색상 선택 */}
+            <div className="grid gap-2">
+              <Label>캘린더 색상</Label>
+              <div className="flex gap-2 flex-wrap">
+                {PRESET_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`w-8 h-8 rounded-md border-2 transition-all ${
+                      !isCustomColor && selectedColor === color
+                        ? 'border-gray-900 scale-110'
+                        : 'border-gray-300'
+                    }`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => {
+                      setSelectedColor(color);
+                      setIsCustomColor(false);
+                    }}
+                    aria-label={`색상 ${color} 선택`}
+                  />
+                ))}
+
+                {/* 커스텀 색상 선택 */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={`w-8 h-8 rounded-md border-2 transition-all flex items-center justify-center ${
+                        isCustomColor
+                          ? 'border-gray-900 scale-110'
+                          : 'border-gray-300'
+                      }`}
+                      style={{
+                        backgroundColor: isCustomColor
+                          ? customColor
+                          : '#ffffff',
+                      }}
+                    >
+                      {!isCustomColor && (
+                        <Plus className="w-4 h-4 text-gray-500" />
+                      )}
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-3">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="custom-color">색상 선택:</Label>
+                      <input
+                        id="custom-color"
+                        type="color"
+                        value={customColor}
+                        onChange={(e) => {
+                          setCustomColor(e.target.value);
+                          setIsCustomColor(true);
+                        }}
+                        className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+
+            {/* 멤버 초대 */}
+            <div className="grid gap-2">
+              <Label htmlFor="invite-email">멤버 초대 (선택사항)</Label>
+              <div className="flex gap-2">
+                <Input
+                  id="invite-email"
+                  type="email"
+                  placeholder="이메일 주소 입력"
+                  value={currentEmail}
+                  onChange={(e) => {
+                    setCurrentEmail(e.target.value);
+                    setEmailError('');
+                  }}
+                  onKeyPress={handleEmailKeyPress}
+                  disabled={isCreating}
+                />
+                <Button
+                  type="button"
+                  onClick={handleAddEmail}
+                  disabled={!currentEmail.trim() || isCreating}
+                  variant="outline"
+                >
+                  추가
+                </Button>
+              </div>
+              {emailError && (
+                <p className="text-sm text-red-500 mt-1">{emailError}</p>
+              )}
+
+              {/* 추가된 이메일 목록 */}
+              {inviteEmails.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {inviteEmails.map((email) => (
+                    <div
+                      key={email}
+                      className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
+                    >
+                      <span className="text-sm">{email}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleRemoveEmail(email)}
+                        className="text-gray-500 hover:text-gray-700"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  <p className="text-xs text-gray-500 mt-2">
+                    초대된 멤버들에게 이메일이 발송됩니다.
+                  </p>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>
@@ -79,13 +267,13 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
               disabled={isCreating}
               variant="outline"
             >
-              Cancel
+              취소
             </Button>
             <Button
               type="submit"
               disabled={!newCalendarName.trim() || isCreating}
             >
-              {isCreating ? 'Creating...' : 'Create'}
+              {isCreating ? '생성 중...' : '생성'}
             </Button>
           </DialogFooter>
         </form>

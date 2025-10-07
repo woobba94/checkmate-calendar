@@ -74,11 +74,47 @@
     // 오늘 날짜 강조
     .fc-day-today {
       background-color: var(--color-primary-alpha-10) !important;
-      
+
       .fc-daygrid-day-number {
         color: var(--color-primary);
         font-weight: 600;
       }
+    }
+  }
+
+  // 데스크톱: 이벤트 제목 앞 색상 dot
+  @media (min-width: 768px) {
+    .fc-event {
+      display: flex;
+      align-items: center;
+
+      // 이벤트 제목 앞 색상 dot
+      .fc-event-title-container {
+        display: flex;
+        align-items: center;
+
+        &::before {
+          content: '';
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background-color: currentColor;
+          margin-right: 6px;
+          flex-shrink: 0;
+        }
+      }
+
+      // 시간이 표시되는 경우
+      .fc-event-time {
+        margin-right: 4px;
+      }
+    }
+
+    // 리스트 뷰에서도 dot 표시
+    .fc-list-event-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
     }
   }
 }

@@ -11,6 +11,7 @@ import {
 import { CalendarPlus, MoreHorizontal, Edit, Trash } from 'lucide-react';
 import React from 'react';
 import TextWithTooltip from '@/components/common/text-with-tooltip/TextWithTooltip';
+import './CalendarSelector.scss';
 
 interface CalendarSelectorProps {
   calendars: CalendarType[];
@@ -47,9 +48,9 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
             캘린더가 없습니다
           </div>
         )}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 calendar-selector">
           {calendars.map((calendar) => (
-            <div key={calendar.id} className="relative">
+            <div key={calendar.id} className="relative calendar-selector__item">
               <Label
                 htmlFor={calendar.id}
                 className="hover:bg-white transition-colors flex items-center gap-2 rounded-md p-3 cursor-pointer h-16"
@@ -61,7 +62,17 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                     onCheckedChange={(checked) =>
                       onCalendarChange(calendar.id, Boolean(checked))
                     }
-                    className="border-gray-300 data-[state=checked]:border-primary"
+                    className="calendar-selector__checkbox border-gray-300"
+                    style={
+                      {
+                        '--checkbox-color': calendar.color,
+                        backgroundColor: selectedCalendarIds.includes(
+                          calendar.id
+                        )
+                          ? calendar.color
+                          : 'transparent',
+                      } as React.CSSProperties
+                    }
                   />
                 </div>
                 <div className="flex items-center font-normal flex-1 min-w-0">

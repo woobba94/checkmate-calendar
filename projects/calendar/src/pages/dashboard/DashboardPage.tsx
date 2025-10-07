@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import Calendar from '@/components/calendar/core/Calendar';
 import CalendarHeader from '@/components/calendar/header/CalendarHeader';
@@ -33,10 +34,27 @@ import { MobileSidebarWrapper } from '@/components/sidebar/MobileSidebarWrapper'
 import { TodayTomorrowView } from '@/components/calendar/kanban/TodayTomorrowView';
 import { DateEventsPanel } from '@/components/calendar/panels/DateEventsPanel';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { Crosshair } from 'lucide-react';
+import { Crosshair, Plus } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+
+// 프리셋 색상 목록
+const PRESET_COLORS = [
+  '#02B1F0', // 파란색
+  '#05AA5B', // 초록색
+  '#97D045', // 연두색
+  '#FFC828', // 노란색
+  '#FF562C', // 주황색
+  '#FF4E9D', // 분홍색
+  '#50419C', // 보라색
+];
 
 const DashboardPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
   const { user, logout } = useAuth();
   const userId = user?.id || '';
   const { isMobile } = useResponsive();
@@ -46,6 +64,9 @@ const DashboardPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
+  const [editColor, setEditColor] = useState('#02B1F0');
+  const [editCustomColor, setEditCustomColor] = useState('#000000');
+  const [isEditCustomColor, setIsEditCustomColor] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(!isMobile);
@@ -66,6 +87,24 @@ const DashboardPage: React.FC = () => {
 
   // 복수 선택된 캘린더 id
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>([]);
+
+  // URL 쿼리 파라미터로 캘린더 ID가 전달된 경우 처리
+  useEffect(() => {
+    const calendarIdFromQuery = searchParams.get('calendar');
+    if (calendarIdFromQuery && calendars.length > 0) {
+      // 해당 캘린더가 존재하는지 확인
+      const calendarExists = calendars.some(
+        (cal) => cal.id === calendarIdFromQuery
+      );
+      if (
+        calendarExists &&
+        !selectedCalendarIds.includes(calendarIdFromQuery)
+      ) {
+        setSelectedCalendarIds([calendarIdFromQuery]);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, calendars]);
 
   const handleCalendarToggle = (calendarId: string, checked: boolean) => {
     setSelectedCalendarIds((prev) =>
@@ -167,14 +206,18 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  const handleCreateCalendar = async (name: string) => {
+  const handleCreateCalendar = async (
+    name: string,
+    color: string,
+    inviteEmails: string[]
+  ) => {
     if (!name.trim()) {
       setLocalError('Please enter a calendar name');
       return;
     }
 
     try {
-      await createCalendar({ name });
+      await createCalendar({ name, color, inviteEmails });
       setIsCalendarModalOpen(false);
     } catch (e) {
       setLocalError(
@@ -188,6 +231,19 @@ const DashboardPage: React.FC = () => {
     setEditingCalendar(calendar);
     setEditName(calendar.name);
     setEditDesc(calendar.description || '');
+
+    const currentColor = calendar.color || '#02B1F0';
+    setEditColor(currentColor);
+
+    // 프리셋 색상에 없으면 커스텀 색상으로 처리
+    if (!PRESET_COLORS.includes(currentColor)) {
+      setIsEditCustomColor(true);
+      setEditCustomColor(currentColor);
+    } else {
+      setIsEditCustomColor(false);
+      setEditCustomColor('#000000');
+    }
+
     setIsEditModalOpen(true);
   };
 
@@ -196,9 +252,11 @@ const DashboardPage: React.FC = () => {
     if (!editingCalendar) return;
     setEditLoading(true);
     try {
+      const finalColor = isEditCustomColor ? editCustomColor : editColor;
       await updateCalendar(editingCalendar.id, {
         name: editName,
         description: editDesc,
+        color: finalColor,
       });
       await queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
       setIsEditModalOpen(false);
@@ -269,7 +327,7 @@ const DashboardPage: React.FC = () => {
           calendars={calendars.map((cal) => ({
             id: cal.id,
             name: cal.name,
-            color: '#3b82f6', // 기본 색상
+            color: cal.color || '#3b82f6', // 캘린더 색상 사용
           }))}
           onEventClick={handleEventClick}
           className="h-full"
@@ -280,6 +338,7 @@ const DashboardPage: React.FC = () => {
     return (
       <Calendar
         events={mergedEvents}
+        calendars={calendars}
         onEventClick={handleEventClick}
         onDateClick={handleDateClick}
         currentView={view}
@@ -389,7 +448,7 @@ const DashboardPage: React.FC = () => {
             if (!open) handleEditCalendarCancel();
           }}
         >
-          <DialogContent className="sm:max-w-[425px]">
+          <DialogContent className="sm:max-w-[500px]">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -421,6 +480,69 @@ const DashboardPage: React.FC = () => {
                     value={editDesc}
                     onChange={(e) => setEditDesc(e.target.value)}
                   />
+                </div>
+
+                {/* 색상 선택 */}
+                <div className="grid gap-2">
+                  <Label>캘린더 색상</Label>
+                  <div className="flex gap-2 flex-wrap">
+                    {PRESET_COLORS.map((color) => (
+                      <button
+                        key={color}
+                        type="button"
+                        className={`w-8 h-8 rounded-md border-2 transition-all ${
+                          !isEditCustomColor && editColor === color
+                            ? 'border-gray-900 scale-110'
+                            : 'border-gray-300'
+                        }`}
+                        style={{ backgroundColor: color }}
+                        onClick={() => {
+                          setEditColor(color);
+                          setIsEditCustomColor(false);
+                        }}
+                        aria-label={`색상 ${color} 선택`}
+                      />
+                    ))}
+
+                    {/* 커스텀 색상 선택 */}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button
+                          type="button"
+                          className={`w-8 h-8 rounded-md border-2 transition-all flex items-center justify-center ${
+                            isEditCustomColor
+                              ? 'border-gray-900 scale-110'
+                              : 'border-gray-300'
+                          }`}
+                          style={{
+                            backgroundColor: isEditCustomColor
+                              ? editCustomColor
+                              : '#ffffff',
+                          }}
+                        >
+                          {!isEditCustomColor && (
+                            <Plus className="w-4 h-4 text-gray-500" />
+                          )}
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-3">
+                        <div className="flex items-center gap-2">
+                          <Label htmlFor="edit-custom-color">색상 선택:</Label>
+                          <input
+                            id="edit-custom-color"
+                            type="color"
+                            value={editCustomColor}
+                            onChange={(e) => {
+                              setEditCustomColor(e.target.value);
+                              setEditColor(e.target.value);
+                              setIsEditCustomColor(true);
+                            }}
+                            className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
+                          />
+                        </div>
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
               <DialogFooter>

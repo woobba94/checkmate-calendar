@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMemo } from 'react';
 import { getCalendars, createCalendar } from '@/services/calendarService';
 import type { Calendar } from '@/types/calendar';
 
@@ -23,11 +24,15 @@ export function useCalendars(userId: string) {
   const createCalendarMutation = useMutation({
     mutationFn: ({
       name,
+      color,
+      inviteEmails,
       description,
     }: {
       name: string;
+      color: string;
+      inviteEmails: string[];
       description?: string;
-    }) => createCalendar(name, description, userId),
+    }) => createCalendar(name, color, inviteEmails, description, userId),
     onSuccess: (newCalendar) => {
       // cache를 optimistic하게 업데이트
       queryClient.setQueryData(
@@ -39,8 +44,16 @@ export function useCalendars(userId: string) {
     },
   });
 
+  // 캘린더를 이름순으로 정렬
+  const sortedCalendars = useMemo(() => {
+    if (!calendars) return [];
+    return [...calendars].sort((a, b) =>
+      a.name.localeCompare(b.name, 'ko', { numeric: true })
+    );
+  }, [calendars]);
+
   return {
-    calendars: calendars ?? [],
+    calendars: sortedCalendars,
     isLoading,
     error,
     createCalendar: createCalendarMutation.mutateAsync,

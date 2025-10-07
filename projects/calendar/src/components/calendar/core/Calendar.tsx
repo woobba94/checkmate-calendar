@@ -1,10 +1,20 @@
-import React, { useRef, useEffect, useCallback, useState } from 'react';
+import React, {
+  useRef,
+  useEffect,
+  useCallback,
+  useState,
+  useMemo,
+} from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
-import type { CalendarEvent, CalendarViewType } from '@/types/calendar';
+import type {
+  CalendarEvent,
+  CalendarViewType,
+  Calendar as CalendarType,
+} from '@/types/calendar';
 import { useResizeObserver } from '@/hooks/useResizeObserver';
 import { useThrottledCallback } from '@/hooks/useThrottledCallback';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -12,6 +22,7 @@ import './Calendar.scss';
 
 interface CalendarProps {
   events: CalendarEvent[];
+  calendars?: CalendarType[];
   onEventClick?: (event: CalendarEvent) => void;
   onDateClick?: (date: Date) => void;
   currentView: CalendarViewType;
@@ -23,6 +34,7 @@ interface CalendarProps {
 
 const Calendar: React.FC<CalendarProps> = ({
   events,
+  calendars,
   onEventClick,
   onDateClick,
   currentView,
@@ -38,6 +50,15 @@ const Calendar: React.FC<CalendarProps> = ({
   const { isMobile } = useResponsive();
   const touchStartXRef = useRef<number>(0);
   const touchStartYRef = useRef<number>(0);
+
+  // 캘린더 맵 생성
+  const calendarMap = useMemo(() => {
+    const map = new Map<string, CalendarType>();
+    calendars?.forEach((cal) => {
+      map.set(cal.id, cal);
+    });
+    return map;
+  }, [calendars]);
 
   // 뷰 타입 매핑
   const getFullCalendarView = (view: CalendarViewType): string => {
@@ -263,24 +284,31 @@ const Calendar: React.FC<CalendarProps> = ({
         initialView={getFullCalendarView(currentView)}
         initialDate={currentDate}
         headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
-        events={events.map((event) => ({
-          id: event.id,
-          title: event.title,
-          start: event.start,
-          end: event.end,
-          allDay: event.allDay,
-          description: event.description,
-          backgroundColor: event.color,
-          // 확장 속성으로 추가 필드 전달
-          extendedProps: {
+        events={events.map((event) => {
+          const calendar = calendarMap.get(event.calendar_id);
+          const eventColor = calendar?.color || event.color || '#e5e5e5';
+
+          return {
+            id: event.id,
+            title: event.title,
+            start: event.start,
+            end: event.end,
+            allDay: event.allDay,
             description: event.description,
-            color: event.color,
-            calendar_id: event.calendar_id,
-            created_by: event.created_by,
-            created_at: event.created_at,
-            updated_at: event.updated_at,
-          },
-        }))}
+            backgroundColor: eventColor,
+            borderColor: eventColor,
+            textColor: '#ffffff', // 색상 대비를 위해 흰색 텍스트
+            // 확장 속성으로 추가 필드 전달
+            extendedProps: {
+              description: event.description,
+              color: eventColor,
+              calendar_id: event.calendar_id,
+              created_by: event.created_by,
+              created_at: event.created_at,
+              updated_at: event.updated_at,
+            },
+          };
+        })}
         eventClick={handleEventClick}
         dateClick={(info) => onDateClick && onDateClick(info.date)}
         editable={!isMobile}
@@ -302,8 +330,9 @@ const Calendar: React.FC<CalendarProps> = ({
         eventContent={
           isMobile
             ? (arg) => {
+                const eventColor = arg.event.backgroundColor || '#e5e5e5';
                 return {
-                  html: `<div class="fc-event-color-bar" style="background-color: ${arg.event.backgroundColor}"></div>`,
+                  html: `<div class="fc-event-color-bar" style="background-color: ${eventColor}"></div>`,
                 };
               }
             : undefined
