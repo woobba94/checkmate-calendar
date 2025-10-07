@@ -1,23 +1,21 @@
-@import '@/styles/color-tokens';
-
 .event-color-bar {
   border-radius: 3px;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  
+
   // 클릭 가능한 경우
   &[role='button'] {
     cursor: pointer;
-    
+
     &:hover {
       transform: scale(1.1);
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
     }
-    
+
     &:active {
       transform: scale(0.95);
     }
-    
+
     &:focus {
       outline: none;
       box-shadow: 0 0 0 2px var(--color-primary-alpha-20);
