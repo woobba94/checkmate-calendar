@@ -34,7 +34,7 @@ import { MobileSidebarWrapper } from '@/components/sidebar/MobileSidebarWrapper'
 import { TodayTomorrowView } from '@/components/calendar/kanban/TodayTomorrowView';
 import { DateEventsPanel } from '@/components/calendar/panels/DateEventsPanel';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { Crosshair, Plus } from 'lucide-react';
+import { Crosshair, Plus, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import {
   Popover,
@@ -68,6 +68,9 @@ const DashboardPage: React.FC = () => {
   const [editCustomColor, setEditCustomColor] = useState('#000000');
   const [isEditCustomColor, setIsEditCustomColor] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
+  const [editInviteEmails, setEditInviteEmails] = useState<string[]>([]);
+  const [editCurrentEmail, setEditCurrentEmail] = useState('');
+  const [editEmailError, setEditEmailError] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(!isMobile);
   const [viewMode, setViewMode] = useState<'month' | 'today-tomorrow'>('month');
@@ -226,6 +229,44 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  // 이메일 검증
+  const validateEmail = (email: string) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  // 수정 모달 이메일 추가
+  const handleEditAddEmail = () => {
+    if (!editCurrentEmail.trim()) return;
+
+    if (!validateEmail(editCurrentEmail)) {
+      setEditEmailError('올바른 이메일 형식이 아닙니다.');
+      return;
+    }
+
+    if (editInviteEmails.includes(editCurrentEmail)) {
+      setEditEmailError('이미 추가된 이메일입니다.');
+      return;
+    }
+
+    setEditInviteEmails([...editInviteEmails, editCurrentEmail]);
+    setEditCurrentEmail('');
+    setEditEmailError('');
+  };
+
+  // 수정 모달 이메일 제거
+  const handleEditRemoveEmail = (email: string) => {
+    setEditInviteEmails(editInviteEmails.filter((e) => e !== email));
+  };
+
+  // 수정 모달 이메일 키 입력
+  const handleEditEmailKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleEditAddEmail();
+    }
+  };
+
   // 사이드바에서 수정 클릭 시
   const onEditCalendar = (calendar: CalendarType) => {
     setEditingCalendar(calendar);
@@ -244,6 +285,11 @@ const DashboardPage: React.FC = () => {
       setEditCustomColor('#000000');
     }
 
+    // 이메일 초대 상태 초기화
+    setEditInviteEmails([]);
+    setEditCurrentEmail('');
+    setEditEmailError('');
+
     setIsEditModalOpen(true);
   };
 
@@ -253,14 +299,22 @@ const DashboardPage: React.FC = () => {
     setEditLoading(true);
     try {
       const finalColor = isEditCustomColor ? editCustomColor : editColor;
-      await updateCalendar(editingCalendar.id, {
-        name: editName,
-        description: editDesc,
-        color: finalColor,
-      });
+      await updateCalendar(
+        editingCalendar.id,
+        {
+          name: editName,
+          description: editDesc,
+          color: finalColor,
+        },
+        editInviteEmails
+      );
       await queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
       setIsEditModalOpen(false);
       setEditingCalendar(null);
+      // 이메일 상태 초기화
+      setEditInviteEmails([]);
+      setEditCurrentEmail('');
+      setEditEmailError('');
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : '캘린더 수정 실패');
     } finally {
@@ -272,6 +326,10 @@ const DashboardPage: React.FC = () => {
   const handleEditCalendarCancel = () => {
     setIsEditModalOpen(false);
     setEditingCalendar(null);
+    // 이메일 상태 초기화
+    setEditInviteEmails([]);
+    setEditCurrentEmail('');
+    setEditEmailError('');
   };
 
   // 오늘 날짜가 현재 월에 포함되어 있는지 확인
@@ -543,6 +601,64 @@ const DashboardPage: React.FC = () => {
                       </PopoverContent>
                     </Popover>
                   </div>
+                </div>
+
+                {/* 멤버 초대 */}
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-invite-email">
+                    멤버 초대 (선택사항)
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="edit-invite-email"
+                      type="email"
+                      placeholder="이메일 주소 입력"
+                      value={editCurrentEmail}
+                      onChange={(e) => {
+                        setEditCurrentEmail(e.target.value);
+                        setEditEmailError('');
+                      }}
+                      onKeyPress={handleEditEmailKeyPress}
+                      disabled={editLoading}
+                    />
+                    <Button
+                      type="button"
+                      onClick={handleEditAddEmail}
+                      disabled={!editCurrentEmail.trim() || editLoading}
+                      variant="outline"
+                    >
+                      추가
+                    </Button>
+                  </div>
+                  {editEmailError && (
+                    <p className="text-sm text-red-500 mt-1">
+                      {editEmailError}
+                    </p>
+                  )}
+
+                  {/* 추가된 이메일 목록 */}
+                  {editInviteEmails.length > 0 && (
+                    <div className="mt-2 space-y-1">
+                      {editInviteEmails.map((email) => (
+                        <div
+                          key={email}
+                          className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
+                        >
+                          <span className="text-sm">{email}</span>
+                          <button
+                            type="button"
+                            onClick={() => handleEditRemoveEmail(email)}
+                            className="text-gray-500 hover:text-gray-700"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      ))}
+                      <p className="text-xs text-gray-500 mt-2">
+                        초대된 멤버들에게 이메일이 발송됩니다.
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
               <DialogFooter>

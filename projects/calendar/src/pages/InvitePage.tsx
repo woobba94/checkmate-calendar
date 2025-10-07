@@ -77,6 +77,14 @@ const InvitePage: React.FC = () => {
     }
   };
 
+  const handleSignupAndAccept = () => {
+    if (!token) return;
+    // 회원가입 페이지로 이동 (redirect 파라미터 포함)
+    navigate(
+      `/signup?redirect=${encodeURIComponent(`/invite?token=${token}`)}`
+    );
+  };
+
   // 로딩 중
   if (isAuthLoading || isLoadingInvitation) {
     return (
@@ -125,15 +133,30 @@ const InvitePage: React.FC = () => {
           {!user ? (
             <>
               <p className="text-sm text-gray-600 text-center mb-4">
-                초대를 수락하려면 로그인이 필요합니다.
+                초대를 수락하려면 계정이 필요합니다.
               </p>
-              <Button
-                onClick={handleAcceptInvitation}
-                className="w-full"
-                size="lg"
-              >
-                로그인하고 초대 수락하기
-              </Button>
+              <div className="space-y-3">
+                <Button
+                  onClick={handleAcceptInvitation}
+                  className="w-full"
+                  size="lg"
+                >
+                  기존 계정으로 로그인
+                </Button>
+                <Button
+                  onClick={handleSignupAndAccept}
+                  variant="outline"
+                  className="w-full"
+                  size="lg"
+                >
+                  새 계정 만들기
+                </Button>
+              </div>
+              <p className="text-xs text-gray-500 text-center mt-2">
+                {invitation?.invitee_email && (
+                  <>초대받은 이메일: <strong>{invitation.invitee_email}</strong></>
+                )}
+              </p>
             </>
           ) : (
             <>
@@ -160,10 +183,10 @@ const InvitePage: React.FC = () => {
 
           <Button
             onClick={() => navigate('/dashboard')}
-            variant="outline"
+            variant="ghost"
             className="w-full"
           >
-            취소
+            나중에 하기
           </Button>
         </div>
       </div>

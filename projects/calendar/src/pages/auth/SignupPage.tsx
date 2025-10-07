@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,11 @@ const SignupPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const navigate = useNavigate();
-  const { signup, isLoading, error } = useAuth();
+  const [searchParams] = useSearchParams();
+  const { signup, login, isLoading, error } = useAuth();
+  
+  // redirect 파라미터 읽기
+  const redirect = searchParams.get('redirect') || '/';
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,10 +27,20 @@ const SignupPage: React.FC = () => {
       return;
     }
     try {
+      // 회원가입
       await signup(email, password);
-      navigate('/login', {
-        state: { message: 'Account created successfully. Please log in.' },
-      });
+      
+      // 자동 로그인 시도
+      try {
+        await login(email, password);
+        // 로그인 성공 시 redirect 페이지로 이동
+        navigate(redirect);
+      } catch (loginError) {
+        // 자동 로그인 실패 시 로그인 페이지로 이동
+        navigate(`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`, {
+          state: { message: '회원가입이 완료되었습니다. 로그인해주세요.' },
+        });
+      }
     } catch {
       // 에러는 useAuth에서 관리
     }
@@ -92,7 +106,7 @@ const SignupPage: React.FC = () => {
         </Button>
         <div className="mt-2.5 text-center text-[15px]">
           <Link
-            to="/login"
+            to={`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`}
             className="text-[var(--accent-color)] no-underline font-medium hover:underline"
           >
             로그인

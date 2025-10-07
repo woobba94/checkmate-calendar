@@ -16,18 +16,11 @@ interface InvitationRequest {
 }
 
 serve(async (req) => {
-  // CORS 처리
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    // Supabase 클라이언트 생성
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-    const supabase = createClient(supabaseUrl, supabaseServiceKey);
-
-    // 요청 본문 파싱
     const {
       calendarId,
       calendarName,
@@ -36,10 +29,22 @@ serve(async (req) => {
       invitationToken,
     } = (await req.json()) as InvitationRequest;
 
-    // 초대 링크 생성
+    console.log('[send-calendar-invitation] 요청 데이터:', {
+      calendarId,
+      calendarName,
+      inviterName,
+      inviteeEmail,
+      invitationToken: invitationToken?.substring(0, 8) + '...',
+    });
+
+    // 환경 변수 확인
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    if (!resendApiKey) {
+      throw new Error('RESEND_API_KEY 환경 변수가 설정되지 않았습니다.');
+    }
+
     const inviteLink = `https://app.checkmate-calendar.com/invite?token=${invitationToken}`;
 
-    // 이메일 HTML 템플릿
     const emailHtml = `
       <!DOCTYPE html>
       <html>
@@ -78,7 +83,6 @@ serve(async (req) => {
       </html>
     `;
 
-    // 이메일 텍스트 버전
     const emailText = `
 CheckMate Calendar 초대
 
@@ -92,29 +96,47 @@ ${inviteLink}
 이 초대는 CheckMate Calendar에서 발송되었습니다.
     `;
 
-    // TODO: 실제 이메일 발송 로직 구현
-    // 예시: SendGrid, Resend, AWS SES 등 사용
-    // const response = await fetch('https://api.resend.com/emails', {
-    //   method: 'POST',
-    //   headers: {
-    //     'Authorization': `Bearer ${Deno.env.get('RESEND_API_KEY')}`,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({
-    //     from: 'CheckMate Calendar <noreply@checkmate-calendar.com>',
-    //     to: inviteeEmail,
-    //     subject: `${inviterName}님이 "${calendarName}" 캘린더에 초대했습니다`,
-    //     html: emailHtml,
-    //     text: emailText,
-    //   }),
-    // })
+    // Resend를 사용한 이메일 발송
+    const emailPayload = {
+      from: 'CheckMate Calendar <noreply@mail.checkmate-calendar.com>',
+      to: inviteeEmail,
+      subject: `${inviterName}님이 "${calendarName}" 캘린더에 초대했습니다`,
+      html: emailHtml,
+      text: emailText,
+    };
 
-    // 임시로 성공 응답 반환
+    console.log('[send-calendar-invitation] Resend API 호출 시작');
+    console.log('[send-calendar-invitation] 이메일 발송 대상:', inviteeEmail);
+
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${resendApiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailPayload),
+    });
+
+    const result = await response.json();
+
+    console.log('[send-calendar-invitation] Resend API 응답:', {
+      status: response.status,
+      ok: response.ok,
+      result,
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `이메일 발송 실패: ${result.message || result.error || JSON.stringify(result)}`
+      );
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
         message: '초대 이메일이 발송되었습니다.',
         inviteLink,
+        emailId: result.id,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -122,10 +144,17 @@ ${inviteLink}
       }
     );
   } catch (error) {
+    console.error('[send-calendar-invitation] ❌ 에러 발생:', {
+      message: error.message,
+      stack: error.stack,
+      error: error,
+    });
+
     return new Response(
       JSON.stringify({
         success: false,
         error: error.message,
+        details: error.toString(),
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

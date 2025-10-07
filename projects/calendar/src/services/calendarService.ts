@@ -46,24 +46,75 @@ export const createCalendar = async (
 
   // 이메일 초대 처리
   if (inviteEmails.length > 0) {
-    const invitations = inviteEmails.map((email) => ({
+    console.log('[createCalendar] 이메일 초대 처리 시작:', inviteEmails);
+
+    // 초대자 정보 가져오기
+    const { data: userData } = await supabase.auth.getUser();
+    const inviterName =
+      userData?.user?.user_metadata?.name || userData?.user?.email || '사용자';
+
+    console.log('[createCalendar] 초대자 정보:', { inviterName, validUserId });
+
+    // 초대장 생성 및 DB 저장
+    const invitationsWithTokens = inviteEmails.map((email) => ({
       calendar_id: calendar.id,
       inviter_id: validUserId,
       invitee_email: email,
-      role: 'member',
+      role: 'member' as const,
+      invitation_token: crypto.randomUUID(), // 토큰 생성
+      status: 'pending' as const,
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7일 후 만료
     }));
 
-    const { error: inviteError } = await supabase
+    console.log(
+      '[createCalendar] 초대장 생성 시도:',
+      invitationsWithTokens.length,
+      '건'
+    );
+
+    // RLS 정책 문제 회피를 위해 select() 제거
+    const { data: createdInvitations, error: inviteError } = await supabase
       .from('calendar_invitations')
-      .insert(invitations);
+      .insert(invitationsWithTokens);
 
     if (inviteError) {
-      console.error('Failed to create invitations:', inviteError);
+      console.error('[createCalendar] ❌ 초대장 DB 저장 실패:', inviteError);
       // 초대 실패는 캘린더 생성을 막지 않음
-    }
+    } else {
+      console.log(
+        '[createCalendar] ✅ 초대장 DB 저장 성공 (추정):',
+        invitationsWithTokens.length,
+        '건'
+      );
 
-    // TODO: 실제 이메일 발송 로직 구현
-    // Supabase Edge Function 또는 백엔드 API를 통해 이메일 발송
+      // 각 초대에 대해 이메일 발송 (select() 없이 직접 처리)
+      for (const invitation of invitationsWithTokens) {
+        try {
+          console.log(
+            '[createCalendar] 이메일 발송 시도:',
+            invitation.invitee_email
+          );
+          await sendCalendarInvitation(
+            calendar.id,
+            calendar.name,
+            inviterName,
+            invitation.invitee_email,
+            invitation.invitation_token
+          );
+          console.log(
+            '[createCalendar] ✅ 이메일 발송 성공:',
+            invitation.invitee_email
+          );
+        } catch (emailError) {
+          console.error(
+            `[createCalendar] ❌ 이메일 발송 실패 (${invitation.invitee_email}):`,
+            emailError
+          );
+          // 이메일 발송 실패는 캘린더 생성을 막지 않음
+        }
+      }
+    }
   }
 
   return calendar;
@@ -100,7 +151,8 @@ export const getCalendarById = async (
 // 캘린더 업데이트
 export const updateCalendar = async (
   calendarId: string,
-  updates: Partial<Pick<Calendar, 'name' | 'description' | 'color'>>
+  updates: Partial<Pick<Calendar, 'name' | 'description' | 'color'>>,
+  inviteEmails: string[] = []
 ): Promise<Calendar> => {
   const { data, error } = await supabase
     .from('calendars')
@@ -114,6 +166,84 @@ export const updateCalendar = async (
 
   if (error) {
     throw new Error(`Failed to update calendar: ${error.message}`);
+  }
+
+  // 이메일 초대 처리
+  if (inviteEmails.length > 0) {
+    console.log('[updateCalendar] 이메일 초대 처리 시작:', inviteEmails);
+
+    // 초대자 정보 가져오기
+    const { data: userData } = await supabase.auth.getUser();
+    const inviterName =
+      userData?.user?.user_metadata?.name || userData?.user?.email || '사용자';
+    const validUserId = userData?.user?.id;
+
+    console.log('[updateCalendar] 초대자 정보:', { inviterName, validUserId });
+
+    if (!validUserId) {
+      throw new Error('User not authenticated');
+    }
+
+    // 초대장 생성 및 DB 저장
+    const invitationsWithTokens = inviteEmails.map((email) => ({
+      calendar_id: calendarId,
+      inviter_id: validUserId,
+      invitee_email: email,
+      role: 'member' as const,
+      invitation_token: crypto.randomUUID(), // 토큰 생성
+      status: 'pending' as const,
+      created_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7일 후 만료
+    }));
+
+    console.log(
+      '[updateCalendar] 초대장 생성 시도:',
+      invitationsWithTokens.length,
+      '건'
+    );
+
+    // RLS 정책 문제 회피를 위해 select() 제거
+    const { data: createdInvitations, error: inviteError } = await supabase
+      .from('calendar_invitations')
+      .insert(invitationsWithTokens);
+
+    if (inviteError) {
+      console.error('[updateCalendar] ❌ 초대장 DB 저장 실패:', inviteError);
+      // 초대 실패는 캘린더 수정을 막지 않음
+    } else {
+      console.log(
+        '[updateCalendar] ✅ 초대장 DB 저장 성공 (추정):',
+        invitationsWithTokens.length,
+        '건'
+      );
+
+      // 각 초대에 대해 이메일 발송 (select() 없이 직접 처리)
+      for (const invitation of invitationsWithTokens) {
+        try {
+          console.log(
+            '[updateCalendar] 이메일 발송 시도:',
+            invitation.invitee_email
+          );
+          await sendCalendarInvitation(
+            calendarId,
+            data.name,
+            inviterName,
+            invitation.invitee_email,
+            invitation.invitation_token
+          );
+          console.log(
+            '[updateCalendar] ✅ 이메일 발송 성공:',
+            invitation.invitee_email
+          );
+        } catch (emailError) {
+          console.error(
+            `[updateCalendar] ❌ 이메일 발송 실패 (${invitation.invitee_email}):`,
+            emailError
+          );
+          // 이메일 발송 실패는 캘린더 수정을 막지 않음
+        }
+      }
+    }
   }
 
   return data;
@@ -297,7 +427,7 @@ export const getInvitationByToken = async (
     invitee_email: data.invitee_email,
     role: data.role,
     status: data.status,
-    calendar_name: data.calendars.name,
+    calendar_name: (data.calendars as any).name,
   };
 };
 
@@ -353,4 +483,46 @@ export const acceptInvitation = async (
   }
 
   return invitation.calendar_id;
+};
+
+// 이메일 초대 발송
+export const sendCalendarInvitation = async (
+  calendarId: string,
+  calendarName: string,
+  inviterName: string,
+  inviteeEmail: string,
+  invitationToken: string
+): Promise<void> => {
+  console.log('[sendCalendarInvitation] Edge Function 호출 시작:', {
+    calendarId,
+    calendarName,
+    inviterName,
+    inviteeEmail,
+    invitationToken: invitationToken.substring(0, 8) + '...',
+  });
+
+  const { data, error } = await supabase.functions.invoke(
+    'send-calendar-invitation',
+    {
+      body: {
+        calendarId,
+        calendarName,
+        inviterName,
+        inviteeEmail,
+        invitationToken,
+      },
+    }
+  );
+
+  if (error) {
+    console.error('[sendCalendarInvitation] ❌ Edge Function 에러:', error);
+    console.error('[sendCalendarInvitation] ❌ 응답 데이터:', data);
+
+    // Edge Function의 실제 에러 메시지를 확인
+    const errorMessage = data?.error || error.message;
+    throw new Error(`Failed to send invitation: ${errorMessage}`);
+  }
+
+  console.log('[sendCalendarInvitation] ✅ Edge Function 응답:', data);
+  return data;
 };
