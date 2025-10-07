@@ -23,6 +23,7 @@ interface AppSidebarProps {
   onCalendarChange: (calendarId: string, checked: boolean) => void;
   onCreateCalendarClick: () => void;
   onEditCalendar: (calendar: CalendarType) => void;
+  onDeleteCalendar: (calendar: CalendarType) => void;
   user?: User | null;
   logout?: () => void;
   colorMode: 'light' | 'dark';
@@ -35,6 +36,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
   onCalendarChange,
   onCreateCalendarClick,
   onEditCalendar,
+  onDeleteCalendar,
   user,
   logout,
   colorMode,
@@ -74,6 +76,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
             onCalendarChange={onCalendarChange}
             onCreateCalendarClick={onCreateCalendarClick}
             onEditCalendar={onEditCalendar}
+            onDeleteCalendar={onDeleteCalendar}
           />
           <div className="mt-4 flex flex-col gap-2">
             <GoogleCalendarIntegration />

@@ -19,6 +19,7 @@ interface CalendarSelectorProps {
   onCalendarChange: (calendarId: string, checked: boolean) => void;
   onCreateCalendarClick: () => void;
   onEditCalendar: (calendar: CalendarType) => void;
+  onDeleteCalendar: (calendar: CalendarType) => void;
 }
 
 const CalendarSelector: React.FC<CalendarSelectorProps> = ({
@@ -27,6 +28,7 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
   onCalendarChange,
   onCreateCalendarClick,
   onEditCalendar,
+  onDeleteCalendar,
 }) => {
   return (
     <div className="flex flex-col gap-3">
@@ -100,7 +102,10 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                       <Edit className="mr-2 h-4 w-4" />
                       <span>수정</span>
                     </DropdownMenuItem>
-                    <DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => onDeleteCalendar(calendar)}
+                      className="text-red-600 focus:text-red-600"
+                    >
                       <Trash className="mr-2 h-4 w-4" />
                       <span>삭제</span>
                     </DropdownMenuItem>

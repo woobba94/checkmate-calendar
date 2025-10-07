@@ -12,7 +12,7 @@ import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModa
 import AgentPanel from '@/components/agent/AgentPanel';
 import { AgentProvider } from '@/contexts/AgentContext';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
-import { updateCalendar } from '@/services/calendarService';
+import { updateCalendar, deleteCalendar } from '@/services/calendarService';
 import { useQueryClient } from '@tanstack/react-query';
 import { useCalendars } from '@/hooks/useCalendars';
 import { useEventsByCalendars } from '@/hooks/useEventsByCalendars';
@@ -78,6 +78,11 @@ const DashboardPage: React.FC = () => {
     null
   );
   const [isDatePanelOpen, setIsDatePanelOpen] = useState(false);
+  const [deletingCalendar, setDeletingCalendar] = useState<CalendarType | null>(
+    null
+  );
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
   // 캘린더 데이터
@@ -332,6 +337,41 @@ const DashboardPage: React.FC = () => {
     setEditEmailError('');
   };
 
+  // 캘린더 삭제 클릭 시
+  const onDeleteCalendar = (calendar: CalendarType) => {
+    setDeletingCalendar(calendar);
+    setIsDeleteDialogOpen(true);
+  };
+
+  // 캘린더 삭제 확인
+  const handleDeleteCalendar = async () => {
+    if (!deletingCalendar) return;
+
+    setIsDeleting(true);
+    try {
+      await deleteCalendar(deletingCalendar.id);
+      await queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
+
+      // 삭제된 캘린더가 선택되어 있으면 선택 해제
+      setSelectedCalendarIds((prev) =>
+        prev.filter((id) => id !== deletingCalendar.id)
+      );
+
+      setIsDeleteDialogOpen(false);
+      setDeletingCalendar(null);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : '캘린더 삭제 실패');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // 캘린더 삭제 취소
+  const handleDeleteCalendarCancel = () => {
+    setIsDeleteDialogOpen(false);
+    setDeletingCalendar(null);
+  };
+
   // 오늘 날짜가 현재 월에 포함되어 있는지 확인
   const isTodayInCurrentMonth = useMemo(() => {
     const today = new Date();
@@ -430,6 +470,7 @@ const DashboardPage: React.FC = () => {
               onCalendarChange={handleCalendarToggle}
               onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
               onEditCalendar={onEditCalendar}
+              onDeleteCalendar={onDeleteCalendar}
               user={user}
               logout={logout}
               colorMode={theme || 'light'}
@@ -449,6 +490,7 @@ const DashboardPage: React.FC = () => {
                 onCalendarChange={handleCalendarToggle}
                 onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
                 onEditCalendar={onEditCalendar}
+                onDeleteCalendar={onDeleteCalendar}
                 user={user}
                 logout={logout}
                 colorMode={theme || 'light'}
@@ -777,6 +819,46 @@ const DashboardPage: React.FC = () => {
           onClose={() => setIsCalendarModalOpen(false)}
           onCreateCalendar={handleCreateCalendar}
         />
+
+        {/* 삭제 확인 다이얼로그 */}
+        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <DialogContent className="sm:max-w-[425px]">
+            <DialogHeader>
+              <DialogTitle>캘린더 삭제</DialogTitle>
+              <DialogDescription>
+                정말로 이 캘린더를 삭제하시겠습니까?
+                <br />
+                <strong className="text-foreground">
+                  {deletingCalendar?.name}
+                </strong>
+                <br />
+                <br />
+                <span className="text-red-600">
+                  이 작업은 되돌릴 수 없으며, 캘린더와 모든 일정이 영구적으로
+                  삭제됩니다.
+                </span>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                type="button"
+                onClick={handleDeleteCalendarCancel}
+                variant="outline"
+                disabled={isDeleting}
+              >
+                취소
+              </Button>
+              <Button
+                type="button"
+                onClick={handleDeleteCalendar}
+                variant="destructive"
+                disabled={isDeleting}
+              >
+                {isDeleting ? '삭제 중...' : '삭제'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </Layout>
   );
