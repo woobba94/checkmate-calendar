@@ -58,6 +58,7 @@ export const createCalendar = async (
     // 초대장 생성 및 DB 저장
     const invitationsWithTokens = inviteEmails.map((email) => ({
       calendar_id: calendar.id,
+      calendar_name: calendar.name,
       inviter_id: validUserId,
       invitee_email: email,
       role: 'member' as const,
@@ -187,6 +188,7 @@ export const updateCalendar = async (
     // 초대장 생성 및 DB 저장
     const invitationsWithTokens = inviteEmails.map((email) => ({
       calendar_id: calendarId,
+      calendar_name: data.name, // 캘린더 이름 추가
       inviter_id: validUserId,
       invitee_email: email,
       role: 'member' as const,
@@ -401,16 +403,7 @@ export const getInvitationByToken = async (
 } | null> => {
   const { data, error } = await supabase
     .from('calendar_invitations')
-    .select(
-      `
-      id,
-      calendar_id,
-      invitee_email,
-      role,
-      status,
-      calendars!inner(name)
-    `
-    )
+    .select('id, calendar_id, calendar_name, invitee_email, role, status')
     .eq('invitation_token', token)
     .single();
 
@@ -427,7 +420,7 @@ export const getInvitationByToken = async (
     invitee_email: data.invitee_email,
     role: data.role,
     status: data.status,
-    calendar_name: (data.calendars as any).name,
+    calendar_name: data.calendar_name || '캘린더',
   };
 };
 
