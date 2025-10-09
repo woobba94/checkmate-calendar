@@ -12,7 +12,7 @@ const SignupPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { signup, login, isLoading, error } = useAuth();
-  
+
   // redirect 파라미터 읽기
   const redirect = searchParams.get('redirect') || '/';
 
@@ -29,18 +29,11 @@ const SignupPage: React.FC = () => {
     try {
       // 회원가입
       await signup(email, password);
-      
-      // 자동 로그인 시도
-      try {
-        await login(email, password);
-        // 로그인 성공 시 redirect 페이지로 이동
-        navigate(redirect);
-      } catch (loginError) {
-        // 자동 로그인 실패 시 로그인 페이지로 이동
-        navigate(`/login${redirect !== '/' ? `?redirect=${encodeURIComponent(redirect)}` : ''}`, {
-          state: { message: '회원가입이 완료되었습니다. 로그인해주세요.' },
-        });
-      }
+
+      // 이메일 인증 페이지로 이동
+      navigate(
+        `/email-verification?email=${encodeURIComponent(email)}&redirect=${encodeURIComponent(redirect)}`
+      );
     } catch {
       // 에러는 useAuth에서 관리
     }

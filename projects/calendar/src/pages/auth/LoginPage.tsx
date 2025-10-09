@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import {
+  Link,
+  useNavigate,
+  useSearchParams,
+  useLocation,
+} from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,11 +14,15 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
   const [searchParams] = useSearchParams();
   const { user, login, isLoading, error } = useAuth();
 
   // redirect 파라미터 읽기
   const redirect = searchParams.get('redirect') || '/';
+
+  // location state에서 메시지 읽기
+  const stateMessage = location.state?.message;
 
   useEffect(() => {
     if (user) {
@@ -44,6 +53,11 @@ const LoginPage: React.FC = () => {
         <h2 className="mb-2 text-[2rem] text-[var(--accent-color)] text-center">
           로그인
         </h2>
+        {stateMessage && (
+          <div className="bg-green-50 border border-green-200 text-green-800 rounded-md px-3 py-2.5 text-[15px] text-center">
+            {stateMessage}
+          </div>
+        )}
         <div className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">이메일</Label>

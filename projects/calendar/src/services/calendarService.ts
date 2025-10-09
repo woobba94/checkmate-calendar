@@ -432,50 +432,30 @@ export const acceptInvitation = async (
   // userId 확인
   const validUserId = await ensureUserId(userId);
 
-  // 초대 정보 조회
-  const invitation = await getInvitationByToken(invitationToken);
+  // Supabase RPC 함수를 사용해 초대 수락 처리
+  // 이 함수는 이메일 검증과 트랜잭션 처리를 모두 수행
+  const { data, error } = await supabase.rpc('accept_calendar_invitation', {
+    p_invitation_token: invitationToken,
+    p_user_id: validUserId,
+  });
 
-  if (!invitation) {
-    throw new Error('유효하지 않은 초대 링크입니다.');
-  }
-
-  if (invitation.status === 'accepted') {
-    return invitation.calendar_id; // 이미 수락됨
-  }
-
-  // 트랜잭션 처리가 이상적이지만, Supabase 클라이언트에서는 제한적
-  // 1. 초대 상태 업데이트
-  const { error: updateError } = await supabase
-    .from('calendar_invitations')
-    .update({
-      status: 'accepted',
-      accepted_at: new Date().toISOString(),
-      accepted_by: validUserId,
-    })
-    .eq('invitation_token', invitationToken);
-
-  if (updateError) {
-    throw new Error(`Failed to accept invitation: ${updateError.message}`);
-  }
-
-  // 2. 캘린더 멤버로 추가
-  const { error: memberError } = await supabase
-    .from('calendar_members')
-    .insert({
-      calendar_id: invitation.calendar_id,
-      user_id: validUserId,
-      role: invitation.role,
-    });
-
-  if (memberError) {
-    // 이미 멤버인 경우 무시
-    if (memberError.code !== '23505') {
-      // unique violation
-      throw new Error(`Failed to add member: ${memberError.message}`);
+  if (error) {
+    // 에러 메시지를 더 친화적으로 변환
+    if (error.message.includes('different email')) {
+      throw new Error('초대받은 이메일 계정만 수락가능합니다.');
+    } else if (error.message.includes('not found or expired')) {
+      throw new Error('초대가 만료되었거나 유효하지 않습니다.');
+    } else if (error.message.includes('User not found')) {
+      throw new Error('사용자를 찾을 수 없습니다.');
     }
+    throw new Error(`초대 수락 중 오류가 발생했습니다: ${error.message}`);
   }
 
-  return invitation.calendar_id;
+  if (!data) {
+    throw new Error('초대 수락에 실패했습니다.');
+  }
+
+  return data; // calendar_id 반환
 };
 
 // 이메일 초대 발송
