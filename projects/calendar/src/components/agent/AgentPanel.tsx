@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useResponsive } from '@/hooks/useResponsive';
 import { cn } from '@/lib/utils';
+import { useAgent } from '@/contexts/AgentContext';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import AgentHistory from './AgentHistory';
 import AgentInput from './AgentInput';
 import './AgentPanel.scss';
@@ -11,6 +14,7 @@ interface AgentPanelProps {
 
 const AgentPanel: React.FC<AgentPanelProps> = ({ className }) => {
   const { isMobile } = useResponsive();
+  const { state } = useAgent();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
 
@@ -102,6 +106,12 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ className }) => {
   // 데스크톱 레이아웃
   return (
     <div className={cn('flex flex-col h-full py-2 pr-2', className)}>
+      {state.error && (
+        <Alert variant="destructive" className="mb-2">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{state.error}</AlertDescription>
+        </Alert>
+      )}
       <AgentHistory />
       <AgentInput />
     </div>

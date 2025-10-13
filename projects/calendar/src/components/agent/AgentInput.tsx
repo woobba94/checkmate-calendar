@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Paperclip, Mic, ArrowUp } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { Paperclip, Mic, ArrowUp, Square } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAgent } from '@/contexts/AgentContext';
 import { useResponsive } from '@/hooks/useResponsive';
@@ -18,24 +18,25 @@ const AgentInput: React.FC<AgentInputProps> = ({
 }) => {
   const { isMobile } = useResponsive();
   const [inputValue, setInputValue] = useState('');
-  const { sendMessage, state } = useAgent();
-  const { isLoading } = state;
+  const { sendMessage, state, stopStreaming } = useAgent();
+  const { isLoading, streamingMessageId } = state;
 
-  const handleSend = () => {
-    if (inputValue.trim() && !isLoading) {
-      sendMessage(inputValue.trim());
+  const handleSend = useCallback(() => {
+    const trimmedValue = inputValue.trim();
+    if (trimmedValue && !isLoading) {
+      sendMessage(trimmedValue);
       setInputValue('');
     }
-  };
+  }, [inputValue, isLoading, sendMessage]);
 
   const handleAttachment = () => {
     // TODO: 파일 첨부 로직
-    console.log('Attach file');
+    // 미구현 기능 - 향후 구현 예정
   };
 
   const handleRecord = () => {
     // TODO: 녹음 로직
-    console.log('Start recording');
+    // 미구현 기능 - 향후 구현 예정
   };
 
   return (
@@ -58,7 +59,7 @@ const AgentInput: React.FC<AgentInputProps> = ({
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="추가하고 싶은 일정을 입력하세요."
+          placeholder="일정 관련 요청을 입력하세요. 예: 내일 오후 2시 회의 추가"
           className="w-full border-0 outline-none bg-transparent text-sm leading-normal placeholder:text-[var(--base-muted-foreground,#6B7280)]"
           style={{
             color: 'var(--base-foreground)',
@@ -77,7 +78,7 @@ const AgentInput: React.FC<AgentInputProps> = ({
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="추가하고 싶은 일정을 입력하세요."
+          placeholder="일정 관련 요청을 입력하세요. 예: 내일 오후 2시 회의 추가"
           className="w-full flex-1 resize-none border-0 outline-none bg-transparent text-sm leading-normal placeholder:text-[var(--base-muted-foreground,#6B7280)]"
           style={{
             color: 'var(--base-foreground)',
@@ -123,16 +124,28 @@ const AgentInput: React.FC<AgentInputProps> = ({
           </Button>
         </div>
 
-        <Button
-          onClick={handleSend}
-          variant={inputValue.trim() ? 'default' : 'ghost'}
-          size="icon"
-          className="rounded-full h-8 w-8"
-          aria-label="전송"
-          disabled={!inputValue.trim() || isLoading}
-        >
-          <ArrowUp size={18} />
-        </Button>
+        {streamingMessageId ? (
+          <Button
+            onClick={stopStreaming}
+            variant="destructive"
+            size="icon"
+            className="rounded-full h-8 w-8"
+            aria-label="중단"
+          >
+            <Square size={16} />
+          </Button>
+        ) : (
+          <Button
+            onClick={handleSend}
+            variant={inputValue.trim() ? 'default' : 'ghost'}
+            size="icon"
+            className="rounded-full h-8 w-8"
+            aria-label="전송"
+            disabled={!inputValue.trim() || isLoading}
+          >
+            <ArrowUp size={18} />
+          </Button>
+        )}
       </div>
     </div>
   );

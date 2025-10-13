@@ -3,13 +3,24 @@ import React, {
   useContext,
   useReducer,
   useCallback,
+  useRef,
 } from 'react';
-import type { Message, ConversationState } from '@/types/agent';
+import type {
+  Message,
+  ConversationState,
+  UserContext,
+  ToolCall,
+} from '@/types/agent';
+import { AgentService } from '@/services/agentService';
+import { supabase } from '@/services/supabase';
+import { useAuth } from '@/hooks/useAuth';
+import { useCalendars } from '@/hooks/useCalendars';
 
 interface AgentContextType {
   state: ConversationState;
-  sendMessage: (content: string) => void;
+  sendMessage: (content: string) => Promise<void>;
   clearMessages: () => void;
+  stopStreaming: () => void;
 }
 
 type AgentAction =
@@ -20,12 +31,15 @@ type AgentAction =
     }
   | { type: 'SET_LOADING'; payload: boolean }
   | { type: 'SET_ERROR'; payload: string | null }
-  | { type: 'CLEAR_MESSAGES' };
+  | { type: 'CLEAR_MESSAGES' }
+  | { type: 'SET_STREAMING_MESSAGE_ID'; payload: string | undefined }
+  | { type: 'APPEND_TO_MESSAGE'; payload: { id: string; content: string } };
 
 const initialState: ConversationState = {
   messages: [],
   isLoading: false,
   error: null,
+  streamingMessageId: undefined,
 };
 
 function agentReducer(
@@ -62,6 +76,21 @@ function agentReducer(
         ...state,
         messages: [],
         error: null,
+        streamingMessageId: undefined,
+      };
+    case 'SET_STREAMING_MESSAGE_ID':
+      return {
+        ...state,
+        streamingMessageId: action.payload,
+      };
+    case 'APPEND_TO_MESSAGE':
+      return {
+        ...state,
+        messages: state.messages.map((msg) =>
+          msg.id === action.payload.id
+            ? { ...msg, content: msg.content + action.payload.content }
+            : msg
+        ),
       };
     default:
       return state;
@@ -72,54 +101,210 @@ const AgentContext = createContext<AgentContextType | null>(null);
 
 export function AgentProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(agentReducer, initialState);
+  const { user } = useAuth();
+  const { calendars: allCalendars } = useCalendars(user?.id || '');
+  const agentServiceRef = useRef<AgentService | null>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
 
-  const sendMessage = useCallback(async (content: string) => {
-    // 사용자 메시지 생성
-    const userMessage: Message = {
-      id: `msg-${Date.now()}`,
-      role: 'user',
-      content,
-      createdAt: new Date().toISOString(),
-      status: 'sent',
-    };
+  // AgentService 인스턴스 생성
+  if (!agentServiceRef.current) {
+    agentServiceRef.current = new AgentService(supabase);
+  }
 
-    dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
-    dispatch({ type: 'SET_LOADING', payload: true });
-    dispatch({ type: 'SET_ERROR', payload: null });
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!user) {
+        dispatch({
+          type: 'SET_ERROR',
+          payload: '로그인이 필요합니다.',
+        });
+        return;
+      }
 
-    try {
-      // TODO: 실제 서버 호출 구현
-      // 현재는 응답을 시뮬레이션
-      setTimeout(() => {
-        const assistantMessage: Message = {
-          id: `msg-${Date.now() + 1}`,
-          role: 'assistant',
-          content:
-            '네, 일정을 추가하는 것을 도와드리겠습니다. 어떤 일정을 추가하시겠습니까?',
-          createdAt: new Date().toISOString(),
-          status: 'sent',
-        };
-        dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }, 1000);
-    } catch (error) {
+      // 이전 스트리밍 중단
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+      abortControllerRef.current = new AbortController();
+
+      // 사용자 메시지 추가
+      const userMessage: Message = {
+        id: `msg-${Date.now()}`,
+        role: 'user',
+        content,
+        createdAt: new Date().toISOString(),
+        status: 'sent',
+      };
+
+      dispatch({ type: 'ADD_MESSAGE', payload: userMessage });
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+
+      // 어시스턴트 메시지 준비
+      const assistantMessageId = `msg-${Date.now() + 1}`;
+      const assistantMessage: Message = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        createdAt: new Date().toISOString(),
+        status: 'streaming',
+        toolCalls: [],
+      };
+
+      dispatch({ type: 'ADD_MESSAGE', payload: assistantMessage });
       dispatch({
-        type: 'SET_ERROR',
-        payload:
-          error instanceof Error
-            ? error.message
-            : '메시지 전송 중 오류가 발생했습니다.',
+        type: 'SET_STREAMING_MESSAGE_ID',
+        payload: assistantMessageId,
       });
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  }, []);
+
+      try {
+        // 사용자 컨텍스트 생성
+        const userContext: UserContext = {
+          userId: user.id,
+          currentDate: new Date().toISOString(),
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          activeCalendarId: allCalendars?.[0]?.id,
+          calendarIds: allCalendars?.map((cal) => cal.id) || [],
+          calendars:
+            allCalendars?.map((cal) => ({
+              id: cal.id,
+              name: cal.name,
+              color: cal.color,
+            })) || [],
+        };
+
+        // 스트리밍 응답 처리
+        const agentService = agentServiceRef.current!;
+
+        for await (const response of agentService.sendMessage(
+          content,
+          state.messages,
+          userContext
+        )) {
+          // 중단 확인
+          if (abortControllerRef.current?.signal.aborted) {
+            break;
+          }
+
+          switch (response.type) {
+            case 'text':
+              dispatch({
+                type: 'APPEND_TO_MESSAGE',
+                payload: {
+                  id: assistantMessageId,
+                  content: response.content,
+                },
+              });
+              break;
+
+            case 'tool_execution':
+              dispatch({
+                type: 'UPDATE_MESSAGE',
+                payload: {
+                  id: assistantMessageId,
+                  updates: {
+                    isToolExecuting: true,
+                    content:
+                      assistantMessage.content + '\n\n' + response.content,
+                  },
+                },
+              });
+
+              if (response.toolResult) {
+                // 도구 실행 결과를 toolCalls에 추가
+                const toolCall: ToolCall = {
+                  id: `tool-${Date.now()}`,
+                  type: 'function',
+                  function: {
+                    name: response.toolName!,
+                    arguments: JSON.stringify(response.toolResult),
+                  },
+                  result: {
+                    status: 'success',
+                    data: response.toolResult,
+                  },
+                };
+
+                dispatch({
+                  type: 'UPDATE_MESSAGE',
+                  payload: {
+                    id: assistantMessageId,
+                    updates: {
+                      toolCalls: [
+                        ...(assistantMessage.toolCalls || []),
+                        toolCall,
+                      ],
+                      isToolExecuting: false,
+                    },
+                  },
+                });
+              }
+              break;
+
+            case 'error':
+              dispatch({
+                type: 'UPDATE_MESSAGE',
+                payload: {
+                  id: assistantMessageId,
+                  updates: {
+                    content: response.content,
+                    status: 'error',
+                  },
+                },
+              });
+              break;
+          }
+        }
+
+        // 스트리밍 완료
+        dispatch({
+          type: 'UPDATE_MESSAGE',
+          payload: {
+            id: assistantMessageId,
+            updates: {
+              status: 'sent',
+            },
+          },
+        });
+      } catch (error) {
+        console.error('Agent error:', error);
+        dispatch({
+          type: 'UPDATE_MESSAGE',
+          payload: {
+            id: assistantMessageId,
+            updates: {
+              content:
+                error instanceof Error
+                  ? `오류가 발생했습니다: ${error.message}`
+                  : '메시지 처리 중 오류가 발생했습니다.',
+              status: 'error',
+            },
+          },
+        });
+      } finally {
+        dispatch({ type: 'SET_LOADING', payload: false });
+        dispatch({ type: 'SET_STREAMING_MESSAGE_ID', payload: undefined });
+      }
+    },
+    [user, allCalendars, state.messages]
+  );
 
   const clearMessages = useCallback(() => {
     dispatch({ type: 'CLEAR_MESSAGES' });
   }, []);
 
+  const stopStreaming = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    dispatch({ type: 'SET_LOADING', payload: false });
+    dispatch({ type: 'SET_STREAMING_MESSAGE_ID', payload: undefined });
+  }, []);
+
   return (
-    <AgentContext.Provider value={{ state, sendMessage, clearMessages }}>
+    <AgentContext.Provider
+      value={{ state, sendMessage, clearMessages, stopStreaming }}
+    >
       {children}
     </AgentContext.Provider>
   );
