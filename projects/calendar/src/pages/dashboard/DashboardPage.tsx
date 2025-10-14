@@ -46,8 +46,24 @@ const DashboardPage: React.FC = () => {
     null
   );
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
-  const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(!isMobile);
+
+  // localStorage에서 패널 상태 복원
+  const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
+    const saved = localStorage.getItem('checkmate:isSidebarOpen');
+    if (saved !== null) {
+      return JSON.parse(saved);
+    }
+    return !isMobile;
+  });
+
+  const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(() => {
+    const saved = localStorage.getItem('checkmate:isAgentPanelOpen');
+    if (saved !== null) {
+      return JSON.parse(saved);
+    }
+    return !isMobile;
+  });
+
   const [viewMode, setViewMode] = useState<'month' | 'today-tomorrow'>('month');
   const [selectedDateForPanel, setSelectedDateForPanel] = useState<Date | null>(
     null
@@ -68,8 +84,59 @@ const DashboardPage: React.FC = () => {
     createCalendar,
   } = useCalendars(userId);
 
-  // 복수 선택된 캘린더 id
-  const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>([]);
+  // 복수 선택된 캘린더 id (localStorage에서 복원)
+  const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>(
+    () => {
+      const saved = localStorage.getItem('checkmate:selectedCalendarIds');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return [];
+        }
+      }
+      return [];
+    }
+  );
+
+  // 패널 상태를 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem(
+      'checkmate:isSidebarOpen',
+      JSON.stringify(isSidebarOpen)
+    );
+  }, [isSidebarOpen]);
+
+  useEffect(() => {
+    localStorage.setItem(
+      'checkmate:isAgentPanelOpen',
+      JSON.stringify(isAgentPanelOpen)
+    );
+  }, [isAgentPanelOpen]);
+
+  // 선택된 캘린더 ID를 localStorage에 저장
+  useEffect(() => {
+    localStorage.setItem(
+      'checkmate:selectedCalendarIds',
+      JSON.stringify(selectedCalendarIds)
+    );
+  }, [selectedCalendarIds]);
+
+  // 캘린더 목록이 로드되면 저장된 선택 캘린더 ID 유효성 검사
+  useEffect(() => {
+    if (calendars.length > 0 && selectedCalendarIds.length > 0) {
+      const validCalendarIds = calendars.map((cal) => cal.id);
+      const filteredIds = selectedCalendarIds.filter((id) =>
+        validCalendarIds.includes(id)
+      );
+
+      // 유효하지 않은 캘린더가 있다면 업데이트
+      if (filteredIds.length !== selectedCalendarIds.length) {
+        setSelectedCalendarIds(filteredIds);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [calendars]);
 
   // URL 쿼리 파라미터로 캘린더 ID가 전달된 경우 처리
   useEffect(() => {
