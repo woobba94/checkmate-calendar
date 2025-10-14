@@ -18,6 +18,10 @@ export function useCalendars(userId: string) {
     queryKey: ['calendars', userId],
     queryFn: getCalendars,
     enabled: !!userId,
+    staleTime: 10 * 60 * 1000, // 10분간 fresh로 유지 (캘린더는 자주 변경되지 않음)
+    gcTime: 30 * 60 * 1000, // 30분간 캐시 유지
+    refetchOnWindowFocus: false, // 윈도우 포커스 시 자동 refetch 방지
+    refetchOnMount: false, // 마운트 시 자동 refetch 방지 (stale하지 않으면)
   });
 
   // 캘린더 생성 mutation

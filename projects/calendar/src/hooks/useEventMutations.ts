@@ -4,17 +4,20 @@ import type { CalendarEvent } from '@/types/calendar';
 import { ensureIsoString } from '@/lib/date-utils';
 
 interface OptimisticContext {
-  previousEvents?: CalendarEvent[];
-  calendarId: string;
+  previousData: Record<string, CalendarEvent[]>;
+  calendarIds: string[];
 }
 
 /**
- * optimistic update를 사용한 이벤트 mutation 관리 Hook
+ * Optimistic update를 사용한 이벤트 mutation 관리 Hook
+ * - 이벤트 생성, 수정, 삭제 시 즉각적인 UI 업데이트 제공
+ * - 에러 발생 시 자동 롤백
+ * - 여러 캘린더에 걸친 이벤트 동기화 처리
  */
 export function useEventMutations(userId: string) {
   const queryClient = useQueryClient();
 
-  // 이벤트 날짜 정규화
+  // 이벤트 날짜 정규화 (ISO 문자열로 변환)
   const normalizeEventDates = <
     T extends { start?: string | Date; end?: string | Date },
   >(
@@ -42,48 +45,58 @@ export function useEventMutations(userId: string) {
       return createEvent(normalized, userId);
     },
     onMutate: async (newEvent) => {
-      const calendarId = newEvent.calendar_id;
+      // 여러 캘린더에 대해 optimistic update
+      const affectedCalendarIds = newEvent.calendar_ids || [];
+      const previousData: Record<string, CalendarEvent[]> = {};
 
-      // 진행 중인 refetch 취소
-      await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
+      // 각 캘린더에 대해 처리
+      for (const calendarId of affectedCalendarIds) {
+        await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
-      // 이전 값 스냅샷
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
-        'events',
-        calendarId,
-      ]);
+        const events = queryClient.getQueryData<CalendarEvent[]>([
+          'events',
+          calendarId,
+        ]);
 
-      // Optimistic update 수행
-      if (previousEvents) {
-        const optimisticEvent: CalendarEvent = {
-          ...normalizeEventDates(newEvent),
-          id: `temp-${Date.now()}`, // 임시 ID
-          created_by: userId,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
+        if (events) {
+          previousData[calendarId] = events;
 
-        queryClient.setQueryData<CalendarEvent[]>(
-          ['events', calendarId],
-          [...previousEvents, optimisticEvent]
-        );
+          const optimisticEvent: CalendarEvent = {
+            ...normalizeEventDates(newEvent),
+            id: `temp-${Date.now()}`,
+            calendar_ids: affectedCalendarIds,
+            created_by: userId,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+
+          queryClient.setQueryData<CalendarEvent[]>(
+            ['events', calendarId],
+            [...events, optimisticEvent]
+          );
+        }
       }
 
-      return { previousEvents, calendarId };
+      return { previousData, calendarIds: affectedCalendarIds };
     },
-    onError: (err, newEvent, context) => {
-      // 에러 발생 시 롤백
-      if (context?.previousEvents) {
-        queryClient.setQueryData(
-          ['events', context.calendarId],
-          context.previousEvents
-        );
+    onError: (_err, _newEvent, context) => {
+      // 에러 발생 시 이전 상태로 롤백
+      if (context) {
+        context.calendarIds.forEach((calendarId) => {
+          if (context.previousData[calendarId]) {
+            queryClient.setQueryData(
+              ['events', calendarId],
+              context.previousData[calendarId]
+            );
+          }
+        });
       }
     },
-    onSettled: (data, error, variables) => {
-      // 에러나 성공 후 항상 refetch
+    onSettled: (_data, _error, variables) => {
+      // 서버와 동기화 (optimistic update의 정확성 보장)
+      // 모든 이벤트 쿼리 무효화 (단일 캘린더 + 다중 캘린더 모두)
       queryClient.invalidateQueries({
-        queryKey: ['events', variables.calendar_id],
+        queryKey: ['events'],
       });
     },
   });
@@ -100,38 +113,50 @@ export function useEventMutations(userId: string) {
       return updateEvent(normalized, userId);
     },
     onMutate: async (updatedEvent) => {
-      const calendarId = updatedEvent.calendar_id;
+      // 여러 캘린더에 대해 optimistic update
+      const affectedCalendarIds = updatedEvent.calendar_ids || [];
+      const previousData: Record<string, CalendarEvent[]> = {};
 
-      await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
+      for (const calendarId of affectedCalendarIds) {
+        await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
-      const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
-        'events',
-        calendarId,
-      ]);
+        const events = queryClient.getQueryData<CalendarEvent[]>([
+          'events',
+          calendarId,
+        ]);
 
-      if (previousEvents) {
-        const normalized = normalizeEventDates(updatedEvent);
-        queryClient.setQueryData<CalendarEvent[]>(
-          ['events', calendarId],
-          previousEvents.map((event) =>
-            event.id === updatedEvent.id ? { ...event, ...normalized } : event
-          )
-        );
+        if (events) {
+          previousData[calendarId] = events;
+          const normalized = normalizeEventDates(updatedEvent);
+          queryClient.setQueryData<CalendarEvent[]>(
+            ['events', calendarId],
+            events.map((event) =>
+              event.id === updatedEvent.id ? { ...event, ...normalized } : event
+            )
+          );
+        }
       }
 
-      return { previousEvents, calendarId };
+      return { previousData, calendarIds: affectedCalendarIds };
     },
-    onError: (err, updatedEvent, context) => {
-      if (context?.previousEvents) {
-        queryClient.setQueryData(
-          ['events', context.calendarId],
-          context.previousEvents
-        );
+    onError: (_err, _updatedEvent, context) => {
+      // 에러 발생 시 이전 상태로 롤백
+      if (context) {
+        context.calendarIds.forEach((calendarId) => {
+          if (context.previousData[calendarId]) {
+            queryClient.setQueryData(
+              ['events', calendarId],
+              context.previousData[calendarId]
+            );
+          }
+        });
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (_data, _error, variables) => {
+      // 서버와 동기화
+      // 모든 이벤트 쿼리 무효화 (단일 캘린더 + 다중 캘린더 모두)
       queryClient.invalidateQueries({
-        queryKey: ['events', variables.calendar_id],
+        queryKey: ['events'],
       });
     },
   });
@@ -152,26 +177,35 @@ export function useEventMutations(userId: string) {
         calendarId,
       ]);
 
+      const previousData: Record<string, CalendarEvent[]> = {};
       if (previousEvents) {
+        previousData[calendarId] = previousEvents;
         queryClient.setQueryData<CalendarEvent[]>(
           ['events', calendarId],
           previousEvents.filter((event) => event.id !== eventId)
         );
       }
 
-      return { previousEvents, calendarId };
+      return { previousData, calendarIds: [calendarId] };
     },
-    onError: (err, variables, context) => {
-      if (context?.previousEvents) {
-        queryClient.setQueryData(
-          ['events', context.calendarId],
-          context.previousEvents
-        );
+    onError: (_err, _variables, context) => {
+      // 에러 발생 시 이전 상태로 롤백
+      if (context) {
+        context.calendarIds.forEach((calendarId) => {
+          if (context.previousData[calendarId]) {
+            queryClient.setQueryData(
+              ['events', calendarId],
+              context.previousData[calendarId]
+            );
+          }
+        });
       }
     },
-    onSettled: (data, error, variables) => {
+    onSettled: (_data, _error, variables) => {
+      // 서버와 동기화
+      // 모든 이벤트 쿼리 무효화 (단일 캘린더 + 다중 캘린더 모두)
       queryClient.invalidateQueries({
-        queryKey: ['events', variables.calendarId],
+        queryKey: ['events'],
       });
     },
   });
