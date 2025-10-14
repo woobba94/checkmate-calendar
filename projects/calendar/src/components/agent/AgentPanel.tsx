@@ -105,9 +105,9 @@ const AgentPanel: React.FC<AgentPanelProps> = ({ className }) => {
 
   // 데스크톱 레이아웃
   return (
-    <div className={cn('flex flex-col h-full py-2 pr-2', className)}>
+    <div className={cn('flex flex-col h-full min-h-0 py-2 pr-2', className)}>
       {state.error && (
-        <Alert variant="destructive" className="mb-2">
+        <Alert variant="destructive" className="mb-2 flex-shrink-0">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>{state.error}</AlertDescription>
         </Alert>

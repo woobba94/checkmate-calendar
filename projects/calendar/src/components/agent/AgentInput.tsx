@@ -42,7 +42,7 @@ const AgentInput: React.FC<AgentInputProps> = ({
   return (
     <div
       className={cn(
-        'p-3 border bg-white rounded-md border-gray-200',
+        'p-3 border bg-white rounded-md border-gray-200 flex-shrink-0',
         isMobile && 'border-0 rounded-none bg-transparent'
       )}
       style={{
@@ -59,7 +59,7 @@ const AgentInput: React.FC<AgentInputProps> = ({
           type="text"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="일정 관련 요청을 입력하세요. 예: 내일 오후 2시 회의 추가"
+          placeholder="추가하고 싶은 일정을 입력하세요."
           className="w-full border-0 outline-none bg-transparent text-sm leading-normal placeholder:text-[var(--base-muted-foreground,#6B7280)]"
           style={{
             color: 'var(--base-foreground)',
@@ -78,7 +78,7 @@ const AgentInput: React.FC<AgentInputProps> = ({
         <textarea
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          placeholder="일정 관련 요청을 입력하세요. 예: 내일 오후 2시 회의 추가"
+          placeholder="추가하고 싶은 일정을 입력하세요."
           className="w-full flex-1 resize-none border-0 outline-none bg-transparent text-sm leading-normal placeholder:text-[var(--base-muted-foreground,#6B7280)]"
           style={{
             color: 'var(--base-foreground)',

@@ -127,13 +127,27 @@ export class ToolExecutor {
     calendar_id?: string;
     description?: string;
   }): Promise<ToolResult> {
-    // 종료 시간이 없으면 시작 시간 + 1시간으로 설정
+    let startTime = args.start;
     let endTime = args.end;
-    if (!endTime) {
+
+    // 종일 일정 처리
+    if (args.all_day) {
+      // 종일 일정은 날짜만 사용 (시간은 00:00:00)
       const startDate = parseISO(args.start);
-      if (args.all_day) {
-        endTime = args.start;
-      } else {
+      // 시간 정보를 00:00:00으로 초기화
+      startDate.setHours(0, 0, 0, 0);
+      startTime = startDate.toISOString();
+
+      // 종료 시간도 같은 날짜의 23:59:59로 설정
+      if (!endTime) {
+        const endDate = new Date(startDate);
+        endDate.setHours(23, 59, 59, 999);
+        endTime = endDate.toISOString();
+      }
+    } else {
+      // 시간 지정 일정
+      if (!endTime) {
+        const startDate = parseISO(args.start);
         const endDate = new Date(startDate);
         endDate.setHours(endDate.getHours() + 1);
         endTime = endDate.toISOString();
@@ -143,7 +157,7 @@ export class ToolExecutor {
     const event = await eventService.createEvent(
       {
         title: args.title,
-        start: args.start,
+        start: startTime,
         end: endTime,
         allDay: args.all_day || false,
         calendar_ids: args.calendar_id

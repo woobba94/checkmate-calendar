@@ -6,8 +6,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
-    <div className="flex flex-col min-h-screen box-border bg-[var(--bg-primary)]">
-      <main className="flex flex-1 w-full">{children}</main>
+    <div className="flex flex-col h-screen box-border bg-[var(--bg-primary)]">
+      <main className="flex flex-1 w-full min-h-0">{children}</main>
     </div>
   );
 };

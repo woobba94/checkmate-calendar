@@ -159,9 +159,11 @@ export function AgentProvider({ children }: { children: React.ReactNode }) {
 
       try {
         // 사용자 컨텍스트 생성
+        // 로컬 날짜와 시간을 별도로 전달
+        const now = new Date();
         const userContext: UserContext = {
           userId: user.id,
-          currentDate: new Date().toISOString(),
+          currentDate: now.toISOString(),
           timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
           activeCalendarId: allCalendars?.[0]?.id,
           calendarIds: allCalendars?.map((cal) => cal.id) || [],

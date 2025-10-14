@@ -463,7 +463,7 @@ const DashboardPage: React.FC = () => {
     <Layout>
       <div
         className={cn(
-          'flex flex-row w-full bg-[#f4f4f5]',
+          'flex flex-row w-full h-full bg-[#f4f4f5]',
           isMobile && 'flex-col'
         )}
       >
@@ -512,7 +512,7 @@ const DashboardPage: React.FC = () => {
         )}
         <div
           className={cn(
-            'flex flex-col flex-1 min-w-0 bg-white',
+            'flex flex-col flex-1 min-w-0 min-h-0 bg-white',
             !isMobile && 'rounded-lg border border-zinc-300 m-2'
           )}
         >
@@ -531,7 +531,7 @@ const DashboardPage: React.FC = () => {
             error={localError}
             onDismiss={() => setLocalError(null)}
           />
-          <div className="h-full p-5 flex flex-col">
+          <div className="flex-1 min-h-0 p-5 flex flex-col overflow-hidden">
             {renderCalendarContent()}
           </div>
         </div>
@@ -544,9 +544,9 @@ const DashboardPage: React.FC = () => {
           <div
             className={`transition-all duration-300 ease-in-out ${
               isAgentPanelOpen ? 'w-80' : 'w-0'
-            } overflow-hidden flex-shrink-0`}
+            } overflow-hidden flex-shrink-0 min-h-0`}
           >
-            <div className="w-80 h-full">
+            <div className="w-80 h-full min-h-0 flex flex-col">
               <AgentProvider>
                 <AgentPanel />
               </AgentProvider>

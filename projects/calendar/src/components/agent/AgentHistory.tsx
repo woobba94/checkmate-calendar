@@ -69,69 +69,66 @@ const AgentHistory: React.FC = () => {
   };
 
   return (
-    <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4">
-      {messages.length === 0 ? (
-        <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
-          <p>일정 관련 요청을 입력해주세요. 예: "내일 회의 일정 추가해줘"</p>
-        </div>
-      ) : (
-        <>
-          {messages.map((message) => (
+    <div
+      ref={scrollRef}
+      className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4"
+    >
+      <>
+        {messages.map((message) => (
+          <div
+            key={message.id}
+            className={`flex ${
+              message.role === 'user' ? 'justify-end' : 'justify-start'
+            }`}
+          >
             <div
-              key={message.id}
-              className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              className={cn(
+                'max-w-[80%] p-3 rounded-lg transition-all',
+                message.role === 'user'
+                  ? 'bg-primary text-primary-foreground'
+                  : 'bg-muted',
+                message.status === 'error' && 'border border-destructive',
+                message.status === 'streaming' && 'animate-pulse'
+              )}
             >
-              <div
-                className={cn(
-                  'max-w-[80%] p-3 rounded-lg transition-all',
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted',
-                  message.status === 'error' && 'border border-destructive',
-                  message.status === 'streaming' && 'animate-pulse'
-                )}
-              >
-                {message.isToolExecuting && (
-                  <div className="flex items-center gap-2 text-xs mb-2 opacity-70">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    <span>도구 실행 중...</span>
-                  </div>
-                )}
+              {message.isToolExecuting && (
+                <div className="flex items-center gap-2 text-xs mb-2 opacity-70">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  <span>도구 실행 중...</span>
+                </div>
+              )}
 
-                <p className="text-sm whitespace-pre-wrap">
-                  {message.content ||
-                    (message.id === streamingMessageId && '...')}
-                </p>
+              <p className="text-sm whitespace-pre-wrap">
+                {message.content ||
+                  (message.id === streamingMessageId && '...')}
+              </p>
 
-                {message.toolCalls && message.toolCalls.length > 0 && (
-                  <div className="mt-2 space-y-1">
-                    {message.toolCalls.map((toolCall, idx) => (
-                      <div key={idx}>{formatToolResult(toolCall)}</div>
-                    ))}
-                  </div>
-                )}
+              {message.toolCalls && message.toolCalls.length > 0 && (
+                <div className="mt-2 space-y-1">
+                  {message.toolCalls.map((toolCall, idx) => (
+                    <div key={idx}>{formatToolResult(toolCall)}</div>
+                  ))}
+                </div>
+              )}
 
-                <span className="text-xs opacity-70 mt-1 block">
-                  {new Date(message.createdAt).toLocaleTimeString('ko-KR', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                  })}
-                </span>
-              </div>
+              <span className="text-xs opacity-70 mt-1 block">
+                {new Date(message.createdAt).toLocaleTimeString('ko-KR', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </span>
             </div>
-          ))}
+          </div>
+        ))}
 
-          {isLoading && !streamingMessageId && (
-            <div className="flex justify-start">
-              <div className="bg-muted p-3 rounded-lg">
-                <Loader2 className="h-4 w-4 animate-spin" />
-              </div>
+        {isLoading && !streamingMessageId && (
+          <div className="flex justify-start">
+            <div className="bg-muted p-3 rounded-lg">
+              <Loader2 className="h-4 w-4 animate-spin" />
             </div>
-          )}
-        </>
-      )}
+          </div>
+        )}
+      </>
     </div>
   );
 };
