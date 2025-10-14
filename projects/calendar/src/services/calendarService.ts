@@ -1,6 +1,10 @@
 import { supabase } from './supabase';
 import { ensureUserId } from './authService';
-import type { Calendar, CalendarMember } from '@/types/calendar';
+import type {
+  Calendar,
+  CalendarMember,
+  CalendarInvitation,
+} from '@/types/calendar';
 
 // 캘린더 생성
 export const createCalendar = async (
@@ -419,14 +423,10 @@ export const findUserByEmail = async (
 // 초대 토큰으로 초대 정보 조회
 export const getInvitationByToken = async (
   token: string
-): Promise<{
-  id: string;
-  calendar_id: string;
-  invitee_email: string;
-  role: string;
-  status: string;
-  calendar_name: string;
-} | null> => {
+): Promise<Pick<
+  CalendarInvitation,
+  'id' | 'calendar_id' | 'invitee_email' | 'role' | 'status' | 'calendar_name'
+> | null> => {
   const { data, error } = await supabase
     .from('calendar_invitations')
     .select('id, calendar_id, calendar_name, invitee_email, role, status')

@@ -13,7 +13,10 @@ const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [invitation, setInvitation] = useState<CalendarInvitation | null>(null);
+  const [invitation, setInvitation] = useState<Pick<
+    CalendarInvitation,
+    'id' | 'calendar_id' | 'invitee_email' | 'role' | 'status' | 'calendar_name'
+  > | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingInvitation, setIsLoadingInvitation] = useState(true);
@@ -39,7 +42,7 @@ const InvitePage: React.FC = () => {
           setInvitation(invitationData);
         }
       } catch (err) {
-        setError('초대 정보를 불러오는 중 오류가 발생했습니다.');
+        setError(`초대 정보를 불러오는 중 오류가 발생했습니다.: ${err}`);
       } finally {
         setIsLoadingInvitation(false);
       }

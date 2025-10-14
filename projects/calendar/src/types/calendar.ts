@@ -75,6 +75,7 @@ export interface CalendarInvitation {
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string | Date;
   expires_at?: string | Date;
+  calendar_name?: string; // 조인 시 포함될 수 있는 캘린더 이름
 }
 
 // 캘린더 권한 타입
