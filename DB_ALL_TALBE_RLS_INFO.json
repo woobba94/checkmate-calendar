@@ -1,0 +1,262 @@
+[
+  {
+    "schemaname": "public",
+    "tablename": "agent_request_logs",
+    "policyname": "Service role can do everything",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(auth.role() = 'service_role'::text)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "agent_request_logs",
+    "policyname": "Users can view own logs",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_invitations",
+    "policyname": "Calendar owners and admins can delete invitations",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "DELETE",
+    "qual": "(EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = calendar_invitations.calendar_id) AND (cm.user_id = auth.uid()) AND (cm.role = ANY (ARRAY['owner'::text, 'admin'::text])))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_invitations",
+    "policyname": "Calendar owners and admins can create invitations",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "((EXISTS ( SELECT 1\n   FROM calendars c\n  WHERE ((c.id = calendar_invitations.calendar_id) AND (c.created_by = auth.uid())))) OR (EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = calendar_invitations.calendar_id) AND (cm.user_id = auth.uid()) AND (cm.role = ANY (ARRAY['owner'::text, 'admin'::text]))))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_invitations",
+    "policyname": "Anyone can view invitations with valid token",
+    "permissive": "PERMISSIVE",
+    "roles": "{anon}",
+    "cmd": "SELECT",
+    "qual": "(((expires_at IS NULL) OR (expires_at > now())) AND (status = 'pending'::text))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_invitations",
+    "policyname": "Authenticated users can view their invitations or manage as adm",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "((invitee_email = (auth.jwt() ->> 'email'::text)) OR (EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = calendar_invitations.calendar_id) AND (cm.user_id = auth.uid()) AND (cm.role = ANY (ARRAY['owner'::text, 'admin'::text]))))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_invitations",
+    "policyname": "Invitees or calendar owners can update invitations",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "((invitee_email = (auth.jwt() ->> 'email'::text)) OR (EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = calendar_invitations.calendar_id) AND (cm.user_id = auth.uid()) AND (cm.role = ANY (ARRAY['owner'::text, 'admin'::text]))))))",
+    "with_check": "((invitee_email = (auth.jwt() ->> 'email'::text)) OR (EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = calendar_invitations.calendar_id) AND (cm.user_id = auth.uid()) AND (cm.role = ANY (ARRAY['owner'::text, 'admin'::text]))))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_members",
+    "policyname": "Owners or self can delete members",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "((user_id = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM calendars\n  WHERE ((calendars.id = calendar_members.calendar_id) AND (calendars.created_by = auth.uid())))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_members",
+    "policyname": "Owners can add members or users can accept invitations",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(((user_id = auth.uid()) AND (role = 'owner'::text) AND (EXISTS ( SELECT 1\n   FROM calendars c\n  WHERE ((c.id = calendar_members.calendar_id) AND (c.created_by = auth.uid()) AND (NOT (EXISTS ( SELECT 1\n           FROM calendar_members existing\n          WHERE ((existing.calendar_id = c.id) AND (existing.role = 'owner'::text))))))))) OR (EXISTS ( SELECT 1\n   FROM calendars c\n  WHERE ((c.id = calendar_members.calendar_id) AND (c.created_by = auth.uid())))) OR ((user_id = auth.uid()) AND (EXISTS ( SELECT 1\n   FROM calendar_invitations ci\n  WHERE ((ci.calendar_id = calendar_members.calendar_id) AND (ci.invitee_email = (auth.jwt() ->> 'email'::text)) AND (ci.status = ANY (ARRAY['pending'::text, 'accepted'::text])) AND ((ci.expires_at IS NULL) OR (ci.expires_at > now())))))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_members",
+    "policyname": "Users can view relevant memberships",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(user_id = auth.uid())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendar_members",
+    "policyname": "Owners can update members",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "(EXISTS ( SELECT 1\n   FROM calendars\n  WHERE ((calendars.id = calendar_members.calendar_id) AND (calendars.created_by = auth.uid()))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendars",
+    "policyname": "Owners can delete calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "(created_by = auth.uid())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendars",
+    "policyname": "Anyone can create calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(auth.uid() = created_by)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendars",
+    "policyname": "Users can view owned or member calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((created_by = auth.uid()) OR (EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = calendars.id) AND (cm.user_id = auth.uid())))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "calendars",
+    "policyname": "Owners can update calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "(created_by = auth.uid())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "event_calendars",
+    "policyname": "Event creators and calendar admins can delete event_calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "(EXISTS ( SELECT 1\n   FROM calendar_members\n  WHERE ((calendar_members.calendar_id = event_calendars.calendar_id) AND (calendar_members.user_id = auth.uid()))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "event_calendars",
+    "policyname": "Calendar members can create event_calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(EXISTS ( SELECT 1\n   FROM calendar_members cm\n  WHERE ((cm.calendar_id = event_calendars.calendar_id) AND (cm.user_id = auth.uid()))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "event_calendars",
+    "policyname": "Users can view event_calendars of their calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "(EXISTS ( SELECT 1\n   FROM calendar_members\n  WHERE ((calendar_members.calendar_id = event_calendars.calendar_id) AND (calendar_members.user_id = auth.uid()))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "event_calendars",
+    "policyname": "Event creators can update google sync info",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "(EXISTS ( SELECT 1\n   FROM calendar_members\n  WHERE ((calendar_members.calendar_id = event_calendars.calendar_id) AND (calendar_members.user_id = auth.uid()))))",
+    "with_check": "(EXISTS ( SELECT 1\n   FROM calendar_members\n  WHERE ((calendar_members.calendar_id = event_calendars.calendar_id) AND (calendar_members.user_id = auth.uid()))))"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "events",
+    "policyname": "Event creators can delete their events",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "DELETE",
+    "qual": "(created_by = auth.uid())",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "events",
+    "policyname": "Anyone can create events",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "INSERT",
+    "qual": null,
+    "with_check": "(auth.uid() = created_by)"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "events",
+    "policyname": "Users can view events in their calendars",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "SELECT",
+    "qual": "((created_by = auth.uid()) OR (id IN ( SELECT ec.event_id\n   FROM (event_calendars ec\n     JOIN calendar_members cm ON ((cm.calendar_id = ec.calendar_id)))\n  WHERE (cm.user_id = auth.uid()))))",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "events",
+    "policyname": "Event creators can update their events",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "UPDATE",
+    "qual": "(created_by = auth.uid())",
+    "with_check": "(created_by = auth.uid())"
+  },
+  {
+    "schemaname": "public",
+    "tablename": "google_integrations",
+    "policyname": "Users can only access their own google integration",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(auth.uid() = user_id)",
+    "with_check": null
+  },
+  {
+    "schemaname": "cron",
+    "tablename": "job",
+    "policyname": "cron_job_policy",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(username = CURRENT_USER)",
+    "with_check": null
+  },
+  {
+    "schemaname": "cron",
+    "tablename": "job_run_details",
+    "policyname": "cron_job_run_details_policy",
+    "permissive": "PERMISSIVE",
+    "roles": "{public}",
+    "cmd": "ALL",
+    "qual": "(username = CURRENT_USER)",
+    "with_check": null
+  }
+]
