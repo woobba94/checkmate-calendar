@@ -14,6 +14,22 @@ const toDate = (date: string | Date): Date => {
   return typeof date === 'string' ? parseISO(date) : date;
 };
 
+// 여러 캘린더의 이벤트를 효율적으로 조회하는 헬퍼 함수
+const fetchEventsByCalendarsAndDateRange = async (
+  calendarIds: string[],
+  startDate: Date,
+  endDate: Date
+): Promise<CalendarEvent[]> => {
+  if (calendarIds.length === 0) return [];
+
+  // 한 번의 쿼리로 모든 이벤트 조회 (N+1 쿼리 방지)
+  return eventService.getEventsByDateRangeMultiple(
+    calendarIds,
+    startDate,
+    endDate
+  );
+};
+
 export class ToolExecutor {
   constructor(private userContext?: { calendarIds?: string[] }) {}
 
@@ -64,28 +80,22 @@ export class ToolExecutor {
     end_date: string;
     calendar_ids?: string[];
   }): Promise<ToolResult> {
-    // 여러 캘린더의 이벤트를 병합
-    const allEvents: CalendarEvent[] = [];
     const calendarIds =
       args.calendar_ids || this.userContext?.calendarIds || [];
-    const startDate = new Date(args.start_date);
-    const endDate = new Date(args.end_date);
+    const startDate = parseISO(args.start_date);
+    const endDate = parseISO(args.end_date);
 
-    for (const calendarId of calendarIds) {
-      const events = await eventService.getEventsByDateRange(
-        calendarId,
-        startDate,
-        endDate
-      );
-      allEvents.push(...events);
-    }
-
-    let filteredEvents = allEvents;
+    // 한 번의 쿼리로 모든 이벤트 조회 (N+1 쿼리 방지)
+    let events = await fetchEventsByCalendarsAndDateRange(
+      calendarIds,
+      startDate,
+      endDate
+    );
 
     // 검색어가 있으면 필터링
     if (args.query) {
       const query = args.query.toLowerCase();
-      filteredEvents = allEvents.filter(
+      events = events.filter(
         (event) =>
           event.title.toLowerCase().includes(query) ||
           (event.description && event.description.toLowerCase().includes(query))
@@ -95,15 +105,15 @@ export class ToolExecutor {
     return {
       status: 'success',
       data: {
-        count: filteredEvents.length,
-        events: filteredEvents.map((event) => ({
+        count: events.length,
+        events: events.map((event) => ({
           id: event.id,
           title: event.title,
           start: toISOString(event.start),
           end: toISOString(event.end),
           allDay: event.allDay || false,
           description: event.description,
-          calendarId: event.calendar_id,
+          calendarId: event.calendar_ids?.[0] || '',
         })),
       },
     };
@@ -136,8 +146,9 @@ export class ToolExecutor {
         start: args.start,
         end: endTime,
         allDay: args.all_day || false,
-        calendar_id:
-          args.calendar_id || this.userContext?.calendarIds?.[0] || 'default',
+        calendar_ids: args.calendar_id
+          ? [args.calendar_id]
+          : this.userContext?.calendarIds || ['default'],
         description: args.description,
       },
       undefined
@@ -225,21 +236,17 @@ export class ToolExecutor {
     calendar_ids?: string[];
     exclude_event_id?: string;
   }): Promise<ToolResult> {
-    // 여러 캘린더의 이벤트를 병합
-    const allEvents: CalendarEvent[] = [];
     const calendarIds =
       args.calendar_ids || this.userContext?.calendarIds || [];
-    const startDate = new Date(args.start);
-    const endDate = new Date(args.end);
+    const checkStart = parseISO(args.start);
+    const checkEnd = parseISO(args.end);
 
-    for (const calendarId of calendarIds) {
-      const events = await eventService.getEventsByDateRange(
-        calendarId,
-        startDate,
-        endDate
-      );
-      allEvents.push(...events);
-    }
+    // 한 번의 쿼리로 모든 이벤트 조회 (N+1 쿼리 방지)
+    const allEvents = await fetchEventsByCalendarsAndDateRange(
+      calendarIds,
+      checkStart,
+      checkEnd
+    );
 
     const conflicts = allEvents.filter((event) => {
       if (args.exclude_event_id && event.id === args.exclude_event_id) {
@@ -248,8 +255,6 @@ export class ToolExecutor {
 
       const eventStart = toDate(event.start);
       const eventEnd = toDate(event.end || event.start);
-      const checkStart = parseISO(args.start);
-      const checkEnd = parseISO(args.end);
 
       // 시간이 겹치는지 확인
       return checkStart < eventEnd && checkEnd > eventStart;
@@ -283,21 +288,17 @@ export class ToolExecutor {
       end: string;
     };
   }): Promise<ToolResult> {
-    // 여러 캘린더의 이벤트를 병합
-    const allEvents: CalendarEvent[] = [];
     const calendarIds =
       args.calendar_ids || this.userContext?.calendarIds || [];
     const startDate = parseISO(args.start_date);
     const endDate = parseISO(args.end_date);
 
-    for (const calendarId of calendarIds) {
-      const events = await eventService.getEventsByDateRange(
-        calendarId,
-        startDate,
-        endDate
-      );
-      allEvents.push(...events);
-    }
+    // 한 번의 쿼리로 모든 이벤트 조회 (N+1 쿼리 방지)
+    const allEvents = await fetchEventsByCalendarsAndDateRange(
+      calendarIds,
+      startDate,
+      endDate
+    );
 
     const workStart = args.working_hours?.start || '09:00';
     const workEnd = args.working_hours?.end || '18:00';
@@ -308,9 +309,6 @@ export class ToolExecutor {
     }> = [];
 
     // 각 날짜별로 가능한 시간대 찾기
-    // const startDate는 이미 위에서 정의됨
-    // const endDate도 이미 위에서 정의됨
-
     for (let date = startDate; date <= endDate; date = addDays(date, 1)) {
       const daySlots: Array<{ start: string; end: string }> = [];
 
@@ -323,7 +321,7 @@ export class ToolExecutor {
       const [endHour, endMin] = workEnd.split(':').map(Number);
       dayEnd.setHours(endHour, endMin, 0, 0);
 
-      // 해당 날짜의 이벤트만 필터링
+      // 해당 날짜의 이벤트만 필터링 및 정렬
       const dayEvents = allEvents
         .filter((event) => {
           const eventDate = toDate(event.start);
