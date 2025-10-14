@@ -119,7 +119,7 @@ export const DateEventsPanel: React.FC<DateEventsPanelProps> = ({
               <EventItem
                 key={event.id}
                 event={event}
-                calendar={calendarMap.get(event.calendar_id)}
+                calendar={calendarMap.get(event.calendar_ids?.[0] || '')}
                 onClick={onEventClick}
               />
             ))

@@ -147,7 +147,7 @@ const Column: React.FC<ColumnProps> = ({
         ) : (
           <div className="kanban-column__events">
             {sortedEvents.map((event) => {
-              const calendar = calendars.get(event.calendar_id);
+              const calendar = calendars.get(event.calendar_ids?.[0] || '');
               return (
                 <EventCard
                   key={event.id}

@@ -10,6 +10,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
+import type { EventClickArg } from '@fullcalendar/core';
 import type {
   CalendarEvent,
   CalendarViewType,
@@ -60,6 +61,40 @@ const Calendar: React.FC<CalendarProps> = ({
     return map;
   }, [calendars]);
 
+  // FullCalendar용 이벤트 데이터 메모이제이션 (깜빡임 방지)
+  const fullCalendarEvents = useMemo(() => {
+    return events.map((event) => {
+      // 선택된 캘린더 중에서 이벤트가 속한 첫 번째 캘린더의 색상 사용
+      const selectedCalendarId = event.calendar_ids?.find((id) =>
+        calendarMap.has(id)
+      );
+      const calendar = selectedCalendarId
+        ? calendarMap.get(selectedCalendarId)
+        : undefined;
+      const eventColor = calendar?.color || '#e5e5e5';
+
+      return {
+        id: event.id,
+        title: event.title,
+        start: event.start,
+        end: event.end,
+        allDay: event.allDay,
+        description: event.description,
+        backgroundColor: eventColor,
+        borderColor: eventColor,
+        textColor: '#ffffff', // 색상 대비를 위해 흰색 텍스트
+        // 확장 속성으로 추가 필드 전달
+        extendedProps: {
+          description: event.description,
+          calendar_ids: event.calendar_ids,
+          created_by: event.created_by,
+          created_at: event.created_at,
+          updated_at: event.updated_at,
+        },
+      };
+    });
+  }, [events, calendarMap]);
+
   // 뷰 타입 매핑
   const getFullCalendarView = (view: CalendarViewType): string => {
     switch (view) {
@@ -90,7 +125,7 @@ const Calendar: React.FC<CalendarProps> = ({
     }
   }, [currentDate]);
 
-  const handleEventClick = (info: { event: any }) => {
+  const handleEventClick = (info: EventClickArg) => {
     if (onEventClick) {
       // 이벤트 데이터를 CalendarEvent 형식으로 변환
       const event: CalendarEvent = {
@@ -100,8 +135,7 @@ const Calendar: React.FC<CalendarProps> = ({
         end: info.event.end,
         allDay: info.event.allDay,
         description: info.event.extendedProps.description,
-        color: info.event.backgroundColor,
-        calendar_id: info.event.extendedProps.calendar_id,
+        calendar_ids: info.event.extendedProps.calendar_ids || [],
         created_by: info.event.extendedProps.created_by,
         created_at: info.event.extendedProps.created_at,
         updated_at: info.event.extendedProps.updated_at,
@@ -284,31 +318,7 @@ const Calendar: React.FC<CalendarProps> = ({
         initialView={getFullCalendarView(currentView)}
         initialDate={currentDate}
         headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
-        events={events.map((event) => {
-          const calendar = calendarMap.get(event.calendar_id);
-          const eventColor = calendar?.color || event.color || '#e5e5e5';
-
-          return {
-            id: event.id,
-            title: event.title,
-            start: event.start,
-            end: event.end,
-            allDay: event.allDay,
-            description: event.description,
-            backgroundColor: eventColor,
-            borderColor: eventColor,
-            textColor: '#ffffff', // 색상 대비를 위해 흰색 텍스트
-            // 확장 속성으로 추가 필드 전달
-            extendedProps: {
-              description: event.description,
-              color: eventColor,
-              calendar_id: event.calendar_id,
-              created_by: event.created_by,
-              created_at: event.created_at,
-              updated_at: event.updated_at,
-            },
-          };
-        })}
+        events={fullCalendarEvents}
         eventClick={handleEventClick}
         dateClick={(info) => onDateClick && onDateClick(info.date)}
         editable={!isMobile}
