@@ -92,11 +92,11 @@
   {
     "schemaname": "public",
     "tablename": "calendar_members",
-    "policyname": "Users can view relevant memberships",
+    "policyname": "Authenticated users can view all calendar memberships",
     "permissive": "PERMISSIVE",
-    "roles": "{public}",
+    "roles": "{authenticated}",
     "cmd": "SELECT",
-    "qual": "(user_id = auth.uid())",
+    "qual": "true",
     "with_check": null
   },
   {
@@ -258,5 +258,25 @@
     "cmd": "ALL",
     "qual": "(username = CURRENT_USER)",
     "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "users",
+    "policyname": "Users can view other users basic info",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "SELECT",
+    "qual": "true",
+    "with_check": null
+  },
+  {
+    "schemaname": "public",
+    "tablename": "users",
+    "policyname": "Users can update own profile",
+    "permissive": "PERMISSIVE",
+    "roles": "{authenticated}",
+    "cmd": "UPDATE",
+    "qual": "(auth.uid() = id)",
+    "with_check": "(auth.uid() = id)"
   }
 ]

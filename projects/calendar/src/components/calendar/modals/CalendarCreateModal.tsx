@@ -3,14 +3,13 @@ import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { X, Plus } from 'lucide-react';
+import { X } from 'lucide-react';
 import {
   Popover,
   PopoverContent,
@@ -125,18 +124,15 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
         <form onSubmit={handleSubmit} aria-label="새 캘린더 생성 폼">
           <DialogHeader>
             <DialogTitle>새 캘린더 만들기</DialogTitle>
-            <DialogDescription id="calendar-modal-description">
-              캘린더를 생성하고 멤버를 초대하세요.
-            </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-6 py-6 my-4">
             {/* 캘린더 이름 */}
             <div className="grid gap-2">
-              <Label htmlFor="name">캘린더 이름</Label>
+              <Label htmlFor="name">이름</Label>
               <Input
                 id="name"
                 type="text"
-                placeholder="캘린더 이름을 입력하세요"
+                placeholder="캘린더의 이름을 입력하세요"
                 value={newCalendarName}
                 onChange={(e) => setNewCalendarName(e.target.value)}
                 disabled={isCreating}
@@ -144,76 +140,14 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
               />
             </div>
 
-            {/* 색상 선택 */}
-            <div className="grid gap-2">
-              <Label>캘린더 색상</Label>
-              <div className="flex gap-2 flex-wrap">
-                {PRESET_COLORS.map((color) => (
-                  <button
-                    key={color}
-                    type="button"
-                    className={`w-8 h-8 rounded-md border-2 transition-all ${
-                      !isCustomColor && selectedColor === color
-                        ? 'border-gray-900 scale-110'
-                        : 'border-gray-300'
-                    }`}
-                    style={{ backgroundColor: color }}
-                    onClick={() => {
-                      setSelectedColor(color);
-                      setIsCustomColor(false);
-                    }}
-                    aria-label={`색상 ${color} 선택`}
-                  />
-                ))}
-
-                {/* 커스텀 색상 선택 */}
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <button
-                      type="button"
-                      className={`w-8 h-8 rounded-md border-2 transition-all flex items-center justify-center ${
-                        isCustomColor
-                          ? 'border-gray-900 scale-110'
-                          : 'border-gray-300'
-                      }`}
-                      style={{
-                        backgroundColor: isCustomColor
-                          ? customColor
-                          : '#ffffff',
-                      }}
-                    >
-                      {!isCustomColor && (
-                        <Plus className="w-4 h-4 text-gray-500" />
-                      )}
-                    </button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-3">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="custom-color">색상 선택:</Label>
-                      <input
-                        id="custom-color"
-                        type="color"
-                        value={customColor}
-                        onChange={(e) => {
-                          setCustomColor(e.target.value);
-                          setIsCustomColor(true);
-                        }}
-                        className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
-                      />
-                    </div>
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-
             {/* 멤버 초대 */}
             <div className="grid gap-2">
-              <Label htmlFor="invite-email">멤버 초대 (선택사항)</Label>
+              <Label htmlFor="invite-email">멤버 추가</Label>
               <div className="flex gap-2">
                 <Input
                   id="invite-email"
                   type="email"
-                  placeholder="이메일 주소 입력"
+                  placeholder="example@gmail.com"
                   value={currentEmail}
                   onChange={(e) => {
                     setCurrentEmail(e.target.value);
@@ -231,8 +165,13 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
                   추가
                 </Button>
               </div>
-              {emailError && (
-                <p className="text-sm text-red-500 mt-1">{emailError}</p>
+
+              {emailError ? (
+                <p className="text-sm text-red-500">{emailError}</p>
+              ) : (
+                <p className="text-sm text-gray-500">
+                  입력한 이메일 주소로 초대장이 발송돼요.
+                </p>
               )}
 
               {/* 추가된 이메일 목록 */}
@@ -258,6 +197,65 @@ const CalendarCreateModal: React.FC<CalendarCreateModalProps> = ({
                   </p>
                 </div>
               )}
+            </div>
+
+            {/* 색상 선택 */}
+            <div className="grid gap-2">
+              <Label>캘린더 색상</Label>
+              <div className="flex gap-2 flex-wrap">
+                {PRESET_COLORS.map((color) => (
+                  <button
+                    key={color}
+                    type="button"
+                    className={`w-8 h-8 rounded-full transition-all ${
+                      !isCustomColor && selectedColor === color
+                        ? 'shadow-lg ring-2 ring-gray-900 ring-offset-2'
+                        : ''
+                    }`}
+                    style={{ backgroundColor: color }}
+                    onClick={() => {
+                      setSelectedColor(color);
+                      setIsCustomColor(false);
+                    }}
+                    aria-label={`색상 ${color} 선택`}
+                  />
+                ))}
+
+                {/* 커스텀 색상 선택 */}
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button
+                      type="button"
+                      className={`w-8 h-8 rounded-full transition-all flex items-center justify-center ${
+                        isCustomColor
+                          ? 'shadow-lg ring-2 ring-gray-900 ring-offset-2'
+                          : ''
+                      }`}
+                      style={{
+                        background: isCustomColor
+                          ? customColor
+                          : 'radial-gradient(55.5% 56.05% at 50% 50%, #FFF 0%, rgba(255, 255, 255, 0.00) 100%), conic-gradient(from 180deg at 50% 50%, #B600FF 5.768228620290756deg, #7C0CFF 22.96677678823471deg, #391AFF 38.5244420170784deg, #264FFE 53.29166293144226deg, #00B4FD 75.50628662109375deg, #00DFC9 102.35596060752869deg, #00FBA7 131.3704240322113deg, #00FA00 160.19450426101685deg, #E2F700 184.59715604782104deg, #F2F600 212.5272560119629deg, #FF8600 246.09018802642822deg, #FF4600 276.0505700111389deg, #FF2900 304.4519019126892deg, #FF0F8F 321.8369936943054deg, #FF00E5 345.4424500465393deg)',
+                      }}
+                    ></button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-3">
+                    <div className="flex items-center gap-2">
+                      <Label htmlFor="custom-color">사용자 정의</Label>
+                      <input
+                        id="custom-color"
+                        type="color"
+                        defaultValue={customColor}
+                        onChange={(e) => {
+                          // 드래그 완료 시에만 반영 (성능 최적화)
+                          setCustomColor(e.target.value);
+                          setIsCustomColor(true);
+                        }}
+                        className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
+                      />
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </div>
           <DialogFooter>

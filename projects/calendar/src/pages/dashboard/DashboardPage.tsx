@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
+import CalendarEditModal from '@/components/calendar/modals/CalendarEditModal';
 import AgentPanel from '@/components/agent/AgentPanel';
 import { AgentProvider } from '@/contexts/AgentContext';
 import { useCalendarNavigation } from '@/hooks/useCalendarNavigation';
@@ -27,32 +28,14 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { useTheme } from '@/hooks/useTheme';
 import { useResponsive } from '@/hooks/useResponsive';
 import { MobileSidebarWrapper } from '@/components/sidebar/MobileSidebarWrapper';
 import { TodayTomorrowView } from '@/components/calendar/kanban/TodayTomorrowView';
 import { DateEventsPanel } from '@/components/calendar/panels/DateEventsPanel';
 import { BottomSheet } from '@/components/ui/bottom-sheet';
-import { Crosshair, Plus, X } from 'lucide-react';
+import { Crosshair } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
-
-// 프리셋 색상 목록
-const PRESET_COLORS = [
-  '#02B1F0', // 파란색
-  '#05AA5B', // 초록색
-  '#97D045', // 연두색
-  '#FFC828', // 노란색
-  '#FF562C', // 주황색
-  '#FF4E9D', // 분홍색
-  '#50419C', // 보라색
-];
 
 const DashboardPage: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -63,15 +46,6 @@ const DashboardPage: React.FC = () => {
     null
   );
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editDesc, setEditDesc] = useState('');
-  const [editColor, setEditColor] = useState('#02B1F0');
-  const [editCustomColor, setEditCustomColor] = useState('#000000');
-  const [isEditCustomColor, setIsEditCustomColor] = useState(false);
-  const [editLoading, setEditLoading] = useState(false);
-  const [editInviteEmails, setEditInviteEmails] = useState<string[]>([]);
-  const [editCurrentEmail, setEditCurrentEmail] = useState('');
-  const [editEmailError, setEditEmailError] = useState('');
   const [isSidebarOpen, setIsSidebarOpen] = useState(!isMobile);
   const [isAgentPanelOpen, setIsAgentPanelOpen] = useState(!isMobile);
   const [viewMode, setViewMode] = useState<'month' | 'today-tomorrow'>('month');
@@ -265,96 +239,26 @@ const DashboardPage: React.FC = () => {
     }
   };
 
-  // 이메일 검증
-  const validateEmail = (email: string) => {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return re.test(email);
-  };
-
-  // 수정 모달 이메일 추가
-  const handleEditAddEmail = () => {
-    if (!editCurrentEmail.trim()) return;
-
-    if (!validateEmail(editCurrentEmail)) {
-      setEditEmailError('올바른 이메일 형식이 아닙니다.');
-      return;
-    }
-
-    if (editInviteEmails.includes(editCurrentEmail)) {
-      setEditEmailError('이미 추가된 이메일입니다.');
-      return;
-    }
-
-    setEditInviteEmails([...editInviteEmails, editCurrentEmail]);
-    setEditCurrentEmail('');
-    setEditEmailError('');
-  };
-
-  // 수정 모달 이메일 제거
-  const handleEditRemoveEmail = (email: string) => {
-    setEditInviteEmails(editInviteEmails.filter((e) => e !== email));
-  };
-
-  // 수정 모달 이메일 키 입력
-  const handleEditEmailKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleEditAddEmail();
-    }
-  };
-
   // 사이드바에서 수정 클릭 시
   const onEditCalendar = (calendar: CalendarType) => {
     setEditingCalendar(calendar);
-    setEditName(calendar.name);
-    setEditDesc(calendar.description || '');
-
-    const currentColor = calendar.color || '#02B1F0';
-    setEditColor(currentColor);
-
-    // 프리셋 색상에 없으면 커스텀 색상으로 처리
-    if (!PRESET_COLORS.includes(currentColor)) {
-      setIsEditCustomColor(true);
-      setEditCustomColor(currentColor);
-    } else {
-      setIsEditCustomColor(false);
-      setEditCustomColor('#000000');
-    }
-
-    // 이메일 초대 상태 초기화
-    setEditInviteEmails([]);
-    setEditCurrentEmail('');
-    setEditEmailError('');
-
     setIsEditModalOpen(true);
   };
 
   // 수정 모달 저장
-  const handleEditCalendarSave = async () => {
-    if (!editingCalendar) return;
-    setEditLoading(true);
+  const handleEditCalendarSave = async (
+    calendarId: string,
+    updates: { name: string; description?: string; color: string },
+    inviteEmails: string[]
+  ) => {
     try {
-      const finalColor = isEditCustomColor ? editCustomColor : editColor;
-      await updateCalendar(
-        editingCalendar.id,
-        {
-          name: editName,
-          description: editDesc,
-          color: finalColor,
-        },
-        editInviteEmails
-      );
+      await updateCalendar(calendarId, updates, inviteEmails);
       await queryClient.invalidateQueries({ queryKey: ['calendars', userId] });
       setIsEditModalOpen(false);
       setEditingCalendar(null);
-      // 이메일 상태 초기화
-      setEditInviteEmails([]);
-      setEditCurrentEmail('');
-      setEditEmailError('');
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : '캘린더 수정 실패');
-    } finally {
-      setEditLoading(false);
+      throw e;
     }
   };
 
@@ -362,10 +266,6 @@ const DashboardPage: React.FC = () => {
   const handleEditCalendarCancel = () => {
     setIsEditModalOpen(false);
     setEditingCalendar(null);
-    // 이메일 상태 초기화
-    setEditInviteEmails([]);
-    setEditCurrentEmail('');
-    setEditEmailError('');
   };
 
   // 캘린더 삭제 클릭 시
@@ -574,182 +474,12 @@ const DashboardPage: React.FC = () => {
             </div>
           </div>
         )}
-        <Dialog
-          open={isEditModalOpen}
-          onOpenChange={(open) => {
-            if (!open) handleEditCalendarCancel();
-          }}
-        >
-          <DialogContent className="sm:max-w-[500px]">
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleEditCalendarSave();
-              }}
-            >
-              <DialogHeader>
-                <DialogTitle>캘린더 수정</DialogTitle>
-                <DialogDescription>
-                  캘린더의 정보를 수정합니다.
-                </DialogDescription>
-              </DialogHeader>
-              <div className="grid gap-4 py-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="name">이름</Label>
-                  <Input
-                    id="name"
-                    type="text"
-                    value={editName}
-                    onChange={(e) => setEditName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="description">설명</Label>
-                  <Input
-                    id="description"
-                    type="text"
-                    value={editDesc}
-                    onChange={(e) => setEditDesc(e.target.value)}
-                  />
-                </div>
-
-                {/* 색상 선택 */}
-                <div className="grid gap-2">
-                  <Label>캘린더 색상</Label>
-                  <div className="flex gap-2 flex-wrap">
-                    {PRESET_COLORS.map((color) => (
-                      <button
-                        key={color}
-                        type="button"
-                        className={`w-8 h-8 rounded-md border-2 transition-all ${
-                          !isEditCustomColor && editColor === color
-                            ? 'border-gray-900 scale-110'
-                            : 'border-gray-300'
-                        }`}
-                        style={{ backgroundColor: color }}
-                        onClick={() => {
-                          setEditColor(color);
-                          setIsEditCustomColor(false);
-                        }}
-                        aria-label={`색상 ${color} 선택`}
-                      />
-                    ))}
-
-                    {/* 커스텀 색상 선택 */}
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <button
-                          type="button"
-                          className={`w-8 h-8 rounded-md border-2 transition-all flex items-center justify-center ${
-                            isEditCustomColor
-                              ? 'border-gray-900 scale-110'
-                              : 'border-gray-300'
-                          }`}
-                          style={{
-                            backgroundColor: isEditCustomColor
-                              ? editCustomColor
-                              : '#ffffff',
-                          }}
-                        >
-                          {!isEditCustomColor && (
-                            <Plus className="w-4 h-4 text-gray-500" />
-                          )}
-                        </button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-3">
-                        <div className="flex items-center gap-2">
-                          <Label htmlFor="edit-custom-color">색상 선택:</Label>
-                          <input
-                            id="edit-custom-color"
-                            type="color"
-                            value={editCustomColor}
-                            onChange={(e) => {
-                              setEditCustomColor(e.target.value);
-                              setEditColor(e.target.value);
-                              setIsEditCustomColor(true);
-                            }}
-                            className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
-                          />
-                        </div>
-                      </PopoverContent>
-                    </Popover>
-                  </div>
-                </div>
-
-                {/* 멤버 초대 */}
-                <div className="grid gap-2">
-                  <Label htmlFor="edit-invite-email">
-                    멤버 초대 (선택사항)
-                  </Label>
-                  <div className="flex gap-2">
-                    <Input
-                      id="edit-invite-email"
-                      type="email"
-                      placeholder="이메일 주소 입력"
-                      value={editCurrentEmail}
-                      onChange={(e) => {
-                        setEditCurrentEmail(e.target.value);
-                        setEditEmailError('');
-                      }}
-                      onKeyPress={handleEditEmailKeyPress}
-                      disabled={editLoading}
-                    />
-                    <Button
-                      type="button"
-                      onClick={handleEditAddEmail}
-                      disabled={!editCurrentEmail.trim() || editLoading}
-                      variant="outline"
-                    >
-                      추가
-                    </Button>
-                  </div>
-                  {editEmailError && (
-                    <p className="text-sm text-red-500 mt-1">
-                      {editEmailError}
-                    </p>
-                  )}
-
-                  {/* 추가된 이메일 목록 */}
-                  {editInviteEmails.length > 0 && (
-                    <div className="mt-2 space-y-1">
-                      {editInviteEmails.map((email) => (
-                        <div
-                          key={email}
-                          className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
-                        >
-                          <span className="text-sm">{email}</span>
-                          <button
-                            type="button"
-                            onClick={() => handleEditRemoveEmail(email)}
-                            className="text-gray-500 hover:text-gray-700"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-                      ))}
-                      <p className="text-xs text-gray-500 mt-2">
-                        초대된 멤버들에게 이메일이 발송됩니다.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-              <DialogFooter>
-                <Button
-                  type="button"
-                  onClick={handleEditCalendarCancel}
-                  variant="outline"
-                >
-                  취소
-                </Button>
-                <Button type="submit" disabled={editLoading}>
-                  {editLoading ? '저장 중...' : '저장'}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
+        <CalendarEditModal
+          isOpen={isEditModalOpen}
+          onClose={handleEditCalendarCancel}
+          calendar={editingCalendar}
+          onSave={handleEditCalendarSave}
+        />
         {/* 모바일: 날짜 이벤트 패널 */}
         {isMobile && (
           <DateEventsPanel
