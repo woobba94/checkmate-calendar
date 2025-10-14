@@ -17,11 +17,19 @@ export interface CalendarEvent {
   end?: string | Date;
   allDay?: boolean;
   description?: string;
-  color?: string;
-  calendar_id: string; // 캘린더 ID
+  calendar_ids?: string[]; // 이벤트가 속한 캘린더 ID 목록
   created_by: string; // 이벤트를 생성한 사용자 ID
   created_at: string | Date;
   updated_at: string | Date;
+}
+
+// 이벤트-캘린더 관계 (Junction Table)
+export interface EventCalendar {
+  event_id: string;
+  calendar_id: string;
+  google_event_id?: string;
+  google_updated?: string | Date;
+  created_at: string | Date;
 }
 
 // 캘린더 멤버 타입
@@ -42,7 +50,7 @@ export interface User {
   user_metadata?: {
     display_name?: string;
     avatar_url?: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
