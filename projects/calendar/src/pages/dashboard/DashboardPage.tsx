@@ -46,6 +46,7 @@ const DashboardPage: React.FC = () => {
     null
   );
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isEditModalReadonly, setIsEditModalReadonly] = useState(false);
 
   // localStorage에서 패널 상태 복원
   const [isSidebarOpen, setIsSidebarOpen] = useState(() => {
@@ -309,6 +310,14 @@ const DashboardPage: React.FC = () => {
   // 사이드바에서 수정 클릭 시
   const onEditCalendar = (calendar: CalendarType) => {
     setEditingCalendar(calendar);
+    setIsEditModalReadonly(false);
+    setIsEditModalOpen(true);
+  };
+
+  // 사이드바에서 정보 보기 클릭 시
+  const onViewCalendar = (calendar: CalendarType) => {
+    setEditingCalendar(calendar);
+    setIsEditModalReadonly(true);
     setIsEditModalOpen(true);
   };
 
@@ -333,6 +342,7 @@ const DashboardPage: React.FC = () => {
   const handleEditCalendarCancel = () => {
     setIsEditModalOpen(false);
     setEditingCalendar(null);
+    setIsEditModalReadonly(false);
   };
 
   // 캘린더 삭제 클릭 시
@@ -470,6 +480,7 @@ const DashboardPage: React.FC = () => {
               onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
               onEditCalendar={onEditCalendar}
               onDeleteCalendar={onDeleteCalendar}
+              onViewCalendar={onViewCalendar}
               user={user}
               logout={logout}
               colorMode={theme || 'light'}
@@ -490,6 +501,7 @@ const DashboardPage: React.FC = () => {
                 onCreateCalendarClick={() => setIsCalendarModalOpen(true)}
                 onEditCalendar={onEditCalendar}
                 onDeleteCalendar={onDeleteCalendar}
+                onViewCalendar={onViewCalendar}
                 user={user}
                 logout={logout}
                 colorMode={theme || 'light'}
@@ -546,6 +558,7 @@ const DashboardPage: React.FC = () => {
           onClose={handleEditCalendarCancel}
           calendar={editingCalendar}
           onSave={handleEditCalendarSave}
+          readonly={isEditModalReadonly}
         />
         {/* 모바일: 날짜 이벤트 패널 */}
         {isMobile && (

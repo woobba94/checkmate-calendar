@@ -31,6 +31,7 @@ interface CalendarEditModalProps {
     updates: { name: string; description?: string; color: string },
     inviteEmails: string[]
   ) => Promise<void>;
+  readonly?: boolean;
 }
 
 // 프리셋 색상 목록
@@ -49,6 +50,7 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
   onClose,
   calendar,
   onSave,
+  readonly = false,
 }) => {
   const [editName, setEditName] = useState('');
   const [editDesc, setEditDesc] = useState('');
@@ -202,7 +204,9 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
       <DialogContent className="sm:max-w-[500px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>캘린더 수정하기</DialogTitle>
+            <DialogTitle>
+              {readonly ? '캘린더 정보' : '캘린더 수정하기'}
+            </DialogTitle>
           </DialogHeader>
           <div className="grid gap-6 py-5 my-4">
             <div className="grid gap-2">
@@ -213,6 +217,7 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
                 value={editName}
                 onChange={(e) => setEditName(e.target.value)}
                 required
+                disabled={readonly}
               />
             </div>
             {/* 현재 멤버 리스트 */}
@@ -229,18 +234,20 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
                   {calendarMembers.map((member) => (
                     <div
                       key={member.id}
-                      className="flex items-center justify-between bg-blue-50 px-3 py-2 rounded-md"
+                      className={`flex items-center justify-between px-3 py-2 rounded-md bg-gray-100`}
                     >
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium">
-                          {member.email}
-                        </span>
-                        <span className="text-xs text-gray-500">
+                      <div className="flex items-center gap-3">
+                        <span
+                          className={`min-w-14 text-center text-xs py-1 px-2 rounded-xl text-gray-600 ${member.role === 'owner' ? 'bg-blue-100' : 'bg-green-100'}`}
+                        >
                           {member.role === 'owner'
                             ? '소유자'
                             : member.role === 'admin'
                               ? '관리자'
                               : '멤버'}
+                        </span>
+                        <span className="text-sm font-medium">
+                          {member.email}
                         </span>
                       </div>
                     </div>
@@ -253,59 +260,61 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
               )}
             </div>
 
-            {/* 멤버 초대 */}
-            <div className="grid gap-2">
-              <Label htmlFor="edit-invite-email">멤버 초대 (선택사항)</Label>
-              <div className="flex gap-2">
-                <Input
-                  id="edit-invite-email"
-                  type="email"
-                  placeholder="이메일 주소 입력"
-                  value={editCurrentEmail}
-                  onChange={(e) => {
-                    setEditCurrentEmail(e.target.value);
-                    setEditEmailError('');
-                  }}
-                  onKeyPress={handleEmailKeyPress}
-                  disabled={editLoading}
-                />
-                <Button
-                  type="button"
-                  onClick={handleAddEmail}
-                  disabled={!editCurrentEmail.trim() || editLoading}
-                  variant="outline"
-                >
-                  추가
-                </Button>
-              </div>
-              {editEmailError && (
-                <p className="text-sm text-red-500 mt-1">{editEmailError}</p>
-              )}
-
-              {/* 추가된 이메일 목록 */}
-              {editInviteEmails.length > 0 && (
-                <div className="mt-2 space-y-1">
-                  {editInviteEmails.map((email) => (
-                    <div
-                      key={email}
-                      className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
-                    >
-                      <span className="text-sm">{email}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveEmail(email)}
-                        className="text-gray-500 hover:text-gray-700"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
-                  <p className="text-xs text-gray-500 mt-2">
-                    초대된 멤버들에게 이메일이 발송됩니다.
-                  </p>
+            {/* 멤버 초대 - readonly일 때는 숨김 */}
+            {!readonly && (
+              <div className="grid gap-2">
+                <Label htmlFor="edit-invite-email">멤버 초대 (선택사항)</Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="edit-invite-email"
+                    type="email"
+                    placeholder="이메일 주소 입력"
+                    value={editCurrentEmail}
+                    onChange={(e) => {
+                      setEditCurrentEmail(e.target.value);
+                      setEditEmailError('');
+                    }}
+                    onKeyPress={handleEmailKeyPress}
+                    disabled={editLoading}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleAddEmail}
+                    disabled={!editCurrentEmail.trim() || editLoading}
+                    variant="outline"
+                  >
+                    추가
+                  </Button>
                 </div>
-              )}
-            </div>
+                {editEmailError && (
+                  <p className="text-sm text-red-500 mt-1">{editEmailError}</p>
+                )}
+
+                {/* 추가된 이메일 목록 */}
+                {editInviteEmails.length > 0 && (
+                  <div className="mt-2 space-y-1">
+                    {editInviteEmails.map((email) => (
+                      <div
+                        key={email}
+                        className="flex items-center justify-between bg-gray-50 px-3 py-2 rounded-md"
+                      >
+                        <span className="text-sm">{email}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveEmail(email)}
+                          className="text-gray-500 hover:text-gray-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <p className="text-xs text-gray-500 mt-2">
+                      입력한 이메일 주소로 초대장이 발송돼요.
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
             {/* 색상 선택 */}
             <div className="grid gap-2">
               <Label>색상</Label>
@@ -321,10 +330,13 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
                     }`}
                     style={{ backgroundColor: color }}
                     onClick={() => {
-                      setEditColor(color);
-                      setIsEditCustomColor(false);
+                      if (!readonly) {
+                        setEditColor(color);
+                        setIsEditCustomColor(false);
+                      }
                     }}
                     aria-label={`색상 ${color} 선택`}
+                    disabled={readonly}
                   />
                 ))}
 
@@ -343,34 +355,45 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
                           ? editCustomColor
                           : 'radial-gradient(55.5% 56.05% at 50% 50%, #FFF 0%, rgba(255, 255, 255, 0.00) 100%), conic-gradient(from 180deg at 50% 50%, #B600FF 5.768228620290756deg, #7C0CFF 22.96677678823471deg, #391AFF 38.5244420170784deg, #264FFE 53.29166293144226deg, #00B4FD 75.50628662109375deg, #00DFC9 102.35596060752869deg, #00FBA7 131.3704240322113deg, #00FA00 160.19450426101685deg, #E2F700 184.59715604782104deg, #F2F600 212.5272560119629deg, #FF8600 246.09018802642822deg, #FF4600 276.0505700111389deg, #FF2900 304.4519019126892deg, #FF0F8F 321.8369936943054deg, #FF00E5 345.4424500465393deg)',
                       }}
+                      disabled={readonly}
                     ></button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-3">
-                    <div className="flex items-center gap-2">
-                      <Label htmlFor="edit-custom-color">사용자 정의</Label>
-                      <input
-                        id="edit-custom-color"
-                        type="color"
-                        defaultValue={editCustomColor}
-                        onChange={(e) => {
-                          // Throttle로 성능 최적화 (60fps로 제한)
-                          handleCustomColorChange(e.target.value);
-                        }}
-                        className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
-                      />
-                    </div>
-                  </PopoverContent>
+                  {!readonly && (
+                    <PopoverContent className="w-auto p-3">
+                      <div className="flex items-center gap-2">
+                        <Label htmlFor="edit-custom-color">사용자 정의</Label>
+                        <input
+                          id="edit-custom-color"
+                          type="color"
+                          defaultValue={editCustomColor}
+                          onChange={(e) => {
+                            // Throttle로 성능 최적화 (60fps로 제한)
+                            handleCustomColorChange(e.target.value);
+                          }}
+                          className="w-20 h-8 border border-gray-300 rounded cursor-pointer"
+                        />
+                      </div>
+                    </PopoverContent>
+                  )}
                 </Popover>
               </div>
             </div>
           </div>
           <DialogFooter>
-            <Button type="button" onClick={handleCancel} variant="outline">
-              취소
-            </Button>
-            <Button type="submit" disabled={editLoading || !hasChanges}>
-              {editLoading ? '저장 중...' : '저장'}
-            </Button>
+            {readonly ? (
+              <Button type="button" onClick={handleCancel}>
+                닫기
+              </Button>
+            ) : (
+              <>
+                <Button type="button" onClick={handleCancel} variant="outline">
+                  취소
+                </Button>
+                <Button type="submit" disabled={editLoading || !hasChanges}>
+                  {editLoading ? '저장 중...' : '저장'}
+                </Button>
+              </>
+            )}
           </DialogFooter>
         </form>
       </DialogContent>

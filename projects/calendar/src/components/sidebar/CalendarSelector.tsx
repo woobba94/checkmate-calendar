@@ -1,4 +1,4 @@
-import type { Calendar as CalendarType } from '@/types/calendar';
+import type { Calendar as CalendarType, User } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -8,7 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { CalendarPlus, MoreHorizontal, Edit, Trash } from 'lucide-react';
+import { CalendarPlus, MoreHorizontal, Edit, Trash, Info } from 'lucide-react';
 import React from 'react';
 import TextWithTooltip from '@/components/common/text-with-tooltip/TextWithTooltip';
 import './CalendarSelector.scss';
@@ -20,6 +20,8 @@ interface CalendarSelectorProps {
   onCreateCalendarClick: () => void;
   onEditCalendar: (calendar: CalendarType) => void;
   onDeleteCalendar: (calendar: CalendarType) => void;
+  onViewCalendar: (calendar: CalendarType) => void;
+  user?: User | null;
 }
 
 const CalendarSelector: React.FC<CalendarSelectorProps> = ({
@@ -29,6 +31,8 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
   onCreateCalendarClick,
   onEditCalendar,
   onDeleteCalendar,
+  onViewCalendar,
+  user,
 }) => {
   return (
     <div className="flex flex-col gap-3">
@@ -98,17 +102,30 @@ const CalendarSelector: React.FC<CalendarSelectorProps> = ({
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-[120px]">
-                    <DropdownMenuItem onClick={() => onEditCalendar(calendar)}>
-                      <Edit className="mr-2 h-4 w-4" />
-                      <span>수정</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => onDeleteCalendar(calendar)}
-                      className="text-red-600 focus:text-red-600"
-                    >
-                      <Trash className="mr-2 h-4 w-4" />
-                      <span>삭제</span>
-                    </DropdownMenuItem>
+                    {user && user.id === calendar.created_by ? (
+                      <>
+                        <DropdownMenuItem
+                          onClick={() => onEditCalendar(calendar)}
+                        >
+                          <Edit className="mr-2 h-4 w-4" />
+                          <span>수정</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => onDeleteCalendar(calendar)}
+                          className="text-red-600 focus:text-red-600"
+                        >
+                          <Trash className="mr-2 h-4 w-4" />
+                          <span>삭제</span>
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <DropdownMenuItem
+                        onClick={() => onViewCalendar(calendar)}
+                      >
+                        <Info className="mr-2 h-4 w-4" />
+                        <span>정보</span>
+                      </DropdownMenuItem>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </Label>
