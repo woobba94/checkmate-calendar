@@ -77,41 +77,101 @@ async function processEvents(supabase, events, calendarId, userId) {
   for (const event of events) {
     try {
       if (event.status === 'cancelled') {
-        // 삭제된 이벤트 처리
-        const { error } = await supabase
-          .from('events')
-          .delete()
+        // 삭제된 이벤트 처리 - event_calendars에서 찾아서 삭제
+        const { data: eventCalendar } = await supabase
+          .from('event_calendars')
+          .select('event_id')
           .eq('google_event_id', event.id)
-          .eq('created_by', userId);
+          .eq('calendar_id', calendarId)
+          .maybeSingle();
 
-        if (!error) {
-          processedCount++;
+        if (eventCalendar) {
+          // 이벤트 삭제 (CASCADE로 event_calendars도 자동 삭제됨)
+          const { error } = await supabase
+            .from('events')
+            .delete()
+            .eq('id', eventCalendar.event_id)
+            .eq('created_by', userId);
+
+          if (!error) {
+            processedCount++;
+          }
         }
       } else {
-        // 새로운/수정된 이벤트 처리
+        // 기존 이벤트 찾기 (event_calendars를 통해)
+        const { data: existingEventCalendar } = await supabase
+          .from('event_calendars')
+          .select('event_id, events(*)')
+          .eq('google_event_id', event.id)
+          .eq('calendar_id', calendarId)
+          .maybeSingle();
+
         const eventData = {
           title: event.summary || '제목 없음',
           start: event.start?.dateTime || event.start?.date,
           end: event.end?.dateTime || event.end?.date,
           allDay: !event.start?.dateTime,
           description: event.description || null,
-          calendar_id: calendarId,
-          created_by: userId,
-          google_event_id: event.id,
-          google_updated: event.updated,
+          created_by: userId, // 명시적으로 설정
           updated_at: new Date().toISOString(),
         };
 
-        const { error } = await supabase.from('events').upsert(eventData, {
-          onConflict: 'google_event_id,created_by',
-          ignoreDuplicates: false,
-        });
+        let eventId;
 
-        if (!error) {
-          processedCount++;
+        if (existingEventCalendar?.event_id) {
+          // 기존 이벤트 업데이트
+          const { error } = await supabase
+            .from('events')
+            .update(eventData)
+            .eq('id', existingEventCalendar.event_id);
+
+          if (error) {
+            console.error(`이벤트 업데이트 오류 (${event.id}):`, error);
+            continue;
+          }
+
+          eventId = existingEventCalendar.event_id;
+
+          // event_calendars의 google_updated 업데이트
+          await supabase
+            .from('event_calendars')
+            .update({ google_updated: event.updated })
+            .eq('event_id', eventId)
+            .eq('calendar_id', calendarId);
         } else {
-          console.error(`이벤트 처리 오류 (${event.id}):`, error);
+          // 새 이벤트 생성
+          const { data: newEvent, error: eventError } = await supabase
+            .from('events')
+            .insert(eventData)
+            .select('id')
+            .single();
+
+          if (eventError || !newEvent) {
+            console.error(`이벤트 생성 오류 (${event.id}):`, eventError);
+            continue;
+          }
+
+          eventId = newEvent.id;
+
+          // event_calendars에 관계 추가 (Google 정보 포함)
+          const { error: relationError } = await supabase
+            .from('event_calendars')
+            .insert({
+              event_id: eventId,
+              calendar_id: calendarId,
+              google_event_id: event.id,
+              google_updated: event.updated,
+            });
+
+          if (relationError) {
+            console.error(`관계 생성 오류 (${event.id}):`, relationError);
+            // 이벤트 롤백
+            await supabase.from('events').delete().eq('id', eventId);
+            continue;
+          }
         }
+
+        processedCount++;
       }
     } catch (error) {
       console.error(`이벤트 처리 예외 (${event.id}):`, error);
