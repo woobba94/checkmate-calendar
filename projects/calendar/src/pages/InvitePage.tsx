@@ -5,6 +5,7 @@ import {
   getInvitationByToken,
   acceptInvitation,
 } from '@/services/calendarService';
+import type { CalendarInvitation } from '@/types/calendar';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 
@@ -12,7 +13,7 @@ const InvitePage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { user, isLoading: isAuthLoading } = useAuth();
-  const [invitation, setInvitation] = useState<any>(null);
+  const [invitation, setInvitation] = useState<CalendarInvitation | null>(null);
   const [isAccepting, setIsAccepting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoadingInvitation, setIsLoadingInvitation] = useState(true);
@@ -154,7 +155,9 @@ const InvitePage: React.FC = () => {
               </div>
               <p className="text-xs text-gray-500 text-center mt-2">
                 {invitation?.invitee_email && (
-                  <>초대받은 이메일: <strong>{invitation.invitee_email}</strong></>
+                  <>
+                    초대받은 이메일: <strong>{invitation.invitee_email}</strong>
+                  </>
                 )}
               </p>
             </>
