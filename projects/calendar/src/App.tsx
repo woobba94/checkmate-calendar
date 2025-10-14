@@ -9,6 +9,7 @@ import NotFoundPage from './pages/NotFoundPage';
 import InvitePage from './pages/InvitePage';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { SplashScreen } from '@/components/common/splash-screen/SplashScreen';
+import { Toaster } from '@/components/ui/toaster';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({
   children,
@@ -27,6 +28,7 @@ const App: React.FC = () => {
     <AuthProvider>
       <AppMain />
       <SplashScreen />
+      <Toaster />
     </AuthProvider>
   );
 };

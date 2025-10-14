@@ -11,7 +11,6 @@ async function fetchGoogleCalendarEvents(accessToken, syncToken, pageToken) {
   if (syncToken) {
     // 일부 sync
     apiUrl.searchParams.set('syncToken', syncToken);
-    console.log('증분 동기화 사용 중');
   } else {
     // 전체 sync( nextSyncToken 받기 위한 최소 설정)
     apiUrl.searchParams.set('maxResults', '2500');
@@ -31,6 +30,16 @@ async function fetchGoogleCalendarEvents(accessToken, syncToken, pageToken) {
 
   if (!response.ok) {
     const errorText = await response.text();
+
+    // 410 에러: syncToken이 만료됨 (전체 동기화 필요)
+    if (response.status === 410) {
+      const error = new Error(
+        'SyncToken이 만료되었습니다. 전체 동기화가 필요합니다.'
+      );
+      error.name = 'SYNC_TOKEN_INVALID';
+      throw error;
+    }
+
     throw new Error(
       `[구글 캘린더 API 오류] response.status: ${response.status}, errorText: ${errorText}`
     );
@@ -44,29 +53,52 @@ async function getAllGoogleEvents(accessToken, syncToken) {
   const allEvents = [];
   let nextPageToken = null;
   let nextSyncToken = null;
+  let usedSyncToken = syncToken;
 
-  do {
-    const data = await fetchGoogleCalendarEvents(
-      accessToken,
-      syncToken,
-      nextPageToken
-    );
-    if (data.items) {
-      allEvents.push(...data.items);
-    }
-    nextPageToken = data.nextPageToken;
-    nextSyncToken = data.nextSyncToken;
-    if (syncToken) {
-      break;
-    }
-  } while (nextPageToken);
+  try {
+    do {
+      const data = await fetchGoogleCalendarEvents(
+        accessToken,
+        usedSyncToken,
+        nextPageToken
+      );
+      if (data.items) {
+        allEvents.push(...data.items);
+      }
+      nextPageToken = data.nextPageToken;
+      nextSyncToken = data.nextSyncToken;
+      if (usedSyncToken) {
+        break;
+      }
+    } while (nextPageToken);
+  } catch (error) {
+    // syncToken 만료 시 전체 동기화로 재시도
+    if (error.name === 'SYNC_TOKEN_INVALID') {
+      usedSyncToken = null;
+      nextPageToken = null;
+      allEvents.length = 0; // 배열 초기화
 
-  console.log(`Total count of patch events: ${allEvents.length}`);
-  console.log('최종 nextSyncToken:', nextSyncToken);
+      do {
+        const data = await fetchGoogleCalendarEvents(
+          accessToken,
+          null,
+          nextPageToken
+        );
+        if (data.items) {
+          allEvents.push(...data.items);
+        }
+        nextPageToken = data.nextPageToken;
+        nextSyncToken = data.nextSyncToken;
+      } while (nextPageToken);
+    } else {
+      throw error;
+    }
+  }
 
   return {
     events: allEvents,
     nextSyncToken,
+    syncTokenInvalidated: syncToken && !usedSyncToken, // syncToken이 무효화되었는지 여부
   };
 }
 
@@ -203,7 +235,6 @@ async function getOrCreateCalendar(supabase, userId, googleEmail) {
 
     if (error) throw error;
     calendar = newCalendar;
-    console.log('구글캘린더 기반 신규 캘린더 생성완료');
   }
 
   // 캘린더에 current user 를 owner 로 추가 (신규/기존 관계없음)
@@ -267,6 +298,16 @@ async function refreshAccessToken(refreshToken) {
 
   if (!response.ok) {
     const error = await response.text();
+
+    // invalid_grant 에러 처리 (refresh_token 만료 또는 권한 취소)
+    if (error.includes('invalid_grant')) {
+      const reAuthError = new Error(
+        '구글 인증이 만료되었거나 취소되었습니다. 다시 연동해주세요.'
+      );
+      reAuthError.name = 'REAUTH_REQUIRED';
+      throw reAuthError;
+    }
+
     throw new Error(`토큰 갱신 실패: ${response.status} - ${error}`);
   }
 
@@ -283,7 +324,6 @@ async function getValidAccessToken(supabase, integration) {
   const expiresAt = new Date(integration.expires_at);
 
   if (expiresAt <= new Date(now.getTime() + 5 * 60 * 1000)) {
-    console.log('토큰 만료됨, 갱신 중...');
     const tokenData = await refreshAccessToken(integration.refresh_token);
     const newExpiresAt = new Date(now.getTime() + tokenData.expires_in * 1000);
 
@@ -297,7 +337,6 @@ async function getValidAccessToken(supabase, integration) {
       .eq('user_id', integration.user_id);
 
     if (error) throw error;
-    console.log('갱신 완료');
     return tokenData.access_token;
   }
 
@@ -343,10 +382,11 @@ serve(async (req) => {
     const syncType = useSyncToken ? 'incremental' : 'full';
 
     // 구글 이벤트 가져오기
-    const { events, nextSyncToken } = await getAllGoogleEvents(
-      validAccessToken,
-      useSyncToken ? integration.sync_token : null
-    );
+    const { events, nextSyncToken, syncTokenInvalidated } =
+      await getAllGoogleEvents(
+        validAccessToken,
+        useSyncToken ? integration.sync_token : null
+      );
 
     // 이벤트 동기화 처리
     const processedCount = await processEvents(
@@ -361,15 +401,17 @@ serve(async (req) => {
       await updateSyncToken(supabase, user_id, nextSyncToken);
     }
 
-    console.log(`동기화 완료 - 처리된 이벤트: ${processedCount}개`);
+    // 실제 동기화 타입 결정 (syncToken이 무효화되면 full sync로 변경)
+    const actualSyncType = syncTokenInvalidated ? 'full' : syncType;
 
     return new Response(
       JSON.stringify({
         success: true,
         message: `patched ${processedCount} events.`,
-        sync_type: syncType,
+        sync_type: actualSyncType,
         total_events: events.length,
         processed_events: processedCount,
+        sync_token_invalidated: syncTokenInvalidated || false,
       }),
       {
         headers: {
@@ -380,12 +422,17 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error('동기화 오류:', error);
+
+    // 재인증 필요 에러는 401로 반환
+    const status = error.name === 'REAUTH_REQUIRED' ? 401 : 400;
+
     return new Response(
       JSON.stringify({
         error: error.message,
+        reauth_required: error.name === 'REAUTH_REQUIRED',
       }),
       {
-        status: 400,
+        status,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders,
