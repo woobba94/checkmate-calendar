@@ -3,7 +3,8 @@ import { useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import Calendar from '@/components/calendar/core/Calendar';
 import CalendarHeader from '@/components/calendar/header/CalendarHeader';
-import EventModal from '@/components/calendar/modals/EventModal';
+import CreateEventModal from '@/components/calendar/modals/CreateEventModal';
+import EditEventModal from '@/components/calendar/modals/EditEventModal';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
 import { useAuth } from '@/contexts/AuthContext';
 import AppSidebar from '@/components/sidebar/AppSidebar';
@@ -138,7 +139,9 @@ const DashboardPage: React.FC = () => {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | undefined>(
     undefined
   );
-  const [isEventModalOpen, setIsEventModalOpen] = useState(false);
+  const [createEventDate, setCreateEventDate] = useState<Date | null>(null);
+  const [isCreateEventModalOpen, setIsCreateEventModalOpen] = useState(false);
+  const [isEditEventModalOpen, setIsEditEventModalOpen] = useState(false);
   const [isCalendarModalOpen, setIsCalendarModalOpen] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
 
@@ -153,7 +156,7 @@ const DashboardPage: React.FC = () => {
 
   const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
-    setIsEventModalOpen(true);
+    setIsEditEventModalOpen(true);
   };
 
   const handleDateClick = (date: Date) => {
@@ -173,24 +176,16 @@ const DashboardPage: React.FC = () => {
       setIsDatePanelOpen(true);
     } else {
       // 데스크톱: 직접 이벤트 추가 모달 열기
-      const newEvent: Omit<
-        CalendarEvent,
-        'id' | 'created_by' | 'created_at' | 'updated_at'
-      > = {
-        title: '',
-        start: date,
-        calendar_ids: selectedCalendarIds,
-      };
-
-      setSelectedEvent(newEvent as CalendarEvent);
-      setIsEventModalOpen(true);
+      setCreateEventDate(date);
+      setIsCreateEventModalOpen(true);
     }
   };
 
-  const handleSaveEvent = async (
-    eventData:
-      | CalendarEvent
-      | Omit<CalendarEvent, 'id' | 'created_by' | 'created_at' | 'updated_at'>
+  const handleCreateEvent = async (
+    eventData: Omit<
+      CalendarEvent,
+      'id' | 'created_by' | 'created_at' | 'updated_at'
+    >
   ) => {
     if (!userId) {
       setLocalError('Please log in to save events');
@@ -198,21 +193,55 @@ const DashboardPage: React.FC = () => {
     }
 
     try {
-      if ('id' in eventData && eventData.id) {
-        await updateEvent(eventData as CalendarEvent);
-      } else {
-        await createEvent(
-          eventData as Omit<
-            CalendarEvent,
-            'id' | 'created_by' | 'created_at' | 'updated_at'
-          >
-        );
-      }
-      // 모달 닫기는 EventModal 내부에서 처리 (여러 캘린더에 저장 시 충돌 방지)
+      await createEvent(eventData);
+      // 모달 닫기는 CreateEventModal 내부에서 처리
     } catch (e) {
-      setLocalError(e instanceof Error ? e.message : 'Failed to save event');
-      // 에러 발생 시에만 모달 닫기
-      setIsEventModalOpen(false);
+      setLocalError(e instanceof Error ? e.message : 'Failed to create event');
+      setIsCreateEventModalOpen(false);
+    }
+  };
+
+  const handleUpdateEvent = async (eventData: CalendarEvent) => {
+    if (!userId) {
+      setLocalError('Please log in to save events');
+      return;
+    }
+
+    try {
+      await updateEvent(eventData);
+      // 모달 닫기는 EditEventModal 내부에서 처리
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Failed to update event');
+      setIsEditEventModalOpen(false);
+    }
+  };
+
+  const handleEventDrop = async (eventId: string, newDate: Date) => {
+    if (!userId) {
+      setLocalError('Please log in to update events');
+      return;
+    }
+
+    try {
+      // 드래그된 이벤트 찾기
+      const event = mergedEvents.find((e) => e.id === eventId);
+      if (!event) return;
+
+      // 새 날짜로 이벤트 업데이트 (종일 일정으로)
+      const startDate = new Date(newDate);
+      startDate.setHours(0, 0, 0, 0);
+      const endDate = new Date(startDate);
+
+      const updatedEvent: CalendarEvent = {
+        ...event,
+        start: startDate.toISOString(),
+        end: endDate.toISOString(),
+        allDay: true,
+      };
+
+      await updateEvent(updatedEvent);
+    } catch (e) {
+      setLocalError(e instanceof Error ? e.message : 'Failed to update event');
     }
   };
 
@@ -441,6 +470,7 @@ const DashboardPage: React.FC = () => {
         calendars={calendars}
         onEventClick={handleEventClick}
         onDateClick={handleDateClick}
+        onEventDrop={handleEventDrop}
         currentView={view}
         currentDate={currentDate}
         onDateChange={setCurrentDate}
@@ -733,16 +763,8 @@ const DashboardPage: React.FC = () => {
             onEventClick={handleEventClick}
             onAddClick={() => {
               if (selectedDateForPanel) {
-                const newEvent: Omit<
-                  CalendarEvent,
-                  'id' | 'created_by' | 'created_at' | 'updated_at'
-                > = {
-                  title: '',
-                  start: selectedDateForPanel,
-                  calendar_ids: selectedCalendarIds,
-                };
-                setSelectedEvent(newEvent as CalendarEvent);
-                setIsEventModalOpen(true);
+                setCreateEventDate(selectedDateForPanel);
+                setIsCreateEventModalOpen(true);
               }
             }}
           />
@@ -761,55 +783,84 @@ const DashboardPage: React.FC = () => {
           </Button>
         )}
 
-        {/* 이벤트 모달 / 바텀 시트 */}
+        {/* 이벤트 생성 모달 / 바텀 시트 */}
         {isMobile ? (
           <BottomSheet
-            isOpen={isEventModalOpen}
-            onClose={() => setIsEventModalOpen(false)}
-            title={selectedEvent?.id ? '일정 수정' : '새 일정'}
+            isOpen={isCreateEventModalOpen}
+            onClose={() => setIsCreateEventModalOpen(false)}
+            title="새 일정"
             height="70%"
           >
-            {/* TODO: EventModal 내용을 모바일용으로 수정 필요 */}
-            <EventModal
-              isOpen={true}
-              onClose={() => setIsEventModalOpen(false)}
+            {createEventDate && (
+              <CreateEventModal
+                isOpen={true}
+                onClose={() => setIsCreateEventModalOpen(false)}
+                date={createEventDate}
+                onSave={handleCreateEvent}
+                calendars={calendars}
+                defaultSelectedCalendarIds={selectedCalendarIds}
+              />
+            )}
+          </BottomSheet>
+        ) : (
+          createEventDate && (
+            <CreateEventModal
+              isOpen={isCreateEventModalOpen}
+              onClose={() => setIsCreateEventModalOpen(false)}
+              date={createEventDate}
+              onSave={handleCreateEvent}
+              calendars={calendars}
+              defaultSelectedCalendarIds={selectedCalendarIds}
+            />
+          )
+        )}
+
+        {/* 이벤트 수정 모달 / 바텀 시트 */}
+        {isMobile ? (
+          <BottomSheet
+            isOpen={isEditEventModalOpen}
+            onClose={() => setIsEditEventModalOpen(false)}
+            title="일정 수정"
+            height="70%"
+          >
+            {selectedEvent && (
+              <EditEventModal
+                isOpen={true}
+                onClose={() => setIsEditEventModalOpen(false)}
+                event={selectedEvent}
+                onSave={handleUpdateEvent}
+                onDelete={async (eventId: string) => {
+                  if (selectedEvent?.calendar_ids?.[0]) {
+                    await deleteEvent({
+                      eventId,
+                      calendarId: selectedEvent.calendar_ids[0],
+                    });
+                    setIsEditEventModalOpen(false);
+                  }
+                }}
+                calendars={calendars}
+              />
+            )}
+          </BottomSheet>
+        ) : (
+          selectedEvent && (
+            <EditEventModal
+              isOpen={isEditEventModalOpen}
+              onClose={() => setIsEditEventModalOpen(false)}
               event={selectedEvent}
-              onSave={handleSaveEvent}
+              onSave={handleUpdateEvent}
               onDelete={async (eventId: string) => {
                 if (selectedEvent?.calendar_ids?.[0]) {
                   await deleteEvent({
                     eventId,
                     calendarId: selectedEvent.calendar_ids[0],
                   });
-                  setIsEventModalOpen(false);
+                  setIsEditEventModalOpen(false);
                 }
               }}
               calendars={calendars}
-              defaultCalendarId={
-                selectedCalendarIds[selectedCalendarIds.length - 1]
-              }
             />
-          </BottomSheet>
-        ) : (
-          <EventModal
-            isOpen={isEventModalOpen}
-            onClose={() => setIsEventModalOpen(false)}
-            event={selectedEvent}
-            onSave={handleSaveEvent}
-            onDelete={async (eventId: string) => {
-              if (selectedEvent?.calendar_ids?.[0]) {
-                await deleteEvent({
-                  eventId,
-                  calendarId: selectedEvent.calendar_ids[0],
-                });
-                setIsEventModalOpen(false);
-              }
-            }}
-            calendars={calendars}
-            defaultCalendarId={
-              selectedCalendarIds[selectedCalendarIds.length - 1]
-            }
-          />
+          )
         )}
 
         <CalendarCreateModal

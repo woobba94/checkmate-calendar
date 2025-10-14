@@ -10,7 +10,7 @@ import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import listPlugin from '@fullcalendar/list';
-import type { EventClickArg } from '@fullcalendar/core';
+import type { EventClickArg, EventDropArg } from '@fullcalendar/core';
 import type {
   CalendarEvent,
   CalendarViewType,
@@ -26,6 +26,7 @@ interface CalendarProps {
   calendars?: CalendarType[];
   onEventClick?: (event: CalendarEvent) => void;
   onDateClick?: (date: Date) => void;
+  onEventDrop?: (eventId: string, newDate: Date) => void;
   currentView: CalendarViewType;
   currentDate?: Date;
   onDateChange?: (date: Date) => void;
@@ -38,6 +39,7 @@ const Calendar: React.FC<CalendarProps> = ({
   calendars,
   onEventClick,
   onDateClick,
+  onEventDrop,
   currentView,
   currentDate,
   onDateChange,
@@ -141,6 +143,12 @@ const Calendar: React.FC<CalendarProps> = ({
         updated_at: info.event.extendedProps.updated_at,
       };
       onEventClick(event);
+    }
+  };
+
+  const handleEventDrop = (info: EventDropArg) => {
+    if (onEventDrop && info.event.start) {
+      onEventDrop(info.event.id, info.event.start);
     }
   };
 
@@ -320,6 +328,7 @@ const Calendar: React.FC<CalendarProps> = ({
         headerToolbar={false} // 헤더는 CalendarHeader 컴포넌트에서 따로관리
         events={fullCalendarEvents}
         eventClick={handleEventClick}
+        eventDrop={handleEventDrop}
         dateClick={(info) => onDateClick && onDateClick(info.date)}
         editable={!isMobile}
         selectable={true}
