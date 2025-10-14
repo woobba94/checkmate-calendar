@@ -179,7 +179,7 @@ const DashboardPage: React.FC = () => {
       > = {
         title: '',
         start: date,
-        calendar_id: selectedCalendarIds[0],
+        calendar_ids: selectedCalendarIds,
       };
 
       setSelectedEvent(newEvent as CalendarEvent);
@@ -208,9 +208,11 @@ const DashboardPage: React.FC = () => {
           >
         );
       }
-      setIsEventModalOpen(false);
+      // 모달 닫기는 EventModal 내부에서 처리 (여러 캘린더에 저장 시 충돌 방지)
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : 'Failed to save event');
+      // 에러 발생 시에만 모달 닫기
+      setIsEventModalOpen(false);
     }
   };
 
@@ -737,7 +739,7 @@ const DashboardPage: React.FC = () => {
                 > = {
                   title: '',
                   start: selectedDateForPanel,
-                  calendar_id: selectedCalendarIds[0],
+                  calendar_ids: selectedCalendarIds,
                 };
                 setSelectedEvent(newEvent as CalendarEvent);
                 setIsEventModalOpen(true);
@@ -774,17 +776,15 @@ const DashboardPage: React.FC = () => {
               event={selectedEvent}
               onSave={handleSaveEvent}
               onDelete={async (eventId: string) => {
-                if (selectedEvent?.calendar_id) {
+                if (selectedEvent?.calendar_ids?.[0]) {
                   await deleteEvent({
                     eventId,
-                    calendarId: selectedEvent.calendar_id,
+                    calendarId: selectedEvent.calendar_ids[0],
                   });
                   setIsEventModalOpen(false);
                 }
               }}
-              calendars={calendars.filter((c) =>
-                selectedCalendarIds.includes(c.id)
-              )}
+              calendars={calendars}
               defaultCalendarId={
                 selectedCalendarIds[selectedCalendarIds.length - 1]
               }
@@ -797,17 +797,15 @@ const DashboardPage: React.FC = () => {
             event={selectedEvent}
             onSave={handleSaveEvent}
             onDelete={async (eventId: string) => {
-              if (selectedEvent?.calendar_id) {
+              if (selectedEvent?.calendar_ids?.[0]) {
                 await deleteEvent({
                   eventId,
-                  calendarId: selectedEvent.calendar_id,
+                  calendarId: selectedEvent.calendar_ids[0],
                 });
                 setIsEventModalOpen(false);
               }
             }}
-            calendars={calendars.filter((c) =>
-              selectedCalendarIds.includes(c.id)
-            )}
+            calendars={calendars}
             defaultCalendarId={
               selectedCalendarIds[selectedCalendarIds.length - 1]
             }
