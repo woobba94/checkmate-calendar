@@ -1,7 +1,10 @@
 # 테스트 계정
-admin@checkmate.com/admin
-(agent limit 100/day)
+```
+ID: admin@checkmate.com
+PW: admin
 
+ps. agent limit 100/day
+```
 # Checkmate Calendar - Monorepo
 
 ### 연동과 일정 공유가 가능한 캘린더 서비스
