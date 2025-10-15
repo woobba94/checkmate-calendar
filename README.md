@@ -5,8 +5,12 @@
 
 문의: [rex@checkmate-calendar.com](mailto:rex@checkmate-calendar.com) 또는 [jwj3199@gmail.com](mailto:jwj3199@gmail.com)
 
-# 테스트 계정
+# 서비스 링크
 
+- **랜딩페이지**: [https://checkmate-calendar.com](https://checkmate-calendar.com)
+- **캘린더 서비스**: [https://app.checkmate-calendar.com](https://app.checkmate-calendar.com)
+
+# 테스트 계정
 ### ID
 ```
 admin@checkmate.com
@@ -136,8 +140,3 @@ npm run build:calendar   # 캘린더 앱 빌드
 - `events`: 일정 정보 (제목, 시간, 설명, 캘린더 참조)
 - `calendar_shares`: 캘린더 공유 관계 (소유자-공유자 매핑)
 - `google_calendar_tokens`: OAuth 토큰 저장
-
-## 서비스 링크
-
-- **랜딩페이지**: [https://checkmate-calendar.com](https://checkmate-calendar.com)
-- **캘린더 서비스**: [https://app.checkmate-calendar.com](https://app.checkmate-calendar.com)
