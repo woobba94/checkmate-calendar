@@ -7,9 +7,13 @@
 
 # 테스트 계정
 
+### ID
 ```
-ID: admin@checkmate.com
-PW: admin
+admin@checkmate.com
+```
+### PW
+```
+admin
 ```
 
 ※ AI 에이전트 기능은 계정당 일일 100회로 제한됩니다.
