@@ -21,6 +21,7 @@ export interface CalendarEvent {
   created_by: string; // 이벤트를 생성한 사용자 ID
   created_at: string | Date;
   updated_at: string | Date;
+  updated_by?: string; // 이벤트를 마지막으로 수정한 사용자 ID
 }
 
 // 이벤트-캘린더 관계 (Junction Table)

@@ -92,6 +92,7 @@ const Calendar: React.FC<CalendarProps> = ({
           created_by: event.created_by,
           created_at: event.created_at,
           updated_at: event.updated_at,
+          updated_by: event.updated_by,
         },
       };
     });
@@ -141,6 +142,7 @@ const Calendar: React.FC<CalendarProps> = ({
         created_by: info.event.extendedProps.created_by,
         created_at: info.event.extendedProps.created_at,
         updated_at: info.event.extendedProps.updated_at,
+        updated_by: info.event.extendedProps.updated_by,
       };
       onEventClick(event);
     }

@@ -21,7 +21,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
 import { getUserById, type UserProfile } from '@/services/authService';
 import { getUserInitials } from '@/lib/user-utils';
-import { formatDateKorean } from '@/lib/date-utils';
+import { formatDateKorean, formatDateTimeKorean } from '@/lib/date-utils';
 import { hasChanges } from '@/lib/form-utils';
 
 interface EditEventModalProps {
@@ -48,7 +48,9 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   const [eventDate, setEventDate] = useState<Date>(new Date());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [createdByUser, setCreatedByUser] = useState<UserProfile | null>(null);
+  const [updatedByUser, setUpdatedByUser] = useState<UserProfile | null>(null);
   const [isLoadingCreator, setIsLoadingCreator] = useState(false);
+  const [isLoadingUpdater, setIsLoadingUpdater] = useState(false);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
@@ -56,8 +58,12 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   // 현재 사용자가 일정 작성자인지 확인
   const isCreatedByCurrentUser = event.created_by === user?.id;
 
+  // 수정 이력이 있는지 확인
+  const hasUpdateHistory = event.updated_by;
+
   // 파일명에 이미 타임스탬프가 포함되어 있어서 별도 처리 불필요
   const creatorAvatarUrl = createdByUser?.avatar_url;
+  const updaterAvatarUrl = updatedByUser?.avatar_url;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -72,8 +78,8 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       setSelectedCalendarIds(event.calendar_ids);
     }
 
-    // 작성자 정보 가져오기 (다른 사람이 만든 일정인 경우)
-    if (!isCreatedByCurrentUser && event.created_by) {
+    // 생성자 정보 가져오기
+    if (event.created_by) {
       setIsLoadingCreator(true);
       getUserById(event.created_by)
         .then((userData) => {
@@ -90,7 +96,26 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     } else {
       setCreatedByUser(null);
     }
-  }, [isOpen, event, isCreatedByCurrentUser]);
+
+    // 마지막 수정자 정보 가져오기 (수정 이력이 있는 경우)
+    if (hasUpdateHistory && event.updated_by) {
+      setIsLoadingUpdater(true);
+      getUserById(event.updated_by)
+        .then((userData) => {
+          if (userData) {
+            setUpdatedByUser(userData);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch updater info:', error);
+        })
+        .finally(() => {
+          setIsLoadingUpdater(false);
+        });
+    } else {
+      setUpdatedByUser(null);
+    }
+  }, [isOpen, event, hasUpdateHistory]);
 
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -291,17 +316,25 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
               </div>
             )}
 
-            {/* 작성자 영역 - 다른 사람이 만든 일정일 때만 표시 */}
-            {!isCreatedByCurrentUser && (
-              <div className="space-y-2 pt-4 border-t">
-                <Label>작성자</Label>
+            {/* 생성자 & 마지막 수정 영역 */}
+            <div
+              className={cn(
+                'pt-4 border-t',
+                hasUpdateHistory ? 'grid grid-cols-2 gap-4' : ''
+              )}
+            >
+              {/* 생성자 */}
+              <div className="space-y-2">
+                <div className="flex items-center h-[20px]">
+                  <Label>생성자</Label>
+                </div>
                 {isLoadingCreator ? (
                   <div className="text-sm text-gray-500">
-                    작성자 정보를 불러오는 중...
+                    생성자 정보를 불러오는 중...
                   </div>
                 ) : createdByUser ? (
                   <div className="flex items-center gap-2">
-                    <Avatar className="h-8 w-8">
+                    <Avatar className="h-6 w-6">
                       <AvatarImage
                         src={creatorAvatarUrl}
                         className="object-contain"
@@ -313,26 +346,82 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                         )}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium">
-                        {createdByUser.display_name ||
-                          createdByUser.email?.split('@')[0] ||
-                          '사용자'}
-                      </span>
-                      {createdByUser.display_name && (
-                        <span className="text-xs text-gray-500">
-                          {createdByUser.email}
+                    {isCreatedByCurrentUser ? (
+                      <span className="text-sm font-medium">나</span>
+                    ) : (
+                      <div className="flex flex-col">
+                        <span className="text-sm font-medium">
+                          {createdByUser.display_name ||
+                            createdByUser.email?.split('@')[0] ||
+                            '사용자'}
                         </span>
-                      )}
-                    </div>
+                        {createdByUser.display_name && (
+                          <span className="text-[10px] text-gray-500">
+                            {createdByUser.email}
+                          </span>
+                        )}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="text-sm text-gray-500">
-                    작성자 정보를 찾을 수 없습니다.
+                    생성자 정보를 찾을 수 없습니다.
                   </div>
                 )}
               </div>
-            )}
+
+              {/* 마지막 수정 영역 - 수정 이력이 있을 때만 표시 */}
+              {hasUpdateHistory && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between h-[20px]">
+                    <Label>마지막 수정</Label>
+                    <span className="text-xs text-gray-500">
+                      {formatDateTimeKorean(event.updated_at)}
+                    </span>
+                  </div>
+                  {isLoadingUpdater ? (
+                    <div className="text-sm text-gray-500">
+                      수정자 정보를 불러오는 중...
+                    </div>
+                  ) : updatedByUser ? (
+                    <div className="flex items-center gap-2">
+                      <Avatar className="h-6 w-6">
+                        <AvatarImage
+                          src={updaterAvatarUrl}
+                          className="object-contain"
+                        />
+                        <AvatarFallback className="text-xs">
+                          {getUserInitials(
+                            updatedByUser.display_name,
+                            updatedByUser.email
+                          )}
+                        </AvatarFallback>
+                      </Avatar>
+                      {event.updated_by === user?.id ? (
+                        <span className="text-sm font-medium">나</span>
+                      ) : (
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {updatedByUser.display_name ||
+                              updatedByUser.email?.split('@')[0] ||
+                              '사용자'}
+                          </span>
+                          {updatedByUser.display_name && (
+                            <span className="text-[10px] text-gray-500">
+                              {updatedByUser.email}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="text-sm text-gray-500">
+                      수정자 정보를 찾을 수 없습니다.
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
 
             {/* 삭제 버튼 - 본인이 만든 일정일 때만 표시 */}
             {isCreatedByCurrentUser && onDelete && (

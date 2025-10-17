@@ -51,3 +51,17 @@ export function formatDateKorean(date: Date): string {
   const weekday = weekdays[date.getDay()];
   return `${month}월 ${day}일 (${weekday})`;
 }
+
+/**
+ * 날짜와 시간을 "0월 0일 0:00" 형식으로 포맷팅
+ * @param date - Date 객체 또는 문자열
+ * @returns 포맷된 날짜시간 문자열
+ */
+export function formatDateTimeKorean(date: Date | string): string {
+  const d = ensureDate(date);
+  const month = d.getMonth() + 1;
+  const day = d.getDate();
+  const hours = d.getHours();
+  const minutes = d.getMinutes().toString().padStart(2, '0');
+  return `${month}월 ${day}일 ${hours}:${minutes}`;
+}
