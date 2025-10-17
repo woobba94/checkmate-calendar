@@ -19,6 +19,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
+import { getUserById } from '@/services/authService';
 
 interface EditEventModalProps {
   isOpen: boolean;
@@ -43,21 +44,18 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>([]);
   const [eventDate, setEventDate] = useState<Date>(new Date());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [createdByUser, setCreatedByUser] = useState<{
+    id: string;
+    email: string;
+    display_name?: string;
+  } | null>(null);
+  const [isLoadingCreator, setIsLoadingCreator] = useState(false);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
   const descriptionTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   // 현재 사용자가 일정 작성자인지 확인
   const isCreatedByCurrentUser = event.created_by === user?.id;
-
-  // 작성자 정보 가져오기
-  // TODO: 향후 개선 필요
-  // - 각 이벤트에 작성자 이름을 저장하거나
-  // - 별도 유저 조회 API를 통해 user_id로 이름을 가져와야 함
-  // 현재는 임시로 user_id만 표시
-  const createdByUser = !isCreatedByCurrentUser
-    ? { id: event.created_by, name: event.created_by }
-    : null;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -71,7 +69,26 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     if (event.calendar_ids && event.calendar_ids.length > 0) {
       setSelectedCalendarIds(event.calendar_ids);
     }
-  }, [isOpen, event]);
+
+    // 작성자 정보 가져오기 (다른 사람이 만든 일정인 경우)
+    if (!isCreatedByCurrentUser && event.created_by) {
+      setIsLoadingCreator(true);
+      getUserById(event.created_by)
+        .then((userData) => {
+          if (userData) {
+            setCreatedByUser(userData);
+          }
+        })
+        .catch((error) => {
+          console.error('Failed to fetch creator info:', error);
+        })
+        .finally(() => {
+          setIsLoadingCreator(false);
+        });
+    } else {
+      setCreatedByUser(null);
+    }
+  }, [isOpen, event, isCreatedByCurrentUser]);
 
   // 날짜 포맷: "0월 0일 (요일)"
   const formatDate = (date: Date): string => {
@@ -325,17 +342,40 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
             )}
 
             {/* 작성자 영역 - 다른 사람이 만든 일정일 때만 표시 */}
-            {createdByUser && (
+            {!isCreatedByCurrentUser && (
               <div className="space-y-2 pt-4 border-t">
                 <Label>작성자</Label>
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback className="text-xs">
-                      {createdByUser.name?.charAt(0).toUpperCase() || '?'}
-                    </AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm">{createdByUser.name}</span>
-                </div>
+                {isLoadingCreator ? (
+                  <div className="text-sm text-gray-500">
+                    작성자 정보를 불러오는 중...
+                  </div>
+                ) : createdByUser ? (
+                  <div className="flex items-center gap-2">
+                    <Avatar className="h-8 w-8">
+                      <AvatarFallback className="text-xs">
+                        {createdByUser.display_name?.charAt(0).toUpperCase() ||
+                          createdByUser.email?.charAt(0).toUpperCase() ||
+                          '?'}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-medium">
+                        {createdByUser.display_name ||
+                          createdByUser.email?.split('@')[0] ||
+                          '사용자'}
+                      </span>
+                      {createdByUser.display_name && (
+                        <span className="text-xs text-gray-500">
+                          {createdByUser.email}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-500">
+                    작성자 정보를 찾을 수 없습니다.
+                  </div>
+                )}
               </div>
             )}
 

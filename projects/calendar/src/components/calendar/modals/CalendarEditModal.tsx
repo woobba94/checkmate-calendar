@@ -62,7 +62,7 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
   const [editCurrentEmail, setEditCurrentEmail] = useState('');
   const [editEmailError, setEditEmailError] = useState('');
   const [calendarMembers, setCalendarMembers] = useState<
-    (CalendarMember & { email?: string })[]
+    (CalendarMember & { email?: string; display_name?: string })[]
   >([]);
   const [isLoadingMembers, setIsLoadingMembers] = useState(false);
 
@@ -246,9 +246,18 @@ const CalendarEditModal: React.FC<CalendarEditModalProps> = ({
                               ? '관리자'
                               : '멤버'}
                         </span>
-                        <span className="text-sm font-medium">
-                          {member.email}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-sm font-medium">
+                            {member.display_name ||
+                              member.email?.split('@')[0] ||
+                              '사용자'}
+                          </span>
+                          {member.display_name && (
+                            <span className="text-xs text-gray-500">
+                              {member.email}
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}

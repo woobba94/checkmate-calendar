@@ -268,17 +268,18 @@ export const deleteCalendar = async (calendarId: string): Promise<void> => {
 };
 
 // 캘린더 멤버 조회 (사용자 정보 포함)
-// public.users 테이블을 JOIN하여 이메일 정보도 함께 가져옴 (RPC 함수보다 효율적)
+// public.users 테이블을 JOIN하여 이메일과 display_name 정보도 함께 가져옴 (RPC 함수보다 효율적)
 export const getCalendarMembers = async (
   calendarId: string
-): Promise<(CalendarMember & { email?: string })[]> => {
+): Promise<(CalendarMember & { email?: string; display_name?: string })[]> => {
   const { data, error } = await supabase
     .from('calendar_members')
     .select(
       `
       *,
       users!calendar_members_user_id_fkey (
-        email
+        email,
+        display_name
       )
     `
     )
@@ -291,11 +292,18 @@ export const getCalendarMembers = async (
 
   // user 정보를 평탄화하고 role 순서대로 정렬
   const membersWithEmail = (data || [])
-    .map((member: CalendarMember & { users?: { email?: string } | null }) => ({
-      ...member,
-      email: member.users?.email,
-      users: undefined, // users 객체 제거
-    }))
+    .map(
+      (
+        member: CalendarMember & {
+          users?: { email?: string; display_name?: string } | null;
+        }
+      ) => ({
+        ...member,
+        email: member.users?.email,
+        display_name: member.users?.display_name,
+        users: undefined, // users 객체 제거
+      })
+    )
     .sort((a, b) => {
       // role 우선순위: owner(1) > admin(2) > member(3)
       const roleOrder: Record<string, number> = {

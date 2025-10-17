@@ -14,6 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/services/supabase';
 import { Moon, Sun } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface UserSettingsDialogProps {
   open: boolean;
@@ -30,6 +31,7 @@ export function UserSettingsDialog({
 }: UserSettingsDialogProps) {
   const { user } = useAuth();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [displayName, setDisplayName] = useState(
     user?.user_metadata?.display_name || ''
   );
@@ -40,11 +42,28 @@ export function UserSettingsDialog({
 
     setLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({
+      // 1. auth.users의 user_metadata 업데이트
+      const { error: authError } = await supabase.auth.updateUser({
         data: { display_name: displayName },
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
+
+      // 2. public.users 테이블 업데이트
+      // INSERT 권한이 없으므로 UPDATE만 시도 (레코드는 회원가입 시 트리거로 자동 생성됨)
+      const { error: dbError } = await supabase
+        .from('users')
+        .update({ display_name: displayName })
+        .eq('id', user.id);
+
+      // 레코드가 없는 경우는 무시 (트리거가 없는 경우를 대비)
+      // RLS 정책상 INSERT 권한이 없으므로 UPDATE만 시도
+      if (dbError && dbError.code !== 'PGRST116') {
+        throw dbError;
+      }
+
+      // 3. auth 쿼리 무효화하여 최신 데이터 가져오기
+      await queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
 
       toast({
         title: '프로필이 업데이트되었습니다',

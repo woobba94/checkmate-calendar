@@ -77,9 +77,11 @@ export const getCurrentUser = async (): Promise<User | null> => {
   }
 
   if (data?.user) {
+    // user_metadata와 함께 반환
     return {
       id: data.user.id,
       email: data.user.email || '', // TODO 사용자 정보에 이메일이 없을 수 없을것같음. 무결하다면 그에 맞게 처리필요.
+      user_metadata: data.user.user_metadata || {},
     };
   }
 
@@ -100,4 +102,26 @@ export const ensureUserId = async (userId?: string): Promise<string> => {
   }
 
   return currentUserId;
+};
+
+// userId로 사용자 정보 조회
+export const getUserById = async (
+  userId: string
+): Promise<{ id: string; email: string; display_name?: string } | null> => {
+  const { data, error } = await supabase
+    .from('users')
+    .select('id, email, display_name')
+    .eq('id', userId)
+    .single();
+
+  if (error) {
+    if (error.code === 'PGRST116') {
+      // 결과가 없는 경우
+      return null;
+    }
+    console.error('Failed to fetch user:', error);
+    return null;
+  }
+
+  return data;
 };
