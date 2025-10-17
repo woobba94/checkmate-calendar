@@ -209,12 +209,10 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
               onKeyDown={handleTitleKeyDown}
               placeholder="어떤 일정인가요?"
               required
-              disabled={!isCreatedByCurrentUser}
               className={cn(
                 'w-full text-lg leading-normal font-medium',
                 'placeholder:text-muted-foreground',
-                'focus:outline-none',
-                'disabled:opacity-50 disabled:cursor-not-allowed'
+                'focus:outline-none'
               )}
             />
 
@@ -224,12 +222,10 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="메모"
-              disabled={!isCreatedByCurrentUser}
               className={cn(
                 'border-none shadow-none resize-none',
                 'focus-visible:ring-0 focus-visible:ring-offset-0',
-                'px-0 py-0',
-                'disabled:opacity-50'
+                'px-0 py-0'
               )}
               rows={3}
             />
