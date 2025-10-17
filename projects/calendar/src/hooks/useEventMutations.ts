@@ -2,22 +2,17 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createEvent, updateEvent, deleteEvent } from '@/services/eventService';
 import type { CalendarEvent } from '@/types/calendar';
 import { ensureIsoString } from '@/lib/date-utils';
+import { useEventRealtimeSyncContext } from '@/contexts/EventRealtimeSyncContext';
 
 interface OptimisticContext {
   previousData: Record<string, CalendarEvent[]>;
   calendarIds: string[];
 }
 
-/**
- * Optimistic update를 사용한 이벤트 mutation 관리 Hook
- * - 이벤트 생성, 수정, 삭제 시 즉각적인 UI 업데이트 제공
- * - 에러 발생 시 자동 롤백
- * - 여러 캘린더에 걸친 이벤트 동기화 처리
- */
 export function useEventMutations(userId: string) {
   const queryClient = useQueryClient();
+  const { recordOptimisticUpdate } = useEventRealtimeSyncContext();
 
-  // 이벤트 날짜 정규화 (ISO 문자열로 변환)
   const normalizeEventDates = <
     T extends { start?: string | Date; end?: string | Date },
   >(
@@ -32,8 +27,6 @@ export function useEventMutations(userId: string) {
     }
     return normalized;
   };
-
-  // 이벤트 생성 mutation
   const createMutation = useMutation<
     CalendarEvent,
     Error,
@@ -45,11 +38,10 @@ export function useEventMutations(userId: string) {
       return createEvent(normalized, userId);
     },
     onMutate: async (newEvent) => {
-      // 여러 캘린더에 대해 optimistic update
       const affectedCalendarIds = newEvent.calendar_ids || [];
       const previousData: Record<string, CalendarEvent[]> = {};
+      const tempId = `temp-${Date.now()}`;
 
-      // 각 캘린더에 대해 처리
       for (const calendarId of affectedCalendarIds) {
         await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
@@ -63,7 +55,7 @@ export function useEventMutations(userId: string) {
 
           const optimisticEvent: CalendarEvent = {
             ...normalizeEventDates(newEvent),
-            id: `temp-${Date.now()}`,
+            id: tempId,
             calendar_ids: affectedCalendarIds,
             created_by: userId,
             created_at: new Date().toISOString(),
@@ -77,10 +69,10 @@ export function useEventMutations(userId: string) {
         }
       }
 
+      recordOptimisticUpdate(tempId);
       return { previousData, calendarIds: affectedCalendarIds };
     },
     onError: (_err, _newEvent, context) => {
-      // 에러 발생 시 이전 상태로 롤백
       if (context) {
         context.calendarIds.forEach((calendarId) => {
           if (context.previousData[calendarId]) {
@@ -92,16 +84,10 @@ export function useEventMutations(userId: string) {
         });
       }
     },
-    onSettled: (_data, _error, variables) => {
-      // 서버와 동기화 (optimistic update의 정확성 보장)
-      // 모든 이벤트 쿼리 무효화 (단일 캘린더 + 다중 캘린더 모두)
-      queryClient.invalidateQueries({
-        queryKey: ['events'],
-      });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
-
-  // 이벤트 수정 mutation
   const updateMutation = useMutation<
     CalendarEvent,
     Error,
@@ -113,9 +99,10 @@ export function useEventMutations(userId: string) {
       return updateEvent(normalized, userId);
     },
     onMutate: async (updatedEvent) => {
-      // 여러 캘린더에 대해 optimistic update
       const affectedCalendarIds = updatedEvent.calendar_ids || [];
       const previousData: Record<string, CalendarEvent[]> = {};
+
+      recordOptimisticUpdate(updatedEvent.id);
 
       for (const calendarId of affectedCalendarIds) {
         await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
@@ -140,7 +127,6 @@ export function useEventMutations(userId: string) {
       return { previousData, calendarIds: affectedCalendarIds };
     },
     onError: (_err, _updatedEvent, context) => {
-      // 에러 발생 시 이전 상태로 롤백
       if (context) {
         context.calendarIds.forEach((calendarId) => {
           if (context.previousData[calendarId]) {
@@ -152,16 +138,10 @@ export function useEventMutations(userId: string) {
         });
       }
     },
-    onSettled: (_data, _error, variables) => {
-      // 서버와 동기화
-      // 모든 이벤트 쿼리 무효화 (단일 캘린더 + 다중 캘린더 모두)
-      queryClient.invalidateQueries({
-        queryKey: ['events'],
-      });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
-
-  // 이벤트 삭제 mutation
   const deleteMutation = useMutation<
     void,
     Error,
@@ -170,6 +150,7 @@ export function useEventMutations(userId: string) {
   >({
     mutationFn: ({ eventId }) => deleteEvent(eventId, userId),
     onMutate: async ({ eventId, calendarId }) => {
+      recordOptimisticUpdate(eventId);
       await queryClient.cancelQueries({ queryKey: ['events', calendarId] });
 
       const previousEvents = queryClient.getQueryData<CalendarEvent[]>([
@@ -189,7 +170,6 @@ export function useEventMutations(userId: string) {
       return { previousData, calendarIds: [calendarId] };
     },
     onError: (_err, _variables, context) => {
-      // 에러 발생 시 이전 상태로 롤백
       if (context) {
         context.calendarIds.forEach((calendarId) => {
           if (context.previousData[calendarId]) {
@@ -201,12 +181,8 @@ export function useEventMutations(userId: string) {
         });
       }
     },
-    onSettled: (_data, _error, variables) => {
-      // 서버와 동기화
-      // 모든 이벤트 쿼리 무효화 (단일 캘린더 + 다중 캘린더 모두)
-      queryClient.invalidateQueries({
-        queryKey: ['events'],
-      });
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['events'] });
     },
   });
 
