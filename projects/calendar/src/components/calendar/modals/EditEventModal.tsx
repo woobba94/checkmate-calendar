@@ -16,10 +16,13 @@ import { X } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/hooks/useAuth';
 import { cn } from '@/lib/utils';
-import { getUserById } from '@/services/authService';
+import { getUserById, type UserProfile } from '@/services/authService';
+import { getUserInitials } from '@/lib/user-utils';
+import { formatDateKorean } from '@/lib/date-utils';
+import { hasChanges } from '@/lib/form-utils';
 
 interface EditEventModalProps {
   isOpen: boolean;
@@ -44,11 +47,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
   const [selectedCalendarIds, setSelectedCalendarIds] = useState<string[]>([]);
   const [eventDate, setEventDate] = useState<Date>(new Date());
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [createdByUser, setCreatedByUser] = useState<{
-    id: string;
-    email: string;
-    display_name?: string;
-  } | null>(null);
+  const [createdByUser, setCreatedByUser] = useState<UserProfile | null>(null);
   const [isLoadingCreator, setIsLoadingCreator] = useState(false);
 
   const titleInputRef = useRef<HTMLInputElement>(null);
@@ -56,6 +55,9 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
 
   // 현재 사용자가 일정 작성자인지 확인
   const isCreatedByCurrentUser = event.created_by === user?.id;
+
+  // 파일명에 이미 타임스탬프가 포함되어 있어서 별도 처리 불필요
+  const creatorAvatarUrl = createdByUser?.avatar_url;
 
   useEffect(() => {
     if (!isOpen) return;
@@ -89,15 +91,6 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
       setCreatedByUser(null);
     }
   }, [isOpen, event, isCreatedByCurrentUser]);
-
-  // 날짜 포맷: "0월 0일 (요일)"
-  const formatDate = (date: Date): string => {
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
-    const weekday = weekdays[date.getDay()];
-    return `${month}월 ${day}일 (${weekday})`;
-  };
 
   const handleTitleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Enter') {
@@ -143,57 +136,18 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
     };
 
     // 변경사항 확인
-    const hasChanges = hasEventChanges(event, updatedEvent);
-
-    if (hasChanges) {
+    if (
+      hasChanges(event, updatedEvent, [
+        'title',
+        'description',
+        'start',
+        'calendar_ids',
+      ])
+    ) {
       await onSave(updatedEvent);
     }
 
     onClose();
-  };
-
-  // 이벤트 변경사항 확인
-  const hasEventChanges = (
-    originalEvent: CalendarEvent,
-    newEvent: CalendarEvent
-  ): boolean => {
-    // 제목 변경 확인
-    if ((originalEvent.title || '').trim() !== newEvent.title) {
-      return true;
-    }
-
-    // 설명 변경 확인
-    if ((originalEvent.description || '').trim() !== newEvent.description) {
-      return true;
-    }
-
-    // 날짜 변경 확인 (날짜만 비교)
-    const originalDate = new Date(originalEvent.start);
-    originalDate.setHours(0, 0, 0, 0);
-    const newDate = new Date(newEvent.start);
-    newDate.setHours(0, 0, 0, 0);
-
-    if (originalDate.getTime() !== newDate.getTime()) {
-      return true;
-    }
-
-    // calendar_ids 변경 확인
-    const originalCalendarIds = (originalEvent.calendar_ids || [])
-      .slice()
-      .sort();
-    const newCalendarIds = (newEvent.calendar_ids || []).slice().sort();
-
-    if (originalCalendarIds.length !== newCalendarIds.length) {
-      return true;
-    }
-
-    for (let i = 0; i < originalCalendarIds.length; i++) {
-      if (originalCalendarIds[i] !== newCalendarIds[i]) {
-        return true;
-      }
-    }
-
-    return false;
   };
 
   const handleDelete = () => {
@@ -239,7 +193,7 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
           <DialogHeader className="px-6 pt-6 pb-4">
-            <DialogTitle>{formatDate(eventDate)}</DialogTitle>
+            <DialogTitle>{formatDateKorean(eventDate)}</DialogTitle>
             <DialogDescription className="sr-only">
               일정을 수정할 수 있습니다.
             </DialogDescription>
@@ -352,10 +306,15 @@ const EditEventModal: React.FC<EditEventModalProps> = ({
                 ) : createdByUser ? (
                   <div className="flex items-center gap-2">
                     <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={creatorAvatarUrl}
+                        className="object-contain"
+                      />
                       <AvatarFallback className="text-xs">
-                        {createdByUser.display_name?.charAt(0).toUpperCase() ||
-                          createdByUser.email?.charAt(0).toUpperCase() ||
-                          '?'}
+                        {getUserInitials(
+                          createdByUser.display_name,
+                          createdByUser.email
+                        )}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex flex-col">

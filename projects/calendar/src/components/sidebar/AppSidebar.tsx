@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { useResponsive } from '@/hooks/useResponsive';
+import { getUserInitials } from '@/lib/user-utils';
 
 interface AppSidebarProps {
   calendars: CalendarType[];
@@ -45,13 +46,7 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
   toggleColorMode,
 }) => {
   const [settingsOpen, setSettingsOpen] = useState(false);
-
-  const getUserInitials = () => {
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return 'U';
-  };
+  const avatarUrl = user?.user_metadata?.avatar_url;
 
   const { isMobile } = useResponsive();
 
@@ -92,8 +87,13 @@ const AppSidebar: React.FC<AppSidebarProps> = ({
         <div className="flex items-center gap-2 pl-4 pr-2 pt-2 pb-4 w-full h-16">
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <Avatar className="h-10 w-10 flex-shrink-0">
-              <AvatarImage src={user.user_metadata?.avatar_url} />
-              <AvatarFallback>{getUserInitials()}</AvatarFallback>
+              <AvatarImage src={avatarUrl} className="object-contain" />
+              <AvatarFallback>
+                {getUserInitials(
+                  user?.user_metadata?.display_name,
+                  user?.email
+                )}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col overflow-hidden flex-1">
               <span className="text-sm font-medium truncate block">

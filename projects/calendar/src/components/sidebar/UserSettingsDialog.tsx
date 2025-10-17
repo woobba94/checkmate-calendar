@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -11,10 +11,16 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/services/supabase';
-import { Moon, Sun } from 'lucide-react';
+import { uploadAvatar, updateProfile } from '@/services/authService';
+import { Moon, Sun, Camera, X } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { useQueryClient } from '@tanstack/react-query';
+import imageCompression from 'browser-image-compression';
+import {
+  getUserInitials,
+  PROFILE_IMAGE_COMPRESSION_OPTIONS,
+  validateProfileImageFile,
+} from '@/lib/user-utils';
 
 interface UserSettingsDialogProps {
   open: boolean;
@@ -36,34 +42,96 @@ export function UserSettingsDialog({
     user?.user_metadata?.display_name || ''
   );
   const [loading, setLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(
+    user?.user_metadata?.avatar_url || ''
+  );
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string>('');
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // user 정보가 변경되면 state 업데이트
+  useEffect(() => {
+    if (user) {
+      setDisplayName(user.user_metadata?.display_name || '');
+      setAvatarUrl(user.user_metadata?.avatar_url || '');
+      setPreviewUrl('');
+      setSelectedFile(null);
+    }
+  }, [user]);
+
+  // previewUrl 변경 및 cleanup (메모리 누수 방지)
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleRemoveAvatar = () => {
+    setAvatarUrl('');
+    setPreviewUrl('');
+    setSelectedFile(null);
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // 파일 검증
+    const validation = validateProfileImageFile(file, 10);
+    if (!validation.valid) {
+      toast({
+        title: '오류 발생',
+        description: validation.error,
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // 파일 저장 및 미리보기 URL 생성
+    setSelectedFile(file);
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
+  };
 
   const handleUpdateProfile = async () => {
     if (!user) return;
 
     setLoading(true);
     try {
-      // 1. auth.users의 user_metadata 업데이트
-      const { error: authError } = await supabase.auth.updateUser({
-        data: { display_name: displayName },
-      });
+      let finalAvatarUrl: string | null = avatarUrl || null;
 
-      if (authError) throw authError;
+      // 새로운 파일이 선택되었으면 업로드
+      if (selectedFile) {
+        // 이미지 압축
+        const compressedFile = await imageCompression(
+          selectedFile,
+          PROFILE_IMAGE_COMPRESSION_OPTIONS
+        );
 
-      // 2. public.users 테이블 업데이트
-      // INSERT 권한이 없으므로 UPDATE만 시도 (레코드는 회원가입 시 트리거로 자동 생성됨)
-      const { error: dbError } = await supabase
-        .from('users')
-        .update({ display_name: displayName })
-        .eq('id', user.id);
-
-      // 레코드가 없는 경우는 무시 (트리거가 없는 경우를 대비)
-      // RLS 정책상 INSERT 권한이 없으므로 UPDATE만 시도
-      if (dbError && dbError.code !== 'PGRST116') {
-        throw dbError;
+        // 파일 업로드
+        finalAvatarUrl = await uploadAvatar(user.id, compressedFile);
       }
 
-      // 3. auth 쿼리 무효화하여 최신 데이터 가져오기
+      // 프로필 업데이트 (빈 문자열은 null로 변환)
+      await updateProfile(user.id, {
+        display_name: displayName,
+        avatar_url: finalAvatarUrl || undefined,
+      });
+
+      // Supabase Auth가 완전히 반영될 때까지 짧은 딜레이
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      // auth 쿼리 무효화하여 최신 데이터 가져오기
       await queryClient.invalidateQueries({ queryKey: ['auth', 'user'] });
+
+      // 미리보기 URL 정리 (useEffect cleanup이 자동 처리)
+      setPreviewUrl('');
 
       toast({
         title: '프로필이 업데이트되었습니다',
@@ -83,30 +151,54 @@ export function UserSettingsDialog({
     }
   };
 
-  const getUserInitials = () => {
-    if (displayName) {
-      return displayName.charAt(0).toUpperCase();
-    }
-    if (user?.email) {
-      return user.email.charAt(0).toUpperCase();
-    }
-    return 'U';
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent
+        className="sm:max-w-[425px]"
+        onOpenAutoFocus={(e) => e.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>사용자 설정</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="flex justify-center">
-            <Avatar className="h-20 w-20">
-              <AvatarImage src={user?.user_metadata?.avatar_url} />
-              <AvatarFallback className="text-2xl">
-                {getUserInitials()}
-              </AvatarFallback>
-            </Avatar>
+            <div className="relative group">
+              <Avatar
+                className="h-20 w-20 cursor-pointer"
+                onClick={handleAvatarClick}
+              >
+                <AvatarImage
+                  src={previewUrl || avatarUrl}
+                  className="object-contain"
+                />
+                <AvatarFallback className="text-2xl">
+                  {getUserInitials(displayName, user?.email)}
+                </AvatarFallback>
+              </Avatar>
+              <div
+                className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                onClick={handleAvatarClick}
+              >
+                <Camera className="h-6 w-6 text-white" />
+              </div>
+              {(avatarUrl || previewUrl) && (
+                <button
+                  type="button"
+                  onClick={handleRemoveAvatar}
+                  className="absolute -top-0 -right-0 bg-black text-white rounded-full p-1 opacity-0 group-hover:opacity-100 z-10 hover:ring-1 hover:ring-white hover:ring-inset transition-all"
+                  aria-label="프로필 사진 제거"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              )}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </div>
           </div>
           <div className="grid gap-2">
             <Label htmlFor="email">이메일</Label>

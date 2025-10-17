@@ -38,3 +38,16 @@ export function ensureDate(value: string | Date): Date {
 
   return date;
 }
+
+/**
+ * 날짜를 "0월 0일 (요일)" 형식으로 포맷팅
+ * @param date - Date 객체
+ * @returns 포맷된 날짜 문자열
+ */
+export function formatDateKorean(date: Date): string {
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+  const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+  const weekday = weekdays[date.getDay()];
+  return `${month}월 ${day}일 (${weekday})`;
+}
