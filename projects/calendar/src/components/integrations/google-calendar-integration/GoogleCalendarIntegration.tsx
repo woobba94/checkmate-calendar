@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { useGoogleCalendarAuth } from '@/hooks/useGoogleCalendar';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 
 const GoogleCalendarIntegration: React.FC = () => {
   const { user } = useAuth();

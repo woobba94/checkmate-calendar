@@ -7,7 +7,8 @@ import EmailVerificationPage from './pages/auth/EmailVerificationPage';
 import AuthCallbackPage from './pages/auth/AuthCallbackPage';
 import NotFoundPage from './pages/NotFoundPage';
 import InvitePage from './pages/InvitePage';
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { AuthProvider } from './contexts/AuthContext';
+import { useAuth } from './hooks/useAuth';
 import { SplashScreen } from '@/components/common/splash-screen/SplashScreen';
 import { Toaster } from '@/components/ui/toaster';
 

@@ -6,7 +6,7 @@ import CalendarHeader from '@/components/calendar/header/CalendarHeader';
 import CreateEventModal from '@/components/calendar/modals/CreateEventModal';
 import EditEventModal from '@/components/calendar/modals/EditEventModal';
 import type { CalendarEvent, Calendar as CalendarType } from '@/types/calendar';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/hooks/useAuth';
 import AppSidebar from '@/components/sidebar/AppSidebar';
 import ErrorMessage from '@/components/common/error-message/ErrorMessage';
 import CalendarCreateModal from '@/components/calendar/modals/CalendarCreateModal';
