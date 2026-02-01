@@ -6,31 +6,39 @@
   <!-- Main page -->
   <url>
     <loc>https://checkmate-calendar.com/</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2026-02-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  
+
+  <!-- Pricing page -->
+  <url>
+    <loc>https://checkmate-calendar.com/pricing</loc>
+    <lastmod>2026-02-01</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!-- Terms page -->
   <url>
     <loc>https://checkmate-calendar.com/terms</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-  
+
   <!-- Privacy page -->
   <url>
     <loc>https://checkmate-calendar.com/privacy</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
   </url>
-  
+
   <!-- Calendar App -->
   <url>
     <loc>https://app.checkmate-calendar.com/</loc>
-    <lastmod>2025-09-18</lastmod>
+    <lastmod>2026-02-01</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
