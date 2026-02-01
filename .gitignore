@@ -46,3 +46,6 @@ lerna-debug.log*
 # Supabase
 **/supabase/.branches
 **/supabase/.temp
+
+# Claude Code
+.claude/settings.local.json
