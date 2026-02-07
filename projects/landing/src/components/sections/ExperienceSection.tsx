@@ -1,130 +1,199 @@
-import { useState } from 'react';
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useEffect, useState, useRef } from 'react';
+import './ExperienceSection.css';
 
 const ExperienceSection = () => {
-  const [selectedItem, setSelectedItem] = useState<string>('item-1');
+  const [animationStep, setAnimationStep] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const sectionRef = useRef<HTMLElement>(null);
 
-  const experienceItems = [
-    {
-      id: 'item-1',
-      label: '일정을 추가하기',
-      mobileLabel: '일정 추가',
-      content:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea co',
-    },
-    {
-      id: 'item-2',
-      label: '이번주를 요약하기',
-      mobileLabel: '일정 요약',
-      content:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae. Mauris commodo lectus at augue elementum, in faucibus erat mollis. Aliquam erat volutpat. Nulla facilisi.',
-    },
-    {
-      id: 'item-3',
-      label: '일정을 삭제하기',
-      mobileLabel: '일정 삭제',
-      content:
-        'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer nec odio. Praesent libero. Sed cursus ante dapibus diam. Sed nisi. Nulla quis sem at nibh elementum imperdiet. Duis sagittis ipsum. Praesent mauris.',
-    },
-  ];
+  const fullText = '다음주 토요일 팀 미팅';
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [isVisible]);
+
+  // 타이핑 애니메이션
+  useEffect(() => {
+    if (animationStep !== 2) return;
+
+    let charIndex = 0;
+    const typeInterval = setInterval(() => {
+      if (charIndex < fullText.length) {
+        setTypedText(fullText.slice(0, charIndex + 1));
+        charIndex++;
+      } else {
+        clearInterval(typeInterval);
+        setTimeout(() => setAnimationStep(3), 400);
+      }
+    }, 120);
+
+    return () => clearInterval(typeInterval);
+  }, [animationStep]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const steps = [
+      { delay: 600, step: 1 },
+      { delay: 1200, step: 2 },
+      // step 3 is triggered by typing animation completion
+      { delay: 4200, step: 4 },
+      { delay: 5200, step: 5 },
+      { delay: 6200, step: 6 },
+      { delay: 6800, step: 7 },
+      { delay: 9500, step: 0 },
+    ];
+
+    const timers = steps.map(({ delay, step }) =>
+      setTimeout(() => setAnimationStep(step), delay)
+    );
+
+    return () => timers.forEach(clearTimeout);
+  }, [isVisible, animationStep === 0 ? Date.now() : 0]);
+
+  // Reset typed text when animation restarts
+  useEffect(() => {
+    if (animationStep === 0) {
+      setTypedText('');
+    }
+  }, [animationStep]);
 
   return (
-    <section className="py-20 md:py-[200px]">
-      <div className="flex flex-col gap-6 max-w-[1024px] mx-auto px-5 md:px-6">
-        {/* 헤더 영역 */}
-        <div className="flex flex-col gap-3 justify-between">
-          <h2 className="text-2xl md:text-5xl leading-normal font-bold md:font-semibold text-foreground">
-            간편한 일정 관리를 체험해보세요.
+    <section ref={sectionRef} className="experience-section">
+      <div className="experience-container">
+        {/* 텍스트 영역 */}
+        <div className={`experience-text ${isVisible ? 'visible' : ''}`}>
+          <h2 className="experience-title">
+            날짜 고르고, 시간 고르고...
+            <br />
+            그런 거 없습니다.
           </h2>
-          <div className="h-fit text-sm md:text-lg leading-normal font-medium text-muted-foreground">
-            체크메이트의 주요 기능들을 간단히 체험해보세요.{' '}
-            <br className="hidden md:block" />더 나은 일정관리의 시작을 경험하실
-            수 있습니다.
-          </div>
+          <p className="experience-subtitle">
+            "다음주 토요일 미팅" 이렇게만 입력하세요.
+            <br />
+            AI가 알아서 일정을 만들어드립니다.
+          </p>
         </div>
 
-        {/* 범용 체험 영역 */}
-        <div className="w-full h-[300px] md:h-[512px] bg-gray-200 rounded-3xl" />
-
-        {/* 데스크톱: 기존 아코디언 레이아웃 */}
-        <div className="hidden md:grid grid-cols-2 gap-8 mt-8">
-          {/* 좌측 아코디언 영역 */}
-          <div>
-            <h3 className="text-2xl leading-none font-semibold mb-6">
-              체크메이트 AI로
-            </h3>
-            <Accordion
-              type="single"
-              collapsible
-              value={selectedItem}
-              onValueChange={setSelectedItem}
-              className="w-full"
-            >
-              {experienceItems.map((item) => (
-                <AccordionItem key={item.id} value={item.id}>
-                  <AccordionTrigger
-                    className={`text-base leading-none font-medium hover:no-underline ${
-                      selectedItem === item.id
-                        ? 'text-card-foreground'
-                        : 'text-muted-foreground'
-                    }`}
-                  >
-                    {item.label}
-                  </AccordionTrigger>
-                  <AccordionContent className="text-muted-foreground">
-                    {item.content}
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </div>
-
-          {/* 우측 상세 체험 영역 */}
-          <div className="h-[464px] bg-gray-200 rounded-3xl flex items-center justify-center">
-            <span className="text-2xl font-semibold text-gray-600">
-              {experienceItems.find((item) => item.id === selectedItem)?.label}
-            </span>
-          </div>
-        </div>
-
-        {/* 모바일: Tabs 레이아웃 */}
-        <div className="block md:hidden mt-6">
-          <h3 className="text-xl leading-none font-semibold mb-4">
-            체크메이트 AI로
-          </h3>
-          <Tabs defaultValue="item-1" className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
-              {experienceItems.map((item) => (
-                <TabsTrigger
-                  key={item.id}
-                  value={item.id}
-                  className="text-xs font-medium"
-                >
-                  {item.mobileLabel}
-                </TabsTrigger>
-              ))}
-            </TabsList>
-            {experienceItems.map((item) => (
-              <TabsContent key={item.id} value={item.id} className="mt-0">
-                <div className="h-[80px] mb-4">
-                  <p className="text-xs leading-normal text-muted-foreground">
-                    {item.content}
-                  </p>
-                </div>
-                <div className="h-[280px] bg-gray-200 rounded-2xl flex items-center justify-center">
-                  <span className="text-lg leading-normal font-semibold text-gray-600">
-                    {item.label}
+        {/* AI 데모 영역 */}
+        <div className={`ai-demo ${isVisible ? 'visible' : ''}`}>
+          <div className="chat-container">
+            <div className={`agent-input-area ${animationStep >= 1 ? 'focused' : ''}`}>
+              <div className="agent-input-text">
+                {animationStep >= 2 && animationStep < 8 ? (
+                  <span className={`typing-chat ${animationStep >= 3 ? 'done' : ''}`}>
+                    {typedText}
                   </span>
+                ) : (
+                  <span className="chat-placeholder">추가하고 싶은 일정을 입력하세요.</span>
+                )}
+              </div>
+              <div className="agent-input-actions">
+                <div className="input-left-buttons">
+                  <button className="icon-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                  <button className="icon-btn">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
                 </div>
-              </TabsContent>
-            ))}
-          </Tabs>
+                <button className={`send-btn-round ${animationStep >= 3 && animationStep < 4 ? 'active' : ''}`}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 19V5M5 12l7-7 7 7" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* AI 로딩 */}
+            {animationStep === 4 && (
+              <div className="ai-loading">
+                <div className="loading-dots">
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                </div>
+                <span className="loading-text">AI가 분석 중...</span>
+              </div>
+            )}
+
+            {/* AI 응답 */}
+            {animationStep >= 5 && (
+              <div className="ai-response">
+                <div className="response-header">
+                  <span className="ai-avatar">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M12 2a2 2 0 012 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 017 7h1a1 1 0 011 1v3a1 1 0 01-1 1h-1v1a2 2 0 01-2 2H5a2 2 0 01-2-2v-1H2a1 1 0 01-1-1v-3a1 1 0 011-1h1a7 7 0 017-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 012-2z"/>
+                      <circle cx="7.5" cy="14.5" r="1.5"/>
+                      <circle cx="16.5" cy="14.5" r="1.5"/>
+                    </svg>
+                  </span>
+                  <span className="ai-label">체크메이트 AI</span>
+                </div>
+                <div className="response-body">
+                  <p className="response-text">
+                    <strong>2월 8일 토요일</strong>에 <strong>'팀 미팅'</strong> 일정을 추가할까요?
+                  </p>
+                  <div className="response-preview">
+                    <div className="preview-indicator" />
+                    <div className="preview-details">
+                      <span className="preview-title">팀 미팅</span>
+                      <span className="preview-date">2월 8일 (토) 오후 2:00</span>
+                    </div>
+                  </div>
+                  <div className="response-actions">
+                    <button className={`action-btn primary ${animationStep === 6 ? 'clicked' : ''} ${animationStep >= 7 ? 'success' : ''}`}>
+                      {animationStep >= 7 ? (
+                        <>
+                          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                            <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                          </svg>
+                          추가됨
+                        </>
+                      ) : '추가하기'}
+                    </button>
+                    <button className="action-btn secondary">수정하기</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 완료 메시지 */}
+            {animationStep >= 7 && (
+              <div className="ai-complete">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                  <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                일정이 캘린더에 추가되었습니다!
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

@@ -1,6 +1,7 @@
 import Footer from '../components/Footer';
 import {
   HeroSection,
+  SharedCalendarSection,
   FeaturesSection,
   ExperienceSection,
   IntegrationSection,
@@ -20,6 +21,9 @@ const HomePage = () => {
     <>
       {/* Hero Section */}
       <HeroSection />
+
+      {/* Shared Calendar Section */}
+      <SharedCalendarSection />
 
       {/* Features Overview Section */}
       <FeaturesSection />

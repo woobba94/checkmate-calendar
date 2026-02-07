@@ -6,44 +6,45 @@ export function Header() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 h-[60px] w-full z-50"
+      className="fixed top-0 left-0 right-0 h-[64px] w-full z-50 border-b border-border/50"
       style={{
-        background: 'var(--alpha-5, rgba(255, 255, 255, 0.95))',
-        backdropFilter: 'blur(calc(var(--blur-2xl, 40px) / 2))',
+        background: 'rgba(255, 255, 255, 0.85)',
+        backdropFilter: 'blur(20px)',
+        WebkitBackdropFilter: 'blur(20px)',
       }}
     >
-      <div className="mx-auto max-w-[1024px] h-full px-5 md:px-4 flex items-center justify-between">
+      <div className="mx-auto max-w-[1100px] h-full px-6 flex items-center justify-between">
         {/* Logo */}
         <a
           href="https://checkmate-calendar.com"
-          className="flex items-center gap-2 text-foreground hover:opacity-80 transition-opacity"
+          className="flex items-center hover:opacity-80 transition-opacity"
         >
           <img
             src="/simbol-and-text-logo.svg"
-            alt="Checkmate Logo"
+            alt="Checkmate"
             className="h-8"
           />
         </a>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-5">
           {/* Language Switcher */}
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 p-1 bg-muted rounded-lg">
             <button
               onClick={() => setLocale('ko')}
-              className={`px-2 py-1 text-sm rounded transition-colors ${
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
                 locale === 'ko'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-600 hover:text-foreground'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               KO
             </button>
             <button
               onClick={() => setLocale('en')}
-              className={`px-2 py-1 text-sm rounded transition-colors ${
+              className={`px-3 py-1.5 text-sm font-medium rounded-md transition-all duration-200 ${
                 locale === 'en'
-                  ? 'bg-blue-100 text-blue-600'
-                  : 'text-gray-600 hover:text-foreground'
+                  ? 'bg-white text-foreground shadow-sm'
+                  : 'text-muted-foreground hover:text-foreground'
               }`}
             >
               EN
@@ -52,10 +53,11 @@ export function Header() {
 
           {/* CTA Button */}
           <Button
-          onClick={() =>
-            (window.location.href = 'https://app.checkmate-calendar.com')
-          }
-          variant="primary"
+            onClick={() =>
+              (window.location.href = 'https://app.checkmate-calendar.com')
+            }
+            variant="primary"
+            className="px-5 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 rounded-lg shadow-md shadow-indigo-500/20 transition-all duration-200"
           >
             {t('@시작하기@')}
           </Button>

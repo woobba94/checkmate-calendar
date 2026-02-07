@@ -18,40 +18,43 @@ const PricingPage = () => {
       name: 'Free',
       price: '$0',
       period: t('@월@'),
-      description: t('@개인_사용자를_위한_기본_기능@'),
+      description: '모든 기능 무료 제공',
       features: [
-        t('@5개까지_캘린더_스페이스_생성@'),
-        t('@공유_무제한@'),
-        t('@타_캘린더_연동@'),
-        t('@AI_Agent_기본_사용량@'),
+        '무제한 캘린더 스페이스',
+        '공유 무제한',
+        'Google Calendar 연동',
+        'AI 일정 관리',
       ],
-      isPopular: false,
+      isPopular: true,
+      isDisabled: false,
     },
     {
       name: 'Pro',
-      price: '$1',
-      period: t('@월@'),
-      description: t('@개인_사용자를_위한_프리미엄_기능@'),
+      price: '준비 중',
+      period: '',
+      description: '더 많은 기능이 곧 추가됩니다',
       features: [
-        t('@Free_플랜의_모든_기능@'),
-        t('@무제한_캘린더_스페이스@'),
-        t('@AI_Agent_10배_확장@'),
-        t('@광고_없음@'),
+        'Free 플랜의 모든 기능',
+        '추가 기능 준비 중',
+        '추가 기능 준비 중',
+        '추가 기능 준비 중',
       ],
-      isPopular: true,
+      isPopular: false,
+      isDisabled: true,
     },
     {
       name: 'Business',
-      price: '$1',
-      period: t('@사용자당_월@'),
-      description: t('@팀과_조직을_위한_완전한_기능@'),
+      price: '준비 중',
+      period: '',
+      description: '팀과 조직을 위한 기능 준비 중',
       features: [
-        t('@Pro_플랜의_모든_기능@'),
-        t('@어드민_관리_기능@'),
-        t('@팀_통계_및_분석@'),
-        t('@우선_고객_지원@'),
+        'Pro 플랜의 모든 기능',
+        '팀 관리 기능',
+        '통계 및 분석',
+        '우선 고객 지원',
       ],
       isPopular: false,
+      isDisabled: true,
     },
   ];
 
@@ -80,13 +83,22 @@ const PricingPage = () => {
                   className={`relative rounded-2xl border p-6 md:p-8 bg-white ${
                     plan.isPopular
                       ? 'border-blue-500 shadow-lg scale-105'
+                      : plan.isDisabled
+                      ? 'border-gray-200 opacity-60'
                       : 'border-gray-200'
                   }`}
                 >
                   {plan.isPopular && (
                     <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
                       <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm font-medium">
-                        {t('@가장_인기@')}
+                        현재 무료
+                      </span>
+                    </div>
+                  )}
+                  {plan.isDisabled && (
+                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                      <span className="bg-gray-400 text-white px-4 py-1 rounded-full text-sm font-medium">
+                        준비 중
                       </span>
                     </div>
                   )}
@@ -97,10 +109,12 @@ const PricingPage = () => {
                     </h3>
                     <p className="text-gray-600 mb-4">{plan.description}</p>
                     <div className="mb-4">
-                      <span className="text-4xl font-bold text-foreground">
+                      <span className={`text-4xl font-bold ${plan.isDisabled ? 'text-gray-400' : 'text-foreground'}`}>
                         {plan.price}
                       </span>
-                      <span className="text-gray-600 ml-1">/{plan.period}</span>
+                      {plan.period && (
+                        <span className="text-gray-600 ml-1">/{plan.period}</span>
+                      )}
                     </div>
                   </div>
 
@@ -108,7 +122,7 @@ const PricingPage = () => {
                     {plan.features.map((feature, featureIndex) => (
                       <li key={featureIndex} className="flex items-start">
                         <svg
-                          className="w-5 h-5 text-blue-500 mt-0.5 mr-3 flex-shrink-0"
+                          className={`w-5 h-5 mt-0.5 mr-3 flex-shrink-0 ${plan.isDisabled ? 'text-gray-300' : 'text-blue-500'}`}
                           fill="currentColor"
                           viewBox="0 0 20 20"
                         >
@@ -118,22 +132,23 @@ const PricingPage = () => {
                             clipRule="evenodd"
                           />
                         </svg>
-                        <span className="text-gray-700">{feature}</span>
+                        <span className={plan.isDisabled ? 'text-gray-400' : 'text-gray-700'}>{feature}</span>
                       </li>
                     ))}
                   </ul>
 
                   <Button
                     onClick={() =>
-                      (window.location.href =
+                      !plan.isDisabled && (window.location.href =
                         'https://app.checkmate-calendar.com')
                     }
                     variant={plan.isPopular ? 'primary' : 'outline'}
                     className="w-full"
+                    disabled={plan.isDisabled}
                   >
-                    {plan.name === 'Free'
-                      ? t('@무료로_시작하기@')
-                      : t('@시작하기@')}
+                    {plan.isDisabled
+                      ? '준비 중'
+                      : '무료로 시작하기'}
                   </Button>
                 </div>
               ))}

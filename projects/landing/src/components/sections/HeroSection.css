@@ -1,469 +1,463 @@
-/* Hero Section Visual Container */
+/* ===================== */
+/* Hero Section - Elegant & Minimal */
+/* ===================== */
+
+.hero-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 100px 24px 80px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+/* 텍스트 영역 */
+.hero-content {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+/* 배지 */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.08) 0%, rgba(99, 102, 241, 0.04) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.15);
+  border-radius: 100px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6366F1;
+  animation: fadeUp 0.6s ease-out;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  background: #6366F1;
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(1.1); }
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+  letter-spacing: -0.03em;
+  animation: fadeUp 0.6s ease-out 0.1s both;
+}
+
+.title-accent {
+  background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+  max-width: 480px;
+  animation: fadeUp 0.6s ease-out 0.2s both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  animation: fadeUp 0.6s ease-out 0.3s both;
+}
+
+.hero-cta-primary {
+  padding: 16px 32px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%) !important;
+  border: none !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35) !important;
+  transition: all 0.3s ease !important;
+}
+
+.hero-cta-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.45) !important;
+}
+
+.hero-cta-secondary {
+  padding: 16px 32px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  background: transparent !important;
+  border: 1.5px solid var(--border) !important;
+  border-radius: 12px !important;
+  color: var(--foreground) !important;
+  transition: all 0.3s ease !important;
+}
+
+.hero-cta-secondary:hover {
+  background: var(--muted) !important;
+  border-color: var(--muted-foreground) !important;
+}
+
+/* ===================== */
+/* 프로덕트 프레임 시각화 */
+/* ===================== */
+
 .hero-visual-container {
-  padding-top: 100px;
-  margin-top: -280px;
   position: relative;
   width: 100%;
-  height: 1200px;
-  overflow: visible;
-  background:
-    linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 1) 0%,
-      rgba(255, 255, 255, 0.5) 15%,
-      rgba(255, 255, 255, 0) 30%
-    ),
-    linear-gradient(135deg, #0f0f0f 0%, #1a1a2e 50%, #16213e 100%);
-  animation: fadeIn 0.3s ease-out;
+  height: 800px;
+  margin-top: -40px;
+  overflow: hidden;
+  background: linear-gradient(180deg,
+    #ffffff 0%,
+    #fafbfc 8%,
+    #0f0f14 30%,
+    #0f0f14 100%
+  );
 }
 
 .hero-visual-content {
   position: relative;
-  contain: strict;
   width: 100%;
   height: 100%;
-  perspective: 4000px;
-  perspective-origin: 100% 0;
+  perspective: 2000px;
+  perspective-origin: 50% 20%;
   transform-style: preserve-3d;
 }
 
 .product-frame {
   display: flex;
   position: absolute;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  margin: 280px auto auto;
-  border: 1px solid #1e1e1e;
-  border-radius: 10px;
-  background: var(--color-bg-primary);
-  transform: translateX(2%) scale(1.2) rotateX(48deg) rotateY(31deg)
-    rotate(324deg);
-  transform-origin: top left;
-  backface-visibility: hidden;
-  animation: fadeInScale 0.5s ease-out 0.3s both;
+  width: 1200px;
+  height: 750px;
+  left: 50%;
+  top: 200px;
+  margin-left: -600px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  background: linear-gradient(160deg, #18181f 0%, #0f0f14 100%);
+  transform: rotateX(55deg);
+  transform-origin: center top;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.03),
+    0 30px 60px rgba(0, 0, 0, 0.4),
+    0 60px 120px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  animation: floatIn 1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* 사이드바 스타일 */
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: rotateX(65deg) translateY(80px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: rotateX(55deg) translateY(0) scale(1);
+  }
+}
+
+/* 그라데이션 오버레이 */
+.hero-visual-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 180px;
+  background: linear-gradient(to bottom, #ffffff 0%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hero-visual-container::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 280px;
+  background: linear-gradient(to top, var(--background) 0%, var(--background) 30%, transparent 100%);
+  z-index: 10;
+  pointer-events: none;
+}
+
+.hero-visual-content::before,
+.hero-visual-content::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 250px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.hero-visual-content::before {
+  left: 0;
+  background: linear-gradient(to right, #0f0f14 0%, transparent 100%);
+}
+
+.hero-visual-content::after {
+  right: 0;
+  background: linear-gradient(to left, #0f0f14 0%, transparent 100%);
+}
+
+/* 사이드바 */
 .product-sidebar {
-  width: 0;
-  min-width: 0;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
-  border-right: 1px solid rgba(255, 255, 255, 0.1);
+  width: 240px;
+  background: rgba(255, 255, 255, 0.015);
+  border-right: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
-  padding: 24px 0;
-  opacity: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  animation: expandSidebar 0.7s cubic-bezier(0.4, 0, 0.2, 1) 1.5s both;
+  padding: 24px 18px;
+  gap: 24px;
 }
 
 .sidebar-logo {
-  margin-bottom: 32px;
-  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.logo-placeholder {
-  font-size: 24px;
-  font-weight: 700;
+.logo-icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  border-radius: 8px;
+  font-size: 14px;
+  color: white;
+}
+
+.logo-text {
+  font-size: 17px;
+  font-weight: 600;
   color: #f9fafb;
-  white-space: nowrap;
+  letter-spacing: -0.02em;
 }
 
-.sidebar-content {
+.product-sidebar .calendar-list {
   display: flex;
   flex-direction: column;
-  gap: 32px;
-  height: 100%;
+  gap: 4px;
 }
 
-.calendar-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.calendar-item {
+.product-sidebar .calendar-item {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border-radius: 6px;
+  border-radius: 10px;
   cursor: default;
-  white-space: nowrap;
-  min-width: 150px;
+  transition: background 0.2s ease;
 }
 
-.calendar-item.active {
-  background: rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+.product-sidebar .calendar-item.active {
+  background: rgba(255, 255, 255, 0.06);
 }
 
-.calendar-color {
-  width: 16px;
-  height: 16px;
+.product-sidebar .calendar-color {
+  width: 14px;
+  height: 14px;
   border-radius: 4px;
+  flex-shrink: 0;
 }
 
-.calendar-name {
-  font-size: 15px;
-  color: #e5e7eb;
-}
-
-.sidebar-integrations {
-  margin-top: auto;
+.product-sidebar .calendar-name {
+  font-size: 14px;
+  color: #d1d5db;
+  font-weight: 450;
 }
 
 .integration-btn {
-  width: 100%;
-  padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  font-size: 14px;
-  color: #e5e7eb;
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  font-size: 13px;
+  color: #9ca3af;
   cursor: default;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: left;
 }
 
-/* 메인 캘린더 영역 */
+.integration-btn svg {
+  opacity: 0.6;
+}
+
+/* 캘린더 메인 */
 .product-main {
   flex: 1;
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.015);
 }
 
-.calendar-header {
+.product-main .calendar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px 32px;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.8);
-  animation: fadeIn 0.5s ease-out 0.5s both;
+  padding: 18px 28px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.calendar-title {
+.product-main .calendar-title {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
 }
 
-.calendar-title h3 {
-  font-size: 28px;
+.product-main .calendar-title h3 {
+  font-size: 20px;
   font-weight: 600;
   color: #f3f4f6;
   margin: 0;
+  letter-spacing: -0.02em;
 }
 
 .calendar-nav {
   display: flex;
-  gap: 8px;
+  gap: 4px;
 }
 
-.calendar-nav button {
-  width: 36px;
-  height: 36px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 6px;
+.nav-btn {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 8px;
   cursor: default;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 16px;
-  color: #e5e7eb;
-}
-
-.calendar-actions {
-  display: flex;
-  gap: 12px;
+  font-size: 13px;
+  color: #9ca3af;
+  transition: all 0.2s ease;
 }
 
 .add-event-btn {
-  padding: 10px 20px;
-  background: #3b82f6;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-size: 15px;
+  border-radius: 10px;
+  font-size: 13px;
   font-weight: 500;
   cursor: default;
 }
 
-.calendar-grid {
+.product-main .calendar-grid {
   flex: 1;
-  padding: 32px;
+  padding: 20px 28px;
+  display: block;
+}
+
+.product-main .weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.product-main .weekdays span {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6b7280;
+  padding: 8px 0;
+}
+
+.product-main .days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.product-main .day {
+  aspect-ratio: 1;
   display: flex;
   flex-direction: column;
-}
-
-.weekdays {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 8px;
   gap: 4px;
-  margin-bottom: 16px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid rgba(229, 231, 235, 0.5);
-  animation: fadeIn 0.5s ease-out 0.7s both;
-}
-
-.weekdays span {
-  text-align: center;
-  font-weight: 500;
-  color: #d1d5db;
-  font-size: 14px;
-  text-transform: uppercase;
-}
-
-.days {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 4px;
-  flex: 1;
-}
-
-.day {
-  position: relative;
-  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.05);
-  padding: 8px;
-  cursor: default;
-  opacity: 0;
-  animation: slideDown 0.4s ease-out forwards;
+  background: rgba(255, 255, 255, 0.01);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  transition: all 0.2s ease;
 }
 
-.day-number {
-  display: block;
-  font-size: 14px;
-  font-weight: 500;
-  color: #e5e7eb;
-  margin-bottom: 4px;
+.product-main .day.today {
+  background: rgba(99, 102, 241, 0.15);
+  border-color: rgba(99, 102, 241, 0.3);
 }
 
-.day-events {
-  position: absolute;
-  bottom: 8px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
+.product-main .day.today .day-number {
+  color: #a5b4fc;
+  font-weight: 600;
 }
 
-.event-dot {
+.product-main .day-number {
+  font-size: 13px;
+  color: #d1d5db;
+  font-weight: 450;
+}
+
+.product-main .event-dot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
 }
 
-/* Checkerboard Overlay */
-.checkerboard-overlay {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 40px; /* 20px × 2줄 */
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, hsl(var(--muted)) 50%, transparent 50%),
-    linear-gradient(to right, transparent 50%, hsl(var(--muted)) 50%);
-  background-size:
-    40px 20px,
-    40px 20px;
-  background-position:
-    0 0,
-    0 20px;
-  background-repeat: repeat-x, repeat-x;
-}
-
-/* 애니메이션 키프레임 정의 */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes expandSidebar {
-  0% {
-    width: 0;
-    min-width: 0;
-    padding: 24px 0;
-    opacity: 0;
-    transform: translateX(-10px);
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    width: 350px;
-    min-width: 350px;
-    padding: 24px 20px;
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: translateX(2%) scale(1.15) rotateX(48deg) rotateY(31deg)
-      rotate(324deg);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(2%) scale(1.2) rotateX(48deg) rotateY(31deg)
-      rotate(324deg);
-  }
-}
-
-/* 모바일 반응형 스타일 */
+/* 모바일 반응형 */
 @media (max-width: 768px) {
+  .hero-section {
+    padding: 80px 20px 60px;
+  }
+
+  .hero-title {
+    font-size: 2.25rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .hero-cta-primary,
+  .hero-cta-secondary {
+    width: 100%;
+  }
+
   .hero-visual-container {
-    padding-top: 50px;
-    margin-top: -100px;
-    height: 400px;
-  }
-
-  .product-frame {
-    margin: 100px auto auto;
-    transform: translateX(0) scale(0.9) rotateX(48deg) rotateY(31deg)
-      rotate(324deg);
-  }
-
-  @keyframes fadeInScale {
-    from {
-      opacity: 0;
-      transform: translateX(0) scale(0.85) rotateX(48deg) rotateY(31deg)
-        rotate(324deg);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0) scale(0.9) rotateX(48deg) rotateY(31deg)
-        rotate(324deg);
-    }
-  }
-
-  /* 모바일에서도 사이드바 애니메이션 유지 */
-  @keyframes expandSidebar {
-    0% {
-      width: 0;
-      min-width: 0;
-      padding: 12px 0;
-      opacity: 0;
-      transform: translateX(-10px);
-    }
-    50% {
-      opacity: 1;
-    }
-    100% {
-      width: 140px;
-      min-width: 140px;
-      padding: 12px 8px;
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  /* 모바일 사이드바 스타일 조정 */
-  .product-sidebar {
-    padding: 16px 0;
-  }
-
-  .sidebar-logo {
-    margin-bottom: 20px;
-    min-width: 120px;
-    padding: 0 8px;
-  }
-
-  .logo-placeholder {
-    font-size: 16px;
-  }
-
-  .sidebar-content {
-    gap: 20px;
-  }
-
-  .calendar-list {
-    gap: 4px;
-  }
-
-  .calendar-item {
-    padding: 6px 8px;
-    min-width: 100px;
-    gap: 8px;
-  }
-
-  .calendar-color {
-    width: 12px;
-    height: 12px;
-  }
-
-  .calendar-name {
-    font-size: 12px;
-  }
-
-  .integration-btn {
-    padding: 8px 10px;
-    font-size: 11px;
-  }
-
-  .calendar-header {
-    padding: 16px 20px;
-  }
-
-  .calendar-title h3 {
-    font-size: 20px;
-  }
-
-  .calendar-nav button {
-    width: 30px;
-    height: 30px;
-    font-size: 14px;
-  }
-
-  .add-event-btn {
-    padding: 8px 16px;
-    font-size: 13px;
-  }
-
-  .calendar-grid {
-    padding: 20px;
-  }
-
-  .weekdays span {
-    font-size: 12px;
-  }
-
-  .day {
-    padding: 4px;
-  }
-
-  .day-number {
-    font-size: 12px;
-  }
-
-  .event-dot {
-    width: 4px;
-    height: 4px;
+    display: none;
   }
 }

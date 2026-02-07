@@ -1,117 +1,183 @@
-import { useEffect, useRef } from 'react';
-// Import Swiper React components
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Pagination } from 'swiper/modules';
-
-// Import Swiper styles
-import 'swiper/css';
-import 'swiper/css/pagination';
+import { useEffect, useState, useRef } from 'react';
+import './FeaturesSection.css';
 
 const FeaturesSection = () => {
-  const features = [
-    {
-      id: 1,
-      description: '귀찮았던 일정 등록을\n간편하게 관리해보세요.',
-    },
-    {
-      id: 2,
-      description: '나뿐만 아니라\n다른 사람도 함께요.',
-    },
-    {
-      id: 3,
-      description: '다른 캘린더의 일정도\n얼마든지 불러오세요.',
-    },
-  ];
+  const [animationStep, setAnimationStep] = useState(0);
+  const [isVisible, setIsVisible] = useState(false);
+  const [typedText, setTypedText] = useState('');
+  const sectionRef = useRef<HTMLElement>(null);
 
-  // Swiper pagination 스타일 조정을 위한 ref
-  const swiperRef = useRef<any>(null);
+  const fullText = '팀 회의';
 
   useEffect(() => {
-    // 모바일에서만 스와이퍼 pagination 스타일 조정
-    const updatePaginationStyle = () => {
-      if (window.innerWidth <= 768 && swiperRef.current) {
-        const pagination =
-          swiperRef.current.querySelector('.swiper-pagination');
-        if (pagination) {
-          pagination.style.bottom = '20px';
-        }
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
+  }, [isVisible]);
 
-    updatePaginationStyle();
-    window.addEventListener('resize', updatePaginationStyle);
-    return () => window.removeEventListener('resize', updatePaginationStyle);
-  }, []);
+  // 타이핑 애니메이션
+  useEffect(() => {
+    if (animationStep !== 2) return;
+
+    let charIndex = 0;
+    const typeInterval = setInterval(() => {
+      if (charIndex < fullText.length) {
+        setTypedText(fullText.slice(0, charIndex + 1));
+        charIndex++;
+      } else {
+        clearInterval(typeInterval);
+        setTimeout(() => setAnimationStep(3), 400);
+      }
+    }, 120);
+
+    return () => clearInterval(typeInterval);
+  }, [animationStep]);
+
+  useEffect(() => {
+    if (!isVisible) return;
+
+    const steps = [
+      { delay: 600, step: 1 },
+      { delay: 1200, step: 2 },
+      // step 3 is triggered by typing animation completion
+      { delay: 3400, step: 4 },
+      { delay: 4000, step: 5 },
+      { delay: 4600, step: 6 },
+      { delay: 7000, step: 0 },
+    ];
+
+    const timers = steps.map(({ delay, step }) =>
+      setTimeout(() => setAnimationStep(step), delay)
+    );
+
+    return () => timers.forEach(clearTimeout);
+  }, [isVisible, animationStep === 0 ? Date.now() : 0]);
+
+  // Reset typed text when animation restarts
+  useEffect(() => {
+    if (animationStep === 0) {
+      setTypedText('');
+    }
+  }, [animationStep]);
+
+  const problems = [
+    { problem: '입력이 귀찮아서', solution: '제목만 적으면 끝' },
+    { problem: '혼자만 보니까', solution: '함께 쓰는 공유 캘린더' },
+    { problem: '열기 귀찮아서', solution: 'AI한테 물어보면 됨' },
+  ];
 
   return (
-    <section className="py-20 md:py-[200px] bg-muted">
-      <div className="flex flex-col gap-6 max-w-[1024px] mx-auto px-5 md:px-6">
-        <div className="flex flex-col md:flex-row md:justify-between md:items-end gap-4 md:gap-0">
-          <h2 className="text-2xl md:text-5xl leading-normal font-bold md:font-semibold text-foreground">
-            말씀만 하세요,
+    <section ref={sectionRef} className="features-section" id="features">
+      <div className="features-container">
+        {/* 문제 제기 영역 */}
+        <div className={`problem-area ${isVisible ? 'visible' : ''}`}>
+          <h2 className="section-title">왜 캘린더를 안 쓰게 될까요?</h2>
+          <p className="section-subtitle">
+            캘린더가 어려워서가 아닙니다.
             <br />
-            일정은 체크메이트가
-          </h2>
-          <div className="h-fit md:max-w-[498px] text-sm md:text-lg leading-normal font-medium text-muted-foreground">
-            여러 캘린더를 하나로, 누구와도 즉시 공유, 음성·프롬프트로 일정
-            추가까지 여러 캘린더를 하나로, 누구와도 즉시 공유, 음성·프롬프트로
-            일정추가까지여러 캘린더를 하나로, 누구와도 즉시 공유, 음
+            그냥 귀찮았던 거예요.
+          </p>
+
+          <div className="problem-grid">
+            {problems.map((item, index) => (
+              <div
+                key={index}
+                className="problem-card"
+                style={{ transitionDelay: `${0.1 + index * 0.1}s` }}
+              >
+                <div className="problem-side">
+                  <span className="problem-label">문제</span>
+                  <span className="problem-text">{item.problem}</span>
+                </div>
+                <div className="arrow-icon">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M5 12h14M13 5l6 7-6 7" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+                <div className="solution-side">
+                  <span className="solution-label">체크메이트</span>
+                  <span className="solution-text">{item.solution}</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
 
-        {/* 데스크톱: 기존 그리드 레이아웃 */}
-        <div className="hidden md:grid grid-cols-1 md:grid-cols-3 gap-2">
-          {features.map((feature) => (
-            <div
-              key={feature.id}
-              className="flex flex-col justify-end p-6 rounded-3xl h-[336px]"
-              style={{
-                background:
-                  'linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.08) 100%), var(--base-muted, #F3F4F6)',
-              }}
-            >
-              <p className="text-2xl leading-normal font-medium text-card-foreground whitespace-pre-line">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        {/* 일정 등록 데모 영역 */}
+        <div className={`demo-area ${isVisible ? 'visible' : ''}`}>
+          <div className="demo-header">
+            <h3 className="demo-title">제목만 적으면 끝</h3>
+            <p className="demo-subtitle">3초면 일정이 등록됩니다.</p>
+          </div>
 
-        {/* 모바일: 스와이퍼 */}
-        <div className="block md:hidden -mx-5" ref={swiperRef}>
-          <Swiper
-            modules={[Pagination]}
-            spaceBetween={10}
-            slidesPerView={1}
-            centeredSlides={false}
-            pagination={{
-              clickable: true,
-              bulletClass: 'swiper-pagination-bullet',
-              bulletActiveClass: 'swiper-pagination-bullet-active',
-              renderBullet: (_, className) => {
-                return `<span class="${className}" style="width: 8px; height: 8px; background: ${
-                  className.includes('active') ? '#000' : '#ccc'
-                }; margin: 0 4px;"></span>`;
-              },
-            }}
-            className="!pb-12 !px-5"
-          >
-            {features.map((feature) => (
-              <SwiperSlide key={feature.id}>
-                <div
-                  className="flex flex-col justify-end p-6 rounded-3xl h-[280px]"
-                  style={{
-                    background:
-                      'linear-gradient(0deg, rgba(0, 0, 0, 0.08) 0%, rgba(0, 0, 0, 0.08) 100%), var(--base-muted, #F3F4F6)',
-                  }}
-                >
-                  <p className="text-xl leading-normal font-medium text-card-foreground whitespace-pre-line">
-                    {feature.description}
-                  </p>
+          <div className={`event-dialog ${animationStep >= 1 ? 'visible' : ''}`}>
+            <div className="dialog-header">
+              <span className="dialog-title">2월 8일 (토)</span>
+              <button className="dialog-close">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div className="dialog-body">
+              <div className="title-input-area">
+                {animationStep >= 2 && animationStep < 8 ? (
+                  <span className={`typing-title ${animationStep >= 3 ? 'done' : ''}`}>
+                    {typedText}
+                  </span>
+                ) : (
+                  <span className="title-placeholder">어떤 일정인가요?</span>
+                )}
+              </div>
+
+              <div className="memo-area">
+                <span className="memo-placeholder">메모</span>
+              </div>
+
+              <div className="calendar-select-area">
+                <label className="calendar-label">공유할 캘린더</label>
+                <div className="calendar-grid">
+                  <div className="calendar-option selected">
+                    <span className="calendar-checkbox checked">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                        <path d="M10 3L4.5 8.5L2 6" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </span>
+                    <span className="calendar-name">업무 캘린더</span>
+                  </div>
+                  <div className="calendar-option">
+                    <span className="calendar-checkbox" />
+                    <span className="calendar-name">개인 캘린더</span>
+                  </div>
                 </div>
-              </SwiperSlide>
-            ))}
-          </Swiper>
+              </div>
+            </div>
+          </div>
+
+          <div className={`demo-complete-message ${animationStep >= 6 ? 'visible' : ''}`}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+              <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            끝! 이게 전부예요.
+          </div>
         </div>
       </div>
     </section>

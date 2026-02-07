@@ -1,0 +1,388 @@
+/* ===================== */
+/* Features Section - 100vh */
+/* ===================== */
+
+.features-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  background: #ffffff;
+}
+
+.features-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 100px;
+  align-items: center;
+}
+
+/* 문제 제기 영역 - 애니메이션 */
+.problem-area {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.problem-area.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.section-label {
+  display: inline-block;
+  width: fit-content;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6366F1;
+  letter-spacing: 0.02em;
+}
+
+.section-title {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+  letter-spacing: -0.03em;
+}
+
+.section-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+}
+
+/* 문제 → 해결 카드 */
+.problem-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.problem-card {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 28px;
+  background: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.problem-area.visible .problem-card {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.problem-card:hover {
+  background: #ffffff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  transform: translateY(-2px);
+}
+
+.problem-side,
+.solution-side {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.problem-label,
+.solution-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.problem-label {
+  color: #dc2626;
+}
+
+.solution-label {
+  color: #059669;
+}
+
+.problem-text,
+.solution-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.arrow-icon {
+  color: var(--muted-foreground);
+  opacity: 0.4;
+  flex-shrink: 0;
+}
+
+/* 데모 영역 - 애니메이션 */
+.demo-area {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+
+.demo-area.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.demo-header {
+  text-align: center;
+}
+
+.demo-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--foreground);
+  margin-bottom: 8px;
+  letter-spacing: -0.02em;
+}
+
+.demo-subtitle {
+  font-size: 1rem;
+  color: var(--muted-foreground);
+}
+
+/* 일정 등록 다이얼로그 */
+.event-dialog {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 12px 40px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(24px) scale(0.96);
+  transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.event-dialog.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+.dialog-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+}
+
+.dialog-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+.dialog-close {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dialog-close:hover {
+  background: var(--muted);
+}
+
+.dialog-body {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* 제목 입력 영역 */
+.title-input-area {
+  font-size: 1.375rem;
+  font-weight: 600;
+  line-height: 1.4;
+  min-height: 36px;
+  letter-spacing: -0.02em;
+}
+
+.title-placeholder {
+  color: var(--muted-foreground);
+}
+
+.typing-title {
+  display: inline;
+  white-space: nowrap;
+  border-right: 2px solid #6366F1;
+  padding-right: 3px;
+  color: var(--foreground);
+  animation: blinkCursor 0.5s step-end infinite;
+}
+
+.typing-title.done {
+  border-right: none;
+  animation: none;
+  padding-right: 0;
+}
+
+@keyframes blinkCursor {
+  50% { border-color: transparent; }
+}
+
+/* 메모 영역 */
+.memo-area {
+  padding: 16px 0;
+  min-height: 48px;
+  border: none;
+}
+
+.memo-placeholder {
+  font-size: 0.9rem;
+  color: var(--muted-foreground);
+}
+
+/* 캘린더 선택 영역 */
+.calendar-select-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.calendar-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.calendar-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.calendar-option.selected {
+  border-color: #6366F1;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0.02) 100%);
+}
+
+.calendar-checkbox {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.calendar-checkbox.checked {
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  border-color: #6366F1;
+}
+
+.calendar-name {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+/* 완료 메시지 */
+.demo-complete-message {
+  text-align: center;
+  padding: 20px 28px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.demo-complete-message.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 1024px) {
+  .features-container {
+    grid-template-columns: 1fr;
+    gap: 60px;
+  }
+}
+
+@media (max-width: 768px) {
+  .features-section {
+    padding: 60px 20px;
+    min-height: auto;
+  }
+
+  .section-title {
+    font-size: 2.25rem;
+  }
+
+  .section-subtitle {
+    font-size: 1rem;
+  }
+
+  .problem-card {
+    flex-direction: column;
+    text-align: center;
+    gap: 16px;
+    padding: 20px;
+  }
+
+  .arrow-icon {
+    transform: rotate(90deg);
+  }
+}

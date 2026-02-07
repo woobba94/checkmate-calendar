@@ -1,64 +1,88 @@
+import { useEffect, useState, useRef } from 'react';
+import './IntegrationSection.css';
+
 const IntegrationSection = () => {
-  const integrationCards = [
-    {
-      id: 'calendar-sharing',
-      title: '일정 공유 전용 캘린더',
-      description:
-        '팀원들과 일정을 쉽게 공유하고 협업하세요. 권한 관리를 통해 보기 전용이나 편집 권한을 세밀하게 설정할 수 있습니다.',
-      imageAlt: '캘린더 공유 이미지',
-    },
-    {
-      id: 'calendar-sync',
-      title: '회사에서 쓰는 캘린더도 연동',
-      description:
-        '구글 캘린더, 아웃룩 등 기존에 사용하던 캘린더와 실시간으로 동기화됩니다. 여러 캘린더를 하나의 인터페이스에서 편리하게 관리하세요.',
-      imageAlt: '캘린더 연동 이미지',
-    },
-  ];
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !isVisible) {
+            setIsVisible(true);
+          }
+        });
+      },
+      { threshold: 0.2 }
+    );
+
+    const currentRef = sectionRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
+    }
+
+    return () => {
+      if (currentRef) {
+        observer.unobserve(currentRef);
+      }
+    };
+  }, [isVisible]);
 
   return (
-    <section className="pt-12 pb-20 md:pt-[50px] md:pb-[200px]">
-      <div className="flex flex-col gap-10 md:gap-16 max-w-[1024px] mx-auto px-5 md:px-6">
-        {/* 메인 영역 */}
-        <div className="flex flex-col gap-6 md:gap-8">
-          <div className="flex flex-col gap-3">
-            <h2 className="text-2xl md:text-5xl leading-normal font-bold md:font-semibold text-foreground">
-              분산된 일정들을 하나로 모으세요.
-            </h2>
-            <p className="text-sm md:text-lg leading-normal font-medium text-muted-foreground">
-              다른 사람의 일정 부터, 다른 캘린더에 있는 일정까지.
-              <br />
-              분산되어 있던 당신의 모든 일정, 간단하게 한번에 보세요.
-            </p>
-          </div>
-
-          {/* Full-width 이미지 영역 */}
-          <div className="w-full h-[200px] md:h-[512px] bg-gray-200 rounded-2xl md:rounded-3xl flex items-center justify-center">
-            <span className="text-base md:text-xl font-medium text-gray-500">
-              추가 기능 전체 이미지 영역
-            </span>
-          </div>
+    <section ref={sectionRef} className="integration-section">
+      <div className="integration-container">
+        {/* 텍스트 영역 */}
+        <div className={`integration-text ${isVisible ? 'visible' : ''}`}>
+          <h2 className="integration-title">
+            흩어진 일정,
+            <br />
+            한 곳에 모으세요
+          </h2>
+          <p className="integration-subtitle">
+            이미 쓰고 있는 Google 캘린더도 연동됩니다.
+            <br />
+            여기저기 흩어진 일정, 이제 한 곳에서 보세요.
+          </p>
         </div>
 
-        {/* 서브 영역 - 데스크톱: 가로 배치, 모바일: 세로 배치 */}
-        <div className="flex flex-col md:grid md:grid-cols-2 gap-10 md:gap-8">
-          {integrationCards.map((card) => (
-            <div key={card.id} className="flex flex-col gap-4 md:gap-5">
-              <div className="flex flex-col gap-2 md:gap-3">
-                <h3 className="text-lg md:text-2xl leading-none md:leading-tight font-semibold text-foreground">
-                  {card.title}
-                </h3>
-                <p className="text-sm md:text-base leading-normal md:leading-relaxed text-muted-foreground">
-                  {card.description}
-                </p>
+        {/* 연동 데모 영역 */}
+        <div className={`integration-demo ${isVisible ? 'visible' : ''}`}>
+          <div className="demo-wrapper">
+            <div className="integration-card">
+              <div className="card-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none">
+                  <rect x="3" y="4" width="18" height="16" rx="2" stroke="#4285F4" strokeWidth="1.5"/>
+                  <path d="M3 9h18" stroke="#4285F4" strokeWidth="1.5"/>
+                  <path d="M9 4V7M15 4V7" stroke="#4285F4" strokeWidth="1.5" strokeLinecap="round"/>
+                  <circle cx="12" cy="14" r="2" fill="#EA4335"/>
+                </svg>
               </div>
-              <div className="h-[180px] md:h-[330px] bg-gray-200 rounded-2xl md:rounded-3xl md:mt-2 flex items-center justify-center">
-                <span className="text-sm md:text-base font-medium text-gray-500">
-                  {card.imageAlt}
-                </span>
+              <div className="card-info">
+                <div className="card-name">Google Calendar</div>
+                <div className="card-desc">기존 일정 그대로</div>
               </div>
             </div>
-          ))}
+
+            <div className="sync-connector">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </div>
+
+            <div className="integration-card checkmate">
+              <div className="card-icon checkmate">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+                  <path d="M9 11l3 3L22 4" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <div className="card-info">
+                <div className="card-name">체크메이트</div>
+                <div className="card-desc">모든 일정을 한 곳에서</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </section>

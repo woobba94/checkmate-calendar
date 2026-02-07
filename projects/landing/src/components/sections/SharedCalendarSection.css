@@ -1,0 +1,442 @@
+/* ===================== */
+/* Shared Calendar Section - 100vh */
+/* ===================== */
+
+.shared-calendar-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 24px;
+  background: linear-gradient(180deg, var(--muted) 0%, #ffffff 100%);
+}
+
+.shared-calendar-container {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 100px;
+  align-items: center;
+}
+
+/* 텍스트 영역 - 애니메이션 */
+.shared-calendar-text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  opacity: 0;
+  transform: translateX(-50px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shared-calendar-text.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.section-label {
+  display: inline-block;
+  width: fit-content;
+  padding: 8px 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6366F1;
+  letter-spacing: 0.02em;
+}
+
+.shared-title {
+  font-size: 3.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+  letter-spacing: -0.03em;
+}
+
+.shared-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  color: var(--muted-foreground);
+}
+
+.shared-features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 16px;
+  list-style: none;
+  padding: 0;
+}
+
+.shared-features li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--foreground);
+}
+
+.feature-check {
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  border-radius: 6px;
+  color: white;
+  flex-shrink: 0;
+}
+
+/* 데모 영역 - 애니메이션 */
+.shared-demo {
+  width: 100%;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+
+.shared-demo.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.shared-demo .demo-container {
+  display: flex;
+  align-items: stretch;
+  gap: 32px;
+  justify-content: center;
+}
+
+/* 화면 카드 */
+.shared-demo .demo-screen {
+  flex: 1;
+  max-width: 260px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.06);
+  transition: all 0.4s ease;
+}
+
+.shared-demo .demo-screen:hover {
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.06),
+    0 16px 40px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+}
+
+.shared-demo .screen-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  background: var(--muted);
+  border-bottom: 1px solid var(--border);
+}
+
+/* 사용자 아바타 */
+.user-avatar {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: white;
+}
+
+.user-avatar.user-a {
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+}
+
+.user-avatar.user-b {
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+}
+
+.shared-demo .screen-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--foreground);
+  letter-spacing: -0.01em;
+}
+
+.shared-demo .screen-content {
+  padding: 20px;
+  height: 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+/* 미니 캘린더 */
+.shared-demo .mini-calendar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.shared-demo .calendar-date {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: -0.01em;
+}
+
+/* 이벤트 카드 */
+.shared-demo .event-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.06) 0%, rgba(99, 102, 241, 0.02) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.12);
+  border-radius: 14px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shared-demo .event-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.event-indicator {
+  width: 4px;
+  height: 36px;
+  background: linear-gradient(180deg, #6366F1 0%, #4F46E5 100%);
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.shared-demo .event-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shared-demo .event-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.shared-demo .event-time {
+  font-size: 0.8rem;
+  color: var(--muted-foreground);
+}
+
+/* 타이핑 애니메이션 */
+.shared-demo .typing-text {
+  display: inline;
+  white-space: nowrap;
+  border-right: 2px solid #6366F1;
+  padding-right: 3px;
+  animation: sharedBlink 0.5s step-end infinite;
+}
+
+.shared-demo .typing-text.done {
+  border-right: none;
+  animation: none;
+  padding-right: 0;
+}
+
+@keyframes sharedBlink {
+  50% { border-color: transparent; }
+}
+
+/* 빈 상태 */
+.shared-demo .empty-state {
+  padding: 32px;
+  text-align: center;
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+}
+
+/* 저장 버튼 */
+.shared-demo .save-btn {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  padding: 14px 18px;
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.shared-demo .save-btn.clicked {
+  transform: scale(0.97);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.4);
+}
+
+/* 토스트 메시지 */
+.shared-demo .toast-message {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  right: 20px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+  color: white;
+  border-radius: 12px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: center;
+  animation: toastSlideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes toastSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 동기화 화살표 */
+.shared-demo .sync-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  opacity: 0.2;
+  transition: all 0.5s ease;
+}
+
+.shared-demo .sync-arrow.active {
+  opacity: 1;
+}
+
+.shared-demo .sync-arrow.active .sync-icon {
+  animation: syncPulse 0.8s ease infinite;
+  background: linear-gradient(135deg, #6366F1 0%, #4F46E5 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.shared-demo .sync-icon {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  color: var(--muted-foreground);
+  transition: all 0.4s ease;
+}
+
+.shared-demo .sync-label {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+@keyframes syncPulse {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(6px); }
+}
+
+/* 완료 메시지 */
+.shared-demo .demo-message {
+  text-align: center;
+  margin-top: 32px;
+  padding: 18px 28px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(16, 185, 129, 0.04) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+  border-radius: 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #059669;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.shared-demo .demo-message.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* 모바일 반응형 */
+@media (max-width: 1024px) {
+  .shared-calendar-container {
+    grid-template-columns: 1fr;
+    gap: 60px;
+    text-align: center;
+  }
+
+  .shared-calendar-text {
+    align-items: center;
+  }
+
+  .shared-features {
+    align-items: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .shared-calendar-section {
+    padding: 60px 20px;
+    min-height: auto;
+  }
+
+  .shared-title {
+    font-size: 2.25rem;
+  }
+
+  .shared-subtitle {
+    font-size: 1rem;
+  }
+
+  .shared-demo .demo-container {
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+  }
+
+  .shared-demo .demo-screen {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .shared-demo .sync-arrow {
+    transform: rotate(90deg);
+    padding: 12px 0;
+  }
+
+  .shared-demo .sync-arrow .sync-icon svg {
+    transform: rotate(-90deg);
+  }
+}
