@@ -3,12 +3,12 @@
 본 프로젝트는 포트폴리오 목적으로 공개되었습니다.  
 코드 열람은 자유로우나, 사용 시에는 사전 문의 부탁드립니다.
 
-문의: [rex@checkmate-calendar.com](mailto:rex@checkmate-calendar.com) 또는 [jwj3199@gmail.com](mailto:jwj3199@gmail.com)
+문의: [jwj3199@gmail.com](mailto:jwj3199@gmail.com)
 
 # 서비스 링크
 
-- **랜딩페이지**: [https://checkmate-calendar.com](https://checkmate-calendar.com)
-- **캘린더 서비스**: [https://app.checkmate-calendar.com](https://app.checkmate-calendar.com)
+- **랜딩페이지**: [~https://checkmate-calendar.com~](https://checkmate-calendar.com) 도메인 만료. [fallback 도메인](https://checkmate-calendar-landing-g6xo1vkla-woobba94s-projects.vercel.app/)
+- **캘린더 서비스**: [~https://app.checkmate-calendar.com~](https://app.checkmate-calendar.com) 도메인 만료. -> [fallback 도메인](https://checkmate-calendar-ix29cxcvx-woobba94s-projects.vercel.app/)
 
 # 테스트 계정
 ### ID
