@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { useI18n } from '@/contexts/I18nContext';
+import { CALENDAR_APP_URL } from '@/lib/calendar-url';
 
 export function Header() {
   const { t, locale, setLocale } = useI18n();
@@ -53,9 +54,7 @@ export function Header() {
 
           {/* CTA Button */}
           <Button
-            onClick={() =>
-              (window.location.href = 'https://app.checkmate-calendar.com')
-            }
+            onClick={() => (window.location.href = CALENDAR_APP_URL)}
             variant="primary"
             className="px-5 py-2 text-sm font-semibold bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 rounded-lg shadow-md shadow-indigo-500/20 transition-all duration-200"
           >

@@ -1,3 +1,4 @@
+import { CALENDAR_APP_URL } from '@/lib/calendar-url';
 import { Button } from '../ui/button';
 import './HeroSection.css';
 
@@ -11,7 +12,7 @@ const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
 
 const HeroSection = () => {
   const handleGetStarted = () => {
-    window.location.href = 'https://app.checkmate-calendar.com';
+    window.location.href = CALENDAR_APP_URL;
   };
 
   return (

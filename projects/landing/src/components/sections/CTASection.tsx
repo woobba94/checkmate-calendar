@@ -1,4 +1,5 @@
 import { useRef, useEffect, useState } from 'react';
+import { CALENDAR_APP_URL } from '@/lib/calendar-url';
 import { Button } from '../ui/button';
 import './CTASection.scss';
 
@@ -89,9 +90,7 @@ const CTASection = () => {
             variant="outline"
             size="lg"
             className="px-10 py-4 text-base font-semibold bg-white text-indigo-600 border-0 rounded-xl shadow-xl shadow-black/10 hover:bg-white/95 hover:shadow-2xl transition-all duration-300"
-            onClick={() =>
-              (window.location.href = 'https://app.checkmate-calendar.com')
-            }
+            onClick={() => (window.location.href = CALENDAR_APP_URL)}
           >
             무료로 시작하기
           </Button>

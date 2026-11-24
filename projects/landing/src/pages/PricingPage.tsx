@@ -2,6 +2,7 @@ import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
 import { useMetaTags } from '../hooks/useMetaTags';
 import { useI18n } from '@/contexts/I18nContext';
+import { CALENDAR_APP_URL } from '@/lib/calendar-url';
 
 const PricingPage = () => {
   const { t } = useI18n();
@@ -139,8 +140,7 @@ const PricingPage = () => {
 
                   <Button
                     onClick={() =>
-                      !plan.isDisabled && (window.location.href =
-                        'https://app.checkmate-calendar.com')
+                      !plan.isDisabled && (window.location.href = CALENDAR_APP_URL)
                     }
                     variant={plan.isPopular ? 'primary' : 'outline'}
                     className="w-full"
