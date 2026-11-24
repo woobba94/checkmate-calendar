@@ -5,7 +5,7 @@ const TermsPage = () => {
   useMetaTags({
     title: '서비스 이용약관 - 체크메이트 캘린더',
     description: '체크메이트 캘린더 서비스 이용약관 및 정책을 확인하세요.',
-    url: 'https://checkmate-calendar.com/terms',
+    url: 'https://checkmate-calendar-landing.vercel.app/terms',
   });
   return (
     <>

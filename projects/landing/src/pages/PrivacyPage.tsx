@@ -5,7 +5,7 @@ const PrivacyPage = () => {
   useMetaTags({
     title: '개인정보처리방침 - 체크메이트 캘린더',
     description: '체크메이트 캘린더의 개인정보 수집 및 처리 방침을 확인하세요.',
-    url: 'https://checkmate-calendar.com/privacy',
+    url: 'https://checkmate-calendar-landing.vercel.app/privacy',
   });
   return (
     <>

@@ -11,7 +11,7 @@ const PricingPage = () => {
     title: '가격 - 체크메이트 캘린더',
     description:
       '체크메이트 캘린더의 가격 정보를 확인하세요. 무료 플랜부터 비즈니스 플랜까지 다양한 옵션을 제공합니다.',
-    url: 'https://checkmate-calendar.com/pricing',
+    url: 'https://checkmate-calendar-landing.vercel.app/pricing',
   });
 
   const plans = [

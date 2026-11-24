@@ -7,8 +7,8 @@
 
 # 서비스 링크
 
-- **랜딩페이지**: [~https://checkmate-calendar.com~](https://checkmate-calendar.com) 도메인 만료. [fallback 도메인](https://checkmate-calendar-landing.vercel.app/)
-- **캘린더 서비스**: [~https://app.checkmate-calendar.com~](https://app.checkmate-calendar.com) 도메인 만료. -> [fallback 도메인](https://checkmate-calendar.vercel.app/)
+- [랜딩 페이지](https://checkmate-calendar-landing.vercel.app/)
+- [캘린더 서비스](https://checkmate-calendar.vercel.app/)
 
 # 테스트 계정
 ### ID
@@ -41,8 +41,8 @@ admin
 ```
 checkmate-calendar/
 ├── projects/
-│   ├── landing/     # 랜딩페이지 (checkmate-calendar.com)
-│   └── calendar/    # 캘린더 앱 (app.checkmate-calendar.com)
+│   ├── landing/     # 랜딩 페이지 (checkmate-calendar-landing.vercel.app)
+│   └── calendar/    # 캘린더 앱 (checkmate-calendar.vercel.app)
 │       ├── src/
 │       │   ├── components/    # UI 컴포넌트
 │       │   │   ├── calendar/  # 캘린더 관련 컴포넌트

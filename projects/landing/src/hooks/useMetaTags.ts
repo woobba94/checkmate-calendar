@@ -11,8 +11,8 @@ interface MetaTags {
 export const useMetaTags = ({
   title = '체크메이트 캘린더 - AI 기반 스마트 일정 관리',
   description = '체크메이트 캘린더는 AI가 일정을 자동으로 관리해주는 스마트 캘린더입니다. 자연어로 일정을 추가하고, 구글 캘린더와 동기화하여 효율적으로 시간을 관리하세요.',
-  image = 'https://checkmate-calendar.com/og-image.svg',
-  url = 'https://checkmate-calendar.com/',
+  image = 'https://checkmate-calendar-landing.vercel.app/og-image.png',
+  url = 'https://checkmate-calendar-landing.vercel.app/',
   keywords = '체크메이트 캘린더, Checkmate Calendar, AI 캘린더, 스마트 일정관리, 구글 캘린더 동기화, 자연어 일정 추가, AI 일정 관리',
 }: MetaTags) => {
   useEffect(() => {

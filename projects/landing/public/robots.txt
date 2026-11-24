@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://checkmate-calendar.com/sitemap.xml
+Sitemap: https://checkmate-calendar-landing.vercel.app/sitemap.xml
 
 # Crawl-delay (in seconds)
 Crawl-delay: 1

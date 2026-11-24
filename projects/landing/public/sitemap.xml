@@ -5,7 +5,7 @@
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <!-- Main page -->
   <url>
-    <loc>https://checkmate-calendar.com/</loc>
+    <loc>https://checkmate-calendar-landing.vercel.app/</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
@@ -13,7 +13,7 @@
 
   <!-- Pricing page -->
   <url>
-    <loc>https://checkmate-calendar.com/pricing</loc>
+    <loc>https://checkmate-calendar-landing.vercel.app/pricing</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
@@ -21,7 +21,7 @@
 
   <!-- Terms page -->
   <url>
-    <loc>https://checkmate-calendar.com/terms</loc>
+    <loc>https://checkmate-calendar-landing.vercel.app/terms</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
@@ -29,17 +29,9 @@
 
   <!-- Privacy page -->
   <url>
-    <loc>https://checkmate-calendar.com/privacy</loc>
+    <loc>https://checkmate-calendar-landing.vercel.app/privacy</loc>
     <lastmod>2026-02-01</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
-  </url>
-
-  <!-- Calendar App -->
-  <url>
-    <loc>https://app.checkmate-calendar.com/</loc>
-    <lastmod>2026-02-01</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.9</priority>
   </url>
 </urlset>

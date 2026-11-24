@@ -17,7 +17,7 @@ export function Header() {
       <div className="mx-auto max-w-[1100px] h-full px-6 flex items-center justify-between">
         {/* Logo */}
         <a
-          href="https://checkmate-calendar.com"
+          href="/"
           className="flex items-center hover:opacity-80 transition-opacity"
         >
           <img

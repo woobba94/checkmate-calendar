@@ -11,7 +11,7 @@ const Footer = () => {
           {/* Logo */}
           <div className="flex flex-col gap-4">
             <a
-              href="https://checkmate-calendar.com"
+              href="/"
               className="flex items-center hover:opacity-80 transition-opacity"
             >
               <img
